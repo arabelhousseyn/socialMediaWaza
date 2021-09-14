@@ -73,7 +73,7 @@ class ListingController extends Controller
             $images = explode(';ibaa;',$request->images);
                    foreach ($images as $image) {
                     $pathImage = uniqid() . '.jpg';
-                    $folderPathImage = "storage/app/ListingImages/";
+                    $folderPathImage = env('MAIN_PATH') . "ListingImages/";
                     $image_base64 = base64_decode($image);
                     $file = $folderPathImage . $pathImage;
                     file_put_contents($file, $image_base64);

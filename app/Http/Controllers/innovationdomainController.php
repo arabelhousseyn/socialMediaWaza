@@ -54,7 +54,7 @@ class innovationdomainController extends Controller
                 return response()->json(['success' => false,'message' => 1], 200);
             }
 
-            $folderPath = "storage/app/innovationDomainImages/";
+            $folderPath = env('MAIN_PATH') . "innovationDomainImages/";
             $image_base64 = base64_decode($request->image);
             $path = uniqid() . '.jpg';
             $file = $folderPath . $path;

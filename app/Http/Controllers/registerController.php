@@ -42,7 +42,7 @@ class registerController extends Controller
                 if(!$checkPhone)
                 {
                     $path = '';
-                    $folderPath = "storage/app/profiles/";
+                    $folderPath = env('MAIN_PATH') . "profiles/";
                     $image_base64 = base64_decode($request->picture);
                     $path = uniqid() . '.jpg';
                     $file = $folderPath . $path;
@@ -89,7 +89,7 @@ class registerController extends Controller
         $id1 = uniqid() . '.jpg';
         $id2 = uniqid() . '.jpg';
 
-        $folderPath = "storage/app/uploads/";
+        $folderPath = env('MAIN_PATH') . "uploads/";
         $image_base64 = base64_decode($request->image1);
         $file = $folderPath . $id1;
         file_put_contents($file, $image_base64);
@@ -107,8 +107,8 @@ class registerController extends Controller
         $check = FaceVerification::where('user_id',$request->id)->first();
         if($check)
         {
-            unlink('storage/app/uploads/' . $check->face1);
-            unlink('storage/app/uploads/' . $check->face2);
+            unlink(env('MAIN_PATH') . 'uploads/' . $check->face1);
+            unlink(env('MAIN_PATH') . 'uploads/' . $check->face2);
             FaceVerification::where('user_id',$request->id)->delete();
         }
 
@@ -132,7 +132,7 @@ class registerController extends Controller
         $id2 = uniqid() . '.jpg';
 
 
-        $folderPath = "storage/app/uploads/";
+        $folderPath = env('MAIN_PATH') . "uploads/";
         $image_base64 = base64_decode($request->image1);
         $file = $folderPath . $id1;
         file_put_contents($file, $image_base64);
@@ -141,8 +141,8 @@ class registerController extends Controller
         $file = $folderPath . $id2;
         file_put_contents($file, $image_base64);
 
-        FaceDetect::extract('storage/app/uploads/' . $id1)->save('storage/faces/out' . $id1);
-        FaceDetect::extract('storage/app/uploads/' . $id2)->save('storage/faces/out' . $id2);
+        FaceDetect::extract(env('MAIN_PATH') . 'uploads/' . $id1)->save('storage/faces/out' . $id1);
+        FaceDetect::extract(env('MAIN_PATH') . 'uploads/' . $id2)->save('storage/faces/out' . $id2);
 
         // $face = FaceDetection::extract('storage/app/uploads/' . $id1);
 

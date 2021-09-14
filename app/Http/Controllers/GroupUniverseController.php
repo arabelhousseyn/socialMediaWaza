@@ -48,7 +48,7 @@ class GroupUniverseController extends Controller
         if($validator->validated())
         {
             $path = '';
-            $folderPath = "storage/app/groupUnivers/";
+            $folderPath = env('MAIN_PATH') . "groupUnivers/";
             $image_base64 = base64_decode($request->cover);
             $path = uniqid() . '.jpg';
             $file = $folderPath . $path;

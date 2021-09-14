@@ -67,7 +67,7 @@ class JobOfferController extends Controller
         {
             if(strlen($request->image) != 0)
             {
-                $folderPath = 'storage/app/JobOffersImages/';
+                $folderPath = 'JobOffersImages/';
                 $image = uniqid() . '.png';
 
                 $image_base64 = base64_decode($request->image);
@@ -78,8 +78,8 @@ class JobOfferController extends Controller
             $jobOffer = JobOffer::create([
                 'user_id' =>Auth::user()->id,
                 'name_company' => $request->name_company,
-                'path' => (strlen($image) != 0) ? 'https://waza.kaiztech.co/storage/app/JobOffersImages/'. $image 
-                : 'https://waza.kaiztech.co/storage/app/profiles/'.Auth::user()->picture,
+                'path' => (strlen($image) != 0) ? 'https://dev.waza.fun/JobOffersImages/'. $image 
+                : 'https://dev.waza.fun/profiles/'.Auth::user()->picture,
                 'sector' => $request->sector,
                 'address' => $request->address,
                 'job' => $request->job,

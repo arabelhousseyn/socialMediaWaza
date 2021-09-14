@@ -53,6 +53,8 @@ class GroupController extends Controller
 
         if($validator->validated())
         {
+            $folderPath = env('MAIN_PATH') . "groupImages/";
+
             if($request->type == 1)
             {
                 $checkName = Group::where('name',$request->name)->first();
@@ -60,8 +62,6 @@ class GroupController extends Controller
                 {
                     return response()->json(['success' => false,'message' => 1], 200);
                 }
-
-            $folderPath = "storage/app/groupImages/";
             $image_base64 = base64_decode($request->cover);
             $path = uniqid() . '.jpg';
             $file = $folderPath . $path;
@@ -86,8 +86,6 @@ class GroupController extends Controller
                 {
                     return response()->json(['success' => false,'message' => 1], 200);
                 }
-
-            $folderPath = "storage/app/groupImages/";
             $image_base64 = base64_decode($request->cover);
             $path = uniqid() . '.jpg';
             $file = $folderPath . $path;

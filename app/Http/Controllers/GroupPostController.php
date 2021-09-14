@@ -67,7 +67,7 @@ class GroupPostController extends Controller
 
                 $images = explode(';ibaa;',$request->images);
                 foreach ($images as $image) {
-                    $folderPath = "storage/app/postImages/";
+                    $folderPath = env('MAIN_PATH') . "postImages/";
                     $image_base64 = base64_decode($image);
                     $path = uniqid() . '.jpg';
                     $file = $folderPath . $path;

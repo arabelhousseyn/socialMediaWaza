@@ -69,7 +69,7 @@ class CvLibraryController extends Controller
         {
             if(strlen($request->image) != 0)
             {
-                $folderPath = 'storage/app/CvLibraryImages/';
+                $folderPath = env('MAIN_PATH') . 'CvLibraryImages/';
                 $image = uniqid() . '.png';
 
                 $image_base64 = base64_decode($request->image);
@@ -80,8 +80,8 @@ class CvLibraryController extends Controller
             $cvLibrary = CvLibrary::create([
                 'user_id' => Auth::user()->id,
                 'FullName' => $request->FullName,
-                'path' => (strlen($image) != 0) ? 'https://waza.kaiztech.co/storage/app/CvLibraryImages/'. $image 
-                : 'https://waza.kaiztech.co/storage/app/profiles/'.Auth::user()->picture,
+                'path' => (strlen($image) != 0) ? 'https://dev.waza.fun/CvLibraryImages/'. $image 
+                : 'https://dev.waza.fun/profiles/'.Auth::user()->picture,
                 'dob' => $request->dob,
                 'arabic' => $request->arabic,
                 'english' => $request->english,

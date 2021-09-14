@@ -40,7 +40,7 @@ class AmanaController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'title' => 'required|max:255|unique:amanas',
+            'title' => 'required|max:255',
             'description' => 'required',
             'abbreviation' => 'required',
             'images' => 'required',
@@ -66,7 +66,7 @@ class AmanaController extends Controller
             
             foreach ($images as $image) {
                 $path = '';
-        $folderPath = "storage/app/amanaImages/";
+        $folderPath = env('MAIN_PATH') . "amanaImages/";
         $image_base64 = base64_decode($image);
         $path = uniqid() . '.jpg';
         $file = $folderPath . $path;

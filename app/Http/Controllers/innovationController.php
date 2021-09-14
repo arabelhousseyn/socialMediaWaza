@@ -65,7 +65,7 @@ class innovationController extends Controller
 
                  if(strlen($request->imageCompany) != 0)
                  {
-                    $folderPath = "storage/app/ImageCompany/";
+                    $folderPath = env('MAIN_PATH') . "ImageCompany/";
                     $image_base64 = base64_decode($request->imageCompany);
                     $pathImageCompany = uniqid() . '.jpg';
                     $file = $folderPath . $pathImageCompany;
@@ -89,7 +89,7 @@ class innovationController extends Controller
                    $images = explode(';ibaa;',$request->images);
                    foreach ($images as $image) {
                     $pathImage = uniqid() . '.jpg';
-                    $folderPathImage = "storage/app/innovationImages/";
+                    $folderPathImage = env('MAIN_PATH') . "innovationImages/";
                     $image_base64 = base64_decode($image);
                     $file = $folderPathImage . $pathImage;
                     file_put_contents($file, $image_base64);
@@ -228,7 +228,7 @@ class innovationController extends Controller
         if(strlen($request->pathBusinessPlan) != 0)
                  {
                    // $pdf = gzdecode(base64_decode($request->pathBusinessPlan));
-                    $folderPath = "storage/app/bussinesPlan/";
+                    $folderPath = env('MAIN_PATH') . "bussinesPlan/";
                     $image_base64 = base64_decode($request->pathBusinessPlan);
                     $pathPdf = uniqid() . '.pdf';
                     $file = $folderPath . $pathPdf;

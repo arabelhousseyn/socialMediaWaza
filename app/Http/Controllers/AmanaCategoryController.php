@@ -57,7 +57,7 @@ class AmanaCategoryController extends Controller
         if($validator->validated())
         {
             $path = '';
-            $folderPath = "storage/app/amanaCategory/";
+            $folderPath = env('MAIN_PATH') . "amanaCategory/";
                     $image_base64 = base64_decode($request->image);
                     $path = uniqid() . '.jpg';
                     $file = $folderPath . $path;

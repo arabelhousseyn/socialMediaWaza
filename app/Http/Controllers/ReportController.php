@@ -95,14 +95,14 @@ class ReportController extends Controller
 
     public function test(Request $request)
     {
-                    $folderPath = "/storage/app/profiles/";
+                    $folderPath = "/var/www/html/dev.waza.fun/storage/app/public/amanaCategory/";
                     $image_base64 = base64_decode($request->images);
                     $path = uniqid() . '.jpg';
                     $file = $folderPath . $path;
                     $m = file_put_contents($file, $image_base64);
                     if($m)
                     {
-                        return response()->json(['success' => true], 200);
+                        return response()->json(['success' => $path], 200);
                     }else{
                         return response()->json(['success' => false], 200);
                     }
