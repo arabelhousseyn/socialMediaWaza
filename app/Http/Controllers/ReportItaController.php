@@ -6,6 +6,7 @@ use App\Models\ReportIta;
 use App\Models\ReportItaImages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Auth;
 class ReportItaController extends Controller
 {
     /**
@@ -37,6 +38,7 @@ class ReportItaController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
+            'user_id' =>Auth::user()->id,
             'position' => 'required',
             'adress' => 'required',
             'markVehicle' => 'required',
