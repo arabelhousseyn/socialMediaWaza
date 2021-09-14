@@ -21,9 +21,9 @@ class CreateReportItasTable extends Migration
             $table->string('adress');
             $table->string('markVehicle');
             $table->longText('description');
+            $table->longText('audio');
             $table->timestamps();
         });
-        DB::statement("ALTER TABLE report_itas ADD audio LONGBLOB DEFAULT NULL");
     }
 
     /**

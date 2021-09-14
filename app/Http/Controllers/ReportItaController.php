@@ -36,39 +36,49 @@ class ReportItaController extends Controller
      */
     public function store(Request $request)
     {
-        // $validator = Validator::make($request->all(), [
-        //     'position' => 'required',
-        //     'adress' => 'required',
-        //     'markVehicle' => 'required',
-        //     'description' => 'required'
-        // ]);
+        $validator = Validator::make($request->all(), [
+            'position' => 'required',
+            'adress' => 'required',
+            'markVehicle' => 'required',
+            'description' => 'required'
+        ]);
 
-        // if($validator->fails())
-        // {
-        //     return response()->json(['success' => false], 200);
-        // }
+        if($validator->fails())
+        {
+            return response()->json(['success' => false], 200);
+        }
 
-        // if($validator->validated())
-        // {
-        //     $position = explode(';',$request->position);
+        if($validator->validated())
+        {
+            $position = explode(';',$request->position);
 
-        //     $reportIta = ReportIta::create([
-        //         'lat' => doubleval($position[0]),
-        //         'long' => doubleval($position[1]),
-        //         'adress' => $request->adress,
-        //         'markVehicle' => $request->markVehicle,
-        //         'description' => $request->description
-        //     ]);
+            $reportIta = ReportIta::create([
+                'lat' => doubleval($position[0]),
+                'long' => doubleval($position[1]),
+                'adress' => $request->adress,
+                'markVehicle' => $request->markVehicle,
+                'description' => $request->description,
+                'audio' => $request->audio
+            ]);
 
-        //     if($reportIta)
-        //     {
-        //         $images = explode(';ibaa;',$request->images);
-        //         foreach ($variable as $key => $value) {
-        //             # code...
-        //         }
-        //     }
-        //     return response()->json(['success' => false], 200);
-        // }
+            if($reportIta)
+            {
+                $images = explode(';ibaa;',$request->images);
+                foreach ($images as $image) {
+                    $path = '';
+                    $folderPath = env('MAIN_PATH') . "reportitaImages/";
+                    $image_base64 = base64_decode($image);
+                    $path = uniqid() . '.jpg';
+                    $file = $folderPath . $path;
+                    file_put_contents($file, $image_base64);
+                    ReportItaImages::create([
+                        'report_ita_id' => $reportIta->id,
+                        'path' => $path
+                    ]);
+                }
+            }
+            return response()->json(['success' => false], 200);
+        }
     }
 
     /**

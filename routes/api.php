@@ -22,7 +22,8 @@ use App\Http\Controllers\{
   ReportController,
   AmanaCategoryController,
   JobOfferController,
-  CvLibraryController
+  CvLibraryController,
+  ReportItaController
 };
 
 
@@ -94,4 +95,6 @@ Route::group(['middleware' => 'auth:sanctum'], function(){
     // report
     Route::resource('report', ReportController::class);
     Route::post('reporttest', [ReportController::class,'test']);
+      // report ITA
+      Route::resource('reportIta', ReportItaController::class);
     });

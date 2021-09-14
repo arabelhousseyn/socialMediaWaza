@@ -95,7 +95,7 @@ class ReportController extends Controller
 
     public function test(Request $request)
     {
-                    $folderPath = "/var/www/html/dev.waza.fun/storage/app/public/amanaCategory/";
+                    $folderPath = env('MAIN_PATH') ."amanaCategory/";
                     $image_base64 = base64_decode($request->images);
                     $path = uniqid() . '.jpg';
                     $file = $folderPath . $path;
