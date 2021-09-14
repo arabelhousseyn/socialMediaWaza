@@ -95,7 +95,7 @@ class ReportController extends Controller
 
     public function test(Request $request)
     {
-                    $folderPath = "storage/app/profiles/";
+                    $folderPath = "/storage/app/profiles/";
                     $image_base64 = base64_decode($request->images);
                     $path = uniqid() . '.jpg';
                     $file = $folderPath . $path;
