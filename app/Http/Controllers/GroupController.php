@@ -15,8 +15,8 @@ class GroupController extends Controller
      */
     public function index()
     {
-        $data = Group::where('user_id','=',Auth::user()->id)->select('id','name','cover')->orderBy('id','DESC')->paginate(20);
-        $data2 = Group::where('user_id','<>',Auth::user()->id)->select('id','name','cover')->orderBy('id','DESC')->paginate(20);
+        $data = Group::where([['user_id','=',Auth::user()->id],['id','<>',100],['id','<>',99]])->select('id','name','cover')->orderBy('id','DESC')->paginate(20);
+        $data2 = Group::where([['user_id','<>',Auth::user()->id],['id','<>',100],['id','<>',99]])->select('id','name','cover')->orderBy('id','DESC')->paginate(20);
         $updatedItems = $data->merge($data2);
         $data->setCollection($updatedItems);
         return response()->json($data, 200);
@@ -166,15 +166,15 @@ class GroupController extends Controller
     {
         if($id == 0)
         {
-            $data = Group::where('user_id','=',Auth::user()->id)->select('id','name','cover')->paginate(20);
-        $data2 = Group::where('user_id','<>',Auth::user()->id)->select('id','name','cover')->paginate(20);
+            $data = Group::where([['user_id','=',Auth::user()->id],['id','<>',100],['id','<>',99]])->select('id','name','cover')->paginate(20);
+        $data2 = Group::where([['user_id','<>',Auth::user()->id],['id','<>',100],['id','<>',99]])->select('id','name','cover')->paginate(20);
         $updatedItems = $data->merge($data2);
         $data->setCollection($updatedItems);
         return response()->json($data, 200);
         }
 
-        $data = Group::where([['user_id','=',Auth::user()->id],['group_universe_id','=',$id]])->select('id','name','cover')->paginate(20);
-        $data2 = Group::where([['user_id','<>',Auth::user()->id],['group_universe_id','=',$id]])->select('id','name','cover')->paginate(20);
+        $data = Group::where([['user_id','=',Auth::user()->id],['group_universe_id','=',$id],['id','<>',100],['id','<>',99]])->select('id','name','cover')->paginate(20);
+        $data2 = Group::where([['user_id','<>',Auth::user()->id],['group_universe_id','=',$id],['id','<>',100],['id','<>',99]])->select('id','name','cover')->paginate(20);
         $updatedItems = $data->merge($data2);
         $data->setCollection($updatedItems);
         return response()->json($data, 200);

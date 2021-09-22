@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\AmanaCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use App\Http\Services\AmanaCategoryService;
 class AmanaCategoryController extends Controller
 {
     /**
@@ -14,12 +13,6 @@ class AmanaCategoryController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-     private $amanaCategoryService;
-
-     public function __construct()
-     {
-         $this->amanaCategoryService = new AmanaCategoryService();
-     }
     
     public function index()
     {

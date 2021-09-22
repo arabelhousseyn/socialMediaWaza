@@ -41,6 +41,7 @@ class registerController extends Controller
                 $checkPhone = User::where('phone',$request->phone)->first();
                 if(!$checkPhone)
                 {
+                    
                     $path = '';
                     $folderPath = env('MAIN_PATH') . "profiles/";
                     $image_base64 = base64_decode($request->picture);
@@ -63,7 +64,7 @@ class registerController extends Controller
                         'is_verified' => 0,
                         'receive_ads' => $request->receive_ads,
                         'token' => null,
-                        'hide_phone' => 0,
+                        'hide_phone' => $request->hide_phone,
                         'is_kaiztech_team' => 0
                     ]);
                     $usr = User::where('id',$user->id)->select('id','fullName','subName',
@@ -75,7 +76,7 @@ class registerController extends Controller
                         'token' => $token
                     ]);
 
-                    return response()->json(['success' => true,'user' => $usr], 200);
+                    return response()->json(['success' => true,'user' => $usr], 200);               
                 }
                 return response()->json(['success' => false,'message' => 1], 200);
             }
@@ -85,8 +86,19 @@ class registerController extends Controller
 
     public function HandleFaceDetection(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'image1' => 'required',
+            'image2' => 'required'
+        ]);
 
-        $id1 = uniqid() . '.jpg';
+        if($validator->fails())
+        {
+            return response()->json(['success' => false], 200);
+        }
+
+        if($validator->validated())
+        {
+            $id1 = uniqid() . '.jpg';
         $id2 = uniqid() . '.jpg';
 
         $folderPath = env('MAIN_PATH') . "uploads/";
@@ -124,6 +136,7 @@ class registerController extends Controller
         ]);
 
         return response()->json(['success' => true], 200);
+        }
     }
 
     public function faceDetection($request)

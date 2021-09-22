@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Freelance;
+use App\Models\JobOffer;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Auth;
@@ -59,6 +60,9 @@ class FreelanceController extends Controller
 
         if($validator->validated())
         {
+            $job = JobOffer::where('id',$request->job_offer_id)->first();
+        if($job)
+        {
             $freelance = Freelance::create([
                 'user_id' => Auth::user()->id,
                 'job_offer_id' => $request->job_offer_id,
@@ -68,7 +72,9 @@ class FreelanceController extends Controller
                 'area' => $request->area
             ]);
 
-            return response()->json(['success' => true], 200);
+            return response()->json(['success' => true], 200);   
+        }
+        return response()->json(['success' => false], 200);
         }    
     }
 
@@ -80,11 +86,14 @@ class FreelanceController extends Controller
      */
     public function show($id)
     {
-        $data = Freelance::with('user')->find($id);
+        $data = Freelance::find($id);
          if($data)
          {
-            $data['pictureUser'] = $data->user->picture;
-            $data['is_kaiztech_team'] = $data->user->is_kaiztech_team;
+            $user = User::where('id',$data->user_id)->first();
+
+            $data['pictureUser'] = $user->picture;
+            $data['is_kaiztech_team'] = $user->is_kaiztech_team;
+            $data['profession'] = $user->profession;
             return response()->json(['success' => true,'data' => $data], 200);
          }
          return response()->json(['success' => false], 200);

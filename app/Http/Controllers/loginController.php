@@ -13,7 +13,7 @@ class loginController extends Controller
     public function index(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'phone' => 'required',
+            'phone' => 'required|digits:10',
             'password' => 'required',
             'country_code' => 'required'
         ]);
@@ -48,8 +48,8 @@ class loginController extends Controller
              $user->update([
                  'token' => $token
              ]);
-             $willaya = Wilaya::with('country')->where('id',$user->wilaya_id)->first();
-             $user->wilaya_id = $willaya;
+             
+             $user['wilaya_name'] = $wilaya->name;
         
             $response = [
                 'success' => true,

@@ -13,7 +13,7 @@ class Amana extends Model
         'description',
         'user_id',
         'abbreviation',
-        'amana_category_id'
+        'amana_category_id',
     ];
 
     protected $hidden = [

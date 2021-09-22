@@ -26,6 +26,10 @@ class innovation extends Model
         'imageCompany'
     ];
 
+    protected $hidden = [
+        'imageCompany'
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -49,5 +53,13 @@ class innovation extends Model
     public function comments()
     {
         return $this->hasMany(innovationComment::class);
+    }
+
+    public function scopeSelective($query,$innovation_domain_id)
+    {
+
+        return ($innovation_domain_id == 0) ? $query->select('id','title','user_id','type','imageCompany')->orderBy('id','DESC')
+        : $query->select('id','title','user_id','type','imageCompany')
+        ->where('innovation_domain_id','=',$innovation_domain_id)->orderBy('id','DESC');
     }
 }

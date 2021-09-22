@@ -8,6 +8,7 @@ class willayaController extends Controller
 {
     public function index($id)
     {
-          return Wilaya::Bycountry($id)->get();
+        $data = Wilaya::Bycountry($id)->get();
+        return response()->json($data, 200);
     }
 }

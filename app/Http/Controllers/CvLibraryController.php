@@ -62,7 +62,7 @@ class CvLibraryController extends Controller
 
         if($validator->fails())
         {
-            return response()->json(['success' => false], 200);
+            return response ()->json(['success' => false], 200);
         }
 
         if($validator->validated())
@@ -92,11 +92,11 @@ class CvLibraryController extends Controller
                 'description' => $request->description
             ]);
             $experience = $request->experience;
-            if(count($experience) > 0)
+            if(@count(@$experience) > 0)
             {
                 foreach ($experience as $value) {
                     Experience::create([
-                        'cv_librarie_id' => $cvLibrary->id,
+                        'cv_library_id' => $cvLibrary->id,
                         'text' => $value['text'],
                         'grade' => $value['grade'],
                         'from' => $value['from'],
@@ -122,11 +122,14 @@ class CvLibraryController extends Controller
      */
     public function show($id)
     {
-        $data = CvLibrary::with('user','experiences')->find($id);
+        $data = CvLibrary::with('experiences')->find($id);
          if($data)
          {
-            $data['pictureUser'] = $data->user->picture;
-            $data['is_kaiztech_team'] = $data->user->is_kaiztech_team;
+            $user = User::where('id',$data->user_id)->first();
+
+            $data['pictureUser'] = $user->picture;
+            $data['is_kaiztech_team'] = $user->is_kaiztech_team;
+            $data['profession'] = $user->profession;
             return response()->json(['success' => true,'data' => $data], 200);
          }
          return response()->json(['success' => false], 200);

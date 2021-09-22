@@ -5,13 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class GroupPostComment extends Model
+class followGroup extends Model
 {
     use HasFactory;
+
     protected $fillable = [
-        'group_post_id',
         'user_id',
-        'comment',
-        'type',
+        'follow_id'
+    ];
+
+    protected $hidden = [
+        'updated_at'
     ];
 }

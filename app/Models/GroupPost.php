@@ -19,7 +19,10 @@ class GroupPost extends Model
         'source',
         'likes',
         'colorabble',
-        'type'
+        'type',
+        'is_approved',
+        'anonym',
+        'title_pitch'
     ];
 
     protected $hidden = [

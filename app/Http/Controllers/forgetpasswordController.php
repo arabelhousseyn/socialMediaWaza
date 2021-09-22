@@ -7,16 +7,22 @@ Use App\Models\User;
 use App\Mail\verificationMail;
 use Mail;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 class forgetpasswordController extends Controller
 {
     public function index(Request $request)
     {
-        if(strlen($request->email) != 0)
-        {
-            if(!filter_var($request->email, FILTER_VALIDATE_EMAIL)) {
-                return response()->json(['success' => false], 200);   
-              }
-    
+      $validator = Validator::make($request->all(), [
+        'email' => 'required|email:rfc,dns,filter',
+    ]);
+
+    if($validator->fails())
+    {
+      return response()->json(['success' => false], 200);
+    }
+
+    if($validator->validated())
+    {
             $user = User::where('email',$request->email)->first();
             if($user)
             {
@@ -37,8 +43,8 @@ class forgetpasswordController extends Controller
                 return response()->json(['success' => true,'user_id' => $user->id], 200);
             }
             return response()->json(['success' => false], 200);
-        }
-        return response()->json(['success' => false], 200);
+
+    }
     }
 
     public function verify(Request $request)

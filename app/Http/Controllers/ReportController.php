@@ -6,7 +6,7 @@ use App\Models\Report;
 use Illuminate\Http\Request;
 use Auth;
 use Illuminate\Support\Facades\Validator;
-use App\Http\Services\ReportService;
+use App\Services\ReportService;
 class ReportController extends Controller
 {
     /**
@@ -95,16 +95,16 @@ class ReportController extends Controller
 
     public function test(Request $request)
     {
-                    $folderPath = env('MAIN_PATH') ."amanaCategory/";
-                    $image_base64 = base64_decode($request->images);
-                    $path = uniqid() . '.jpg';
-                    $file = $folderPath . $path;
-                    $m = file_put_contents($file, $image_base64);
-                    if($m)
-                    {
-                        return response()->json(['success' => $path], 200);
-                    }else{
-                        return response()->json(['success' => false], 200);
-                    }
+       $folderPath = env('MAIN_PATH') ."profiles/";
+       $image_base64 = base64_decode($request->images);
+       $path = uniqid() . '.jpg';
+       $file = $folderPath . $path;
+       $m = file_put_contents($file, $image_base64);
+         if($m)
+         {
+            return response()->json(['success' => $path], 200);
+         }else{
+            return response()->json(['success' => false], 200);
+         }
     }
 }

@@ -48,7 +48,7 @@ class innovationdomainController extends Controller
 
         if($validator->validated())
         {
-            $checkTitle = innovationDomain::where('title',$request->title)->first();
+            $checkTitle = innovationDomain::where('title',$request->title)->first(); // to be changed
             if($checkTitle)
             {
                 return response()->json(['success' => false,'message' => 1], 200);

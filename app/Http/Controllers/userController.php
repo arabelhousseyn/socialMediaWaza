@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\FaceVerification;
 use Iman\Streamer\VideoStreamer;
+use Auth;
+use App\Models\Wilaya;
 class userController extends Controller
 {
     public function approve($id)
@@ -33,7 +35,7 @@ class userController extends Controller
         {
             return response()->json(['success' => $user->is_verified,'UserId' => $id], 200);
         }
-        return response()->json(['success' => false], 200);
+        return response()->json(['success' => 0], 200);
     }
 
     public function getVerificationByUser($id)
@@ -46,5 +48,34 @@ class userController extends Controller
     {
         $users = User::with('verification')->where('is_verified',0)->get();
         return response()->json($users, 200);
+    }
+
+    public function getInformationUser($id)
+    {
+        $following = 0;
+        $user = User::where('id',$id)->select('id','fullName','profession','picture','email','phone','hide_phone','wilaya_id')->first();
+        if($user)
+        {
+        $checkFollowing = User::where('id',$id)->with('followers')->first();
+        foreach ($checkFollowing->followers as $follow) {
+            if($follow->id == Auth::user()->id)
+            {
+                $following = 1;
+                break;
+            }
+        }
+        
+        $willaya = Wilaya::where('id',$user->wilaya_id)->first();
+        $user['wilaya_name'] = $willaya->name;
+        if($user['hide_phone'] == 1)
+        {
+            $user['phone'] = '';
+        }
+
+        $user['following'] = $following;
+
+        return response()->json($user, 200);
+        }
+        return response()->json(['success' => false], 200);
     }
 }

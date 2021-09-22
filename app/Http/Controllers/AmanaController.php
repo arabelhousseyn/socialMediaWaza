@@ -8,6 +8,7 @@ use App\Models\AmanaImage;
 use App\Models\User;
 use Auth;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 class AmanaController extends Controller
 {
     /**
@@ -130,7 +131,8 @@ class AmanaController extends Controller
     { $tempImages = array();
         if($id == 0)
         {
-            $data = Amana::select('id','title','user_id','description','abbreviation','amana_category_id','created_at')->orderBy('id','DESC')->paginate(20);
+            $data = Amana::whereDate('created_at', '>=', Carbon::now()->subDays(30)->setTime(0, 0, 0)->toDateTimeString())->
+            select('id','title','user_id','description','abbreviation','amana_category_id','created_at')->orderBy('id','DESC')->paginate(20);
             foreach ($data as $value) {
                 $userAmana = Amana::with('images')->where('id',$value->id)->first();
                 $user = User::where('id',$value->user_id)->first();
@@ -153,7 +155,8 @@ class AmanaController extends Controller
         return response()->json($data, 200);
         }
 
-        $data = Amana::where('amana_category_id',$id)->select('id','title','user_id','description','abbreviation','amana_category_id','created_at')->orderBy('id','DESC')->paginate(20);
+        $data = Amana::whereDate('created_at', '>=', Carbon::now()->subDays(30)->setTime(0, 0, 0)->toDateTimeString())->
+        where('amana_category_id',$id)->select('id','title','user_id','description','abbreviation','amana_category_id','created_at')->orderBy('id','DESC')->paginate(20);
         foreach ($data as $value) {
             $userAmana = Amana::with('images')->where('id',$value->id)->first();
             $user = User::where('id',$value->user_id)->first();

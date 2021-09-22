@@ -38,7 +38,6 @@ class ReportItaController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'user_id' =>Auth::user()->id,
             'position' => 'required',
             'adress' => 'required',
             'markVehicle' => 'required',
@@ -55,6 +54,7 @@ class ReportItaController extends Controller
             $position = explode(';',$request->position);
 
             $reportIta = ReportIta::create([
+                'user_id' =>Auth::user()->id,
                 'lat' => doubleval($position[0]),
                 'long' => doubleval($position[1]),
                 'adress' => $request->adress,
@@ -79,7 +79,7 @@ class ReportItaController extends Controller
                     ]);
                 }
             }
-            return response()->json(['success' => false], 200);
+            return response()->json(['success' => true], 200);
         }
     }
 

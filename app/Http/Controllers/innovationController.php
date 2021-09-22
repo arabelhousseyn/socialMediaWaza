@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\innovation;
+use App\Models\innovationDomain;
+use App\Models\innovationImage;
+use App\Models\innovationLike;
 use App\Models\User;
 use Carbon\Carbon;
 use ImageOptimizer;
@@ -44,7 +47,8 @@ class innovationController extends Controller
         $validator = Validator::make($request->all(), [
             'title' => 'required',
             'description' => 'required',
-            'innovation_domain_id' => 'required'
+            'innovation_domain_id' => 'required',
+            'type' => 'required'
         ]);
 
         if($validator->fails())
@@ -54,10 +58,17 @@ class innovationController extends Controller
 
         if($validator->validated())
         {
+            $checkInnovationDomain = innovationDomain::find($request->innovation_domain_id);
+
+            if(!$checkInnovationDomain)
+            {
+                return response()->json(['success' => false], 200);
+            }
+
             $check = false;
-        $innovation = null;
-        $pathAudio = null;
-        $pathImageCompany = '';
+            $innovation = null;
+            $pathAudio = null;
+            $pathImageCompany = '';
                  if(strlen($request->audio) != 0)
                  {
                     $pathAudio = $request->audio;
@@ -118,12 +129,20 @@ class innovationController extends Controller
          $data = innovation::with('user','images','likesList')->find($id);
          if($data)
          {
+            $user = User::where('id',$data->user_id)->first();
             $likeList = array();
             $dislikeList = array();
             
             $temp = $data->likesList;
-            $data['pictureUser'] = $data->user->picture;
-            $data['is_kaiztech_team'] = $data->user->is_kaiztech_team;
+            if(strlen($data->imageCompany) != 0)
+            {
+                $data['pictureUser'] = $data->imageCompany;
+                $data['is_company'] = 1;
+            }else{
+                $data['pictureUser'] = $user->picture;
+                $data['is_company'] = 0;
+            }
+            $data['is_kaiztech_team'] = $user->is_kaiztech_team;
             foreach ($temp as $value) {
                 if($value->type == -1)
            {
@@ -179,12 +198,29 @@ class innovationController extends Controller
 
     public function getInnovationByDomain($id)
     {
-        $tempImages = array();
         if($id == 0)
         {
-            $data = innovation::select('id','title','user_id','type','imageCompany')->orderBy('id','DESC')->paginate(20);
+            $data = innovation::with('likesList')->selective($id)->paginate(20);
         
         foreach ($data as $value) {
+            $tempImages = array();
+            $likeList = array();
+            $dislikeList = array();
+            $temp = $value->likesList;
+            foreach ($temp as $vl) {
+                if($vl->type == -1)
+           {
+               array_push($dislikeList,$vl->user_id);
+           }
+
+           if($vl->type == 1)
+           {
+            array_push($likeList,$vl->user_id);
+           }
+            }
+            $value['dislikes'] = count($dislikeList);
+            $value['likes'] = count($likeList);
+
             $userInnovation = innovation::with('images')->where('id',$value->id)->first();
             $user = User::where('id',$value->user_id)->first();
             if(count($userInnovation->images) > 5)
@@ -198,22 +234,57 @@ class innovationController extends Controller
             }
             $value['countImages'] = count($userInnovation->images);
             $value['user'] = $user->fullName;
-            $value['pictureUser'] = $user->picture;
+            if(strlen($value->imageCompany) != 0)
+            {
+                $value['pictureUser'] = env('DISPLAY_PATH') . 'ImageCompany/' . $value->imageCompany;
+            }else{
+                $value['pictureUser'] = env('DISPLAY_PATH') . 'profiles/'.$user->picture;
+            }
             $value['is_kaiztech_team'] = $user->is_kaiztech_team;
         }
     
         return response()->json($data, 200);
         }
 
-        $data = innovation::where('innovation_domain_id','=',$id)->orderBy('id','DESC')
-->select('id','title','user_id','type','imageCompany')->paginate(20);
+        $data = innovation::with('likesList')->selective($id)->paginate(20);
 
         foreach ($data as $value) {
+            $tempImages = array();
+            $likeList = array();
+            $dislikeList = array();
+            $temp = $value->likesList;
+            foreach ($temp as $vl) {
+                if($vl->type == -1)
+           {
+               array_push($dislikeList,$vl->user_id);
+           }
+
+           if($vl->type == 1)
+           {
+            array_push($likeList,$vl->user_id);
+           }
+            }
+            $value['dislikes'] = count($dislikeList);
+            $value['likes'] = count($likeList);
             $userInnovation = innovation::with('images')->where('id',$value->id)->first();
             $user = User::where('id',$value->user_id)->first();
-            $value['images'] = $userInnovation->images[0]->path;
+            if(count($userInnovation->images) > 5)
+            {
+                for ($i=0; $i <5 ; $i++) {
+                    array_push($tempImages,$userInnovation->images[$i]); 
+                }
+                $value['images'] = $tempImages;
+            }else{
+                $value['images'] = $userInnovation->images;
+            }
+            $value['countImages'] = count($userInnovation->images);
             $value['user'] = $user->fullName;
-            $value['pictureUser'] = $user->picture;
+            if(strlen($value->imageCompany) != 0)
+            {
+                $value['pictureUser'] = env('DISPLAY_PATH') . 'ImageCompany/' . $value->imageCompany;
+            }else{
+                $value['pictureUser'] = env('DISPLAY_PATH') . 'profiles/' . $user->picture;
+            }
             $value['is_kaiztech_team'] = $user->is_kaiztech_team;
         }
 
@@ -224,7 +295,19 @@ class innovationController extends Controller
 
     public function funding(Request $request)
     {
-        $pathPdf = '';
+        $validator = Validator::make($request->all(), [
+            'pathBusinessPlan' => 'required',
+            'id' => 'required',
+            'financementAmount' => 'required',
+        ]);
+        if($validator->fails())
+        {
+            return response()->json(['success' => false], 200);
+        }
+
+        if($validator->validated())
+        {
+            $pathPdf = '';
         if(strlen($request->pathBusinessPlan) != 0)
                  {
                    // $pdf = gzdecode(base64_decode($request->pathBusinessPlan));
@@ -234,13 +317,79 @@ class innovationController extends Controller
                     $file = $folderPath . $pathPdf;
                     file_put_contents($file, $image_base64);
                  }
-                 innovation::where('id',$request->id)->update([
+                $update = innovation::where('id',$request->id)->update([
                      'is_financed' => 1,
                      'financementAmount' => $request->financementAmount,
                      'pathBusinessPlan' => $pathPdf
                  ]);
+
+                 if(!$update)
+                 {
+                     return response()->json(['success' => false], 200);
+                 }
                  
                  return response()->json(['success' => true], 200);
+        }
+    }
+
+    public function handleActionInnovation(Request $request)
+    {
+        $check = innovationLike::where([['user_id','=',Auth::user()->id],['innovation_id','=',$request->innovation_id]])->first();
+
+        if($check)
+        {
+            if($request->type == $check->type)
+            {
+                innovationLike::where([['user_id','=',Auth::user()->id],['innovation_id','=',$request->innovation_id]])->delete();  
+            }else{
+                $check->update([
+                    'type' => $request->type
+                ]);    
+            }
+        $data = $this->likeListByInnovation($request->innovation_id);
+
+        return response()->json($data, 200);
+        }
+
+        $like = innovationLike::create([
+            'user_id' => Auth::user()->id,
+            'innovation_id' => $request->innovation_id,
+            'type' => $request->type
+        ]);
+
+        $group_post = innovation::findOrFail($request->innovation_id);
+        $likes = $group_post->likes + 1;
+        $group_post->update([
+            'likes' => $likes
+        ]); 
+        $data = $this->likeListByInnovation($request->innovation_id);
+
+        return response()->json($data, 200);
+    }
+
+    public function likeListByInnovation($id)
+    {
+        $data = innovation::with('user','likesList')->find($id);
+        $final = array();
+        $temp = $data->likesList;
+        $likeList = array();
+        $dislikeList = array();
+        foreach ($temp as $value) {
+           if($value->type == -1)
+           {
+               array_push($dislikeList,$value->user_id);
+           }
+
+           if($value->type == 1)
+           {
+            array_push($likeList,$value->user_id);
+           }
+        }
+
+        $final['dislikeList'] = $dislikeList;
+        $final['likeList'] = $likeList;
+
+         return response()->json($final, 200);
     }
   
 }

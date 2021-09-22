@@ -49,12 +49,34 @@ class User extends Authenticatable
         'updated_at',
         'remember_token',
         'password',
+        'code_verification'
     ];
 
     public function verification()
     {
         return $this->hasOne(FaceVerification::class);
     }
+
+    public function wilaya()
+    {
+        return $this->belongsTo(Wilaya::class);
+    }
+
+    public function followers()
+{
+    return $this->belongsToMany(User::class, follower::class, 'follow_id', 'user_id')->withTimestamps();
+}
+
+public function following()
+{
+    return $this->belongsToMany(User::class, follower::class, 'user_id', 'follow_id')->withTimestamps();
+}
+
+
+public function followingGroup()
+{
+    return $this->belongsToMany(User::class, followGroup::class, 'user_id', 'follow_id')->withTimestamps();
+}
 
     /**
      * The attributes that should be cast to native types.

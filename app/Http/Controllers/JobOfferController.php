@@ -55,7 +55,7 @@ class JobOfferController extends Controller
             'state' => 'required',
             'description' => 'required',
             'mission' => 'required',
-            'profile' => 'required',
+            'profile' => 'required|unique:job_offers',
             'advantage' => 'required'
         ]);
         if($validator->fails())
@@ -108,11 +108,14 @@ class JobOfferController extends Controller
      */
     public function show($id)
     {
-        $data = JobOffer::with('user')->find($id);
+        $data = JobOffer::find($id);
         if($data)
         {
-           $data['pictureUser'] = $data->user->picture;
-           $data['is_kaiztech_team'] = $data->user->is_kaiztech_team;
+            $user = User::where('id',$data->user_id)->first();
+
+            $data['pictureUser'] = $user->picture;
+            $data['is_kaiztech_team'] = $user->is_kaiztech_team;
+            $data['profession'] = $user->profession;
            return response()->json(['success' => true,'data' => $data], 200);
         }
         return response()->json(['success' => false], 200);

@@ -22,6 +22,9 @@ class CreateGroupPostsTable extends Migration
             $table->tinyInteger('colorabble');
             $table->string('likes');
             $table->tinyInteger('type');
+            $table->tinyInteger('is_approved');
+            $table->tinyInteger('anonym');
+            $table->string('title_pitch');
             $table->timestamps();
         });
     }

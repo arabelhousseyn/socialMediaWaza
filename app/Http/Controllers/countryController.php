@@ -8,6 +8,7 @@ class countryController extends Controller
 {
     public function index()
     {
-        return Country::all();
+        $data = Country::all();
+        return response()->json($data, 200);
     }
 }
