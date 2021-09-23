@@ -179,12 +179,26 @@ class GroupPostController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $GroupPost = GroupPost::where('id',$id)->update($request);
+        $validator = Validator::make($request->all(), [
+            'description' => 'required'
+        ]);
+
+        if($validator->fails())
+        {
+            return response()->json(['success' => 'hahah'], 200);
+        }
+
+        if($validator->validated())
+        {
+            $GroupPost = GroupPost::where('id',$id)->update([
+                'description' => $request->description
+            ]);
         if($GroupPost)
         {
             return response()->json(['success' => true], 200);
         }
         return response()->json(['success' => false], 200);
+        }
     }
 
     /**
@@ -208,7 +222,24 @@ class GroupPostController extends Controller
         $tempImages = array();
         if($id == 0)
         {
-            $data = GroupPost::with('likesList')->where('group_id',null)->whereDate('created_at', '>=', Carbon::now()->subDays(7)->setTime(0, 0, 0)->toDateTimeString())
+            $ids = array();
+            $filters = GroupPost::whereDate('created_at', '>=', Carbon::now()->subDays(7)->setTime(0, 0, 0)->toDateTimeString())
+            ->get();
+
+            foreach ($filters as $filter) {
+                if($filter->group_id == null)
+                {
+                    $ids[] = $filter->id;
+                }else{
+                    $grp = Group::where('id',$filter->group_id)->first();
+                    if($grp->user_id == $filter->user_id)
+                    {
+                        $ids[] = $filter->id;
+                    }
+                }
+            }
+
+            $data = GroupPost::with('likesList')->whereIn('id',$ids)
             ->select('id','description','user_id','colorabble','type','anonym','group_id','title_pitch','created_at')->orderBy('id','DESC')->paginate(20);
              foreach ($data as $value) {
             $value['createdAt'] = Carbon::parse($value->created_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
@@ -248,17 +279,16 @@ class GroupPostController extends Controller
                 $value['countImages'] = 0;
             }
             $value['user'] = $user->fullName;
-            $value['picture'] = $user->picture;
+            $value['picture'] = env('DISPLAY_PATH') . 'profiles/' . $user->picture;
             $value['is_admin'] = 0;
             $value['is_kaiztech_team'] = $user->is_kaiztech_team;
             if($value->group_id != null)
             {
                 $group = Group::where('id',$value->group_id)->first();
-                $value['groupName'] = $group->name;
-                $value['pictureGroup'] = env('DISPLAY_PATH') . 'groupImages/' . $group->cover; 
-            }else{
-                $value['groupName'] = '';
-                $value['pictureGroup'] = ''; 
+                $value['user'] = $group->name;
+                $value['picture'] = env('DISPLAY_PATH') . 'groupImages/' . $group->cover;
+                $value['is_admin'] = 1;
+                $value['is_kaiztech_team'] = $user->is_kaiztech_team; 
             }
             }
         return response()->json($data, 200);
@@ -329,11 +359,11 @@ class GroupPostController extends Controller
             if($group->user_id == $value->user_id)
                 {
                 $value['user'] = $group->name;
-            $value['picture'] = $group->cover;
+            $value['picture'] = env('DISPLAY_PATH') . 'groupImages/' .$group->cover;
             $value['is_admin'] = 1;
                 }else{
                 $value['user'] = $user->fullName;
-                $value['picture'] = $user->picture;
+                $value['picture'] = env('DISPLAY_PATH') . 'profiles/' .$user->picture;
                 $value['is_admin'] = 0;
                 }
             $value['is_kaiztech_team'] = $user->is_kaiztech_team;
@@ -473,7 +503,7 @@ class GroupPostController extends Controller
         if($checkGroup->user_id == Auth::user()->id)
         {
             $data = GroupPost::where([['group_id','=',$id],['is_approved','=',0]])->orderBy('id','DESC')->whereDate('created_at', '>=', Carbon::now()->subDays(7)->setTime(0, 0, 0)->toDateTimeString())
-            ->select('id','description','user_id','colorabble','type')->get();
+            ->select('id','description','user_id','colorabble','type','title_pitch')->get();
    
            foreach ($data as $value) {
                $userPost = GroupPost::with('images')->where('id',$value->id)->first();
@@ -496,7 +526,7 @@ class GroupPostController extends Controller
                    $value['countImages'] = 0;
                }
                    $value['user'] = $user->fullName;
-                   $value['picture'] = $user->picture;
+                   $value['picture'] = env('DISPLAY_PATH') . 'profiles/' .$user->picture;
                    $value['is_admin'] = 0;
                
                $value['is_kaiztech_team'] = $user->is_kaiztech_team;

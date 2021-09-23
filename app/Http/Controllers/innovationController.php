@@ -182,7 +182,26 @@ class innovationController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'description' => 'required',
+        ]);
+
+        if($validator->fails())
+        {
+            return response()->json(['success' => false], 200);
+        }
+
+        if($validator->validated())
+        {
+            $GroupPost = innovation::where('id',$id)->update([
+                'description' => $request->description
+            ]);
+        if($GroupPost)
+        {
+            return response()->json(['success' => true], 200);
+        }
+        return response()->json(['success' => false], 200);
+        }
     }
 
     /**
@@ -193,7 +212,12 @@ class innovationController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $GroupPost = innovation::where('id',$id)->delete();
+        if($GroupPost)
+        {
+            return response()->json(['success' => true], 200);
+        }
+        return response()->json(['success' => false], 200);
     }
 
     public function getInnovationByDomain($id)
@@ -203,6 +227,7 @@ class innovationController extends Controller
             $data = innovation::with('likesList')->selective($id)->paginate(20);
         
         foreach ($data as $value) {
+            $value['createdAt'] = Carbon::parse($value->created_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
             $tempImages = array();
             $likeList = array();
             $dislikeList = array();
@@ -249,6 +274,7 @@ class innovationController extends Controller
         $data = innovation::with('likesList')->selective($id)->paginate(20);
 
         foreach ($data as $value) {
+            $value['createdAt'] = Carbon::parse($value->created_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
             $tempImages = array();
             $likeList = array();
             $dislikeList = array();

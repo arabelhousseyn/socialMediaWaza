@@ -134,6 +134,7 @@ class AmanaController extends Controller
             $data = Amana::whereDate('created_at', '>=', Carbon::now()->subDays(30)->setTime(0, 0, 0)->toDateTimeString())->
             select('id','title','user_id','description','abbreviation','amana_category_id','created_at')->orderBy('id','DESC')->paginate(20);
             foreach ($data as $value) {
+                $value['createdAt'] = Carbon::parse($value->created_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
                 $userAmana = Amana::with('images')->where('id',$value->id)->first();
                 $user = User::where('id',$value->user_id)->first();
 
@@ -158,6 +159,7 @@ class AmanaController extends Controller
         $data = Amana::whereDate('created_at', '>=', Carbon::now()->subDays(30)->setTime(0, 0, 0)->toDateTimeString())->
         where('amana_category_id',$id)->select('id','title','user_id','description','abbreviation','amana_category_id','created_at')->orderBy('id','DESC')->paginate(20);
         foreach ($data as $value) {
+            $value['createdAt'] = Carbon::parse($value->created_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
             $userAmana = Amana::with('images')->where('id',$value->id)->first();
             $user = User::where('id',$value->user_id)->first();
 

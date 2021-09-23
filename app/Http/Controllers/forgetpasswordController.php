@@ -27,14 +27,14 @@ class forgetpasswordController extends Controller
             if($user)
             {
                 $code = uniqid();
-                $to = $request->email;
-                $subject = "Code vèrification";
-                $headers = "MIME-Version: 1.0" . "\r\n";
-                $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-                $headers .= 'From: waza' . "\r\n";
-                $message = 'Voici votre code de confirmation : ' . $code;
+                // $to = $request->email;
+                // $subject = "Code vèrification";
+                // $headers = "MIME-Version: 1.0" . "\r\n";
+                // $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+                // $headers .= 'From: waza' . "\r\n";
+                // $message = 'Voici votre code de confirmation : ' . $code;
 
-                mail($to,$subject,$message,$headers);
+                // mail($to,$subject,$message,$headers);
 
 
                 $user->update([

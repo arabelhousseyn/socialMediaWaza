@@ -59,7 +59,7 @@ class innovation extends Model
     {
 
         return ($innovation_domain_id == 0) ? $query->select('id','title','user_id','type','imageCompany')->orderBy('id','DESC')
-        : $query->select('id','title','user_id','type','imageCompany')
+        : $query->select('id','title','user_id','type','imageCompany','created_at')
         ->where('innovation_domain_id','=',$innovation_domain_id)->orderBy('id','DESC');
     }
 }

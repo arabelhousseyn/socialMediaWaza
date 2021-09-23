@@ -87,25 +87,25 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::resource('groupuniverses', GroupUniverseController::class);
 
     // amana
+    Route::get('amanaByCategory/{id}', [AmanaController::class, 'amanaByCategory']);
     Route::resource('amana', AmanaController::class);
     Route::resource('amanaCategory', AmanaCategoryController::class);
-    Route::get('amanaByCategory/{id}', [AmanaController::class, 'amanaByCategory']);
     // job
     // freelance
     Route::resource('freelance', FreelanceController::class);
     // job offer
-    Route::resource('jobOffer', JobOfferController::class);
     Route::get('getAllJobs', [JobOfferController::class, 'getAll']);
+    Route::resource('jobOffer', JobOfferController::class);
     // cv library
     Route::resource('cvLibrary', CvLibraryController::class);
 
     //Category
+    Route::get('listingByCategory/{id}/{pos}', [ListingController::class, 'listingByCategory'])->whereNumber('id', 'pos');
     Route::resource('categories', CategoryController::class);
     Route::resource('listings', ListingController::class);
-    Route::get('listingByCategory/{id}/{pos}', [ListingController::class, 'listingByCategory'])->whereNumber('id', 'pos');
     // report
-    Route::resource('report', ReportController::class);
     Route::post('reporttest', [ReportController::class, 'test']);
+    Route::resource('report', ReportController::class);
     // report ITA
     Route::resource('reportIta', ReportItaController::class);
     // follow
