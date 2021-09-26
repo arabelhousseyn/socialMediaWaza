@@ -47,7 +47,6 @@ class GroupPostController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'description' => 'required',
             'type' => 'required',
             'anonym' => 'required'
         ]);
@@ -61,6 +60,7 @@ class GroupPostController extends Controller
         if($validator->validated())
         {
             $path = '';
+            $videoPath = '';
             $group = Group::where('id',$request->group_id)->first();
             if($request->group_id == 0)
             {
@@ -73,17 +73,29 @@ class GroupPostController extends Controller
                     $is_approved = 0; 
                 }
             }
+
+            
+            if(strlen($request->video) != 0)
+            {
+                    $folderPath = env('MAIN_PATH') . "videoPost/";
+                    $video_base64 = base64_decode($request->video);
+                    $videoPath = uniqid() . '.mp4';
+                    $file = $folderPath . $videoPath;
+                    file_put_contents($file, $video_base64);
+            }
+
             $post = GroupPost::create([
                 'user_id' => Auth::user()->id,
                 'group_id' => ($request->group_id == 0) ? null : $request->group_id,
-                'description' => $request->description,
+                'description' => (strlen($request->description) != 0) ? $request->description : '',
                 'source' => ($request->source == null) ? '' : $request->source,
                 'colorabble' => $request->colorabble,
                 'likes' => 0,
                 'type' => $request->type,
                 'is_approved' => $is_approved,
                 'anonym' => $request->anonym,
-                'title_pitch' => (@$request->title_pitch) ? $request->title_pitch : '' 
+                'title_pitch' => (@$request->title_pitch) ? $request->title_pitch : '',
+                'video' => (strlen($videoPath) != 0) ? $videoPath : '',
             ]);
     
             if(strlen($request->images) != 0)
@@ -125,6 +137,10 @@ class GroupPostController extends Controller
             $temp = $data->likesList;
             $data['is_kaiztech_team'] = $user->is_kaiztech_team;
             $data['user'] = $user;
+            if($data->type == 2)
+            {
+                $data['video'] = env('DISPLAY_PATH') .'videoPost/'.$data->video;
+            } 
 
             if($group)
             {
@@ -240,8 +256,14 @@ class GroupPostController extends Controller
             }
 
             $data = GroupPost::with('likesList')->whereIn('id',$ids)
-            ->select('id','description','user_id','colorabble','type','anonym','group_id','title_pitch','created_at')->orderBy('id','DESC')->paginate(20);
+            ->select('id','description','user_id','colorabble','type','anonym','group_id','title_pitch','created_at','video')->orderBy('id','DESC')->paginate(20);
              foreach ($data as $value) {
+                 if($value['type'] == 2)
+                 {
+                    $value['video'] = env('DISPLAY_PATH') .'videoPost/'.$value->video;
+                 }
+            $row = GroupPost::withCount('comments')->find($value->id);
+            $value['comment'] = $row->comments_count;
             $value['createdAt'] = Carbon::parse($value->created_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
             $likeList = array();
             $dislikeList = array();
@@ -296,7 +318,7 @@ class GroupPostController extends Controller
         $follow = 0;
         $is_admin = 0;
         $data = GroupPost::with('likesList')->where([['group_id','=',$id],['is_approved','=',1]])->orderBy('id','DESC')->whereDate('created_at', '>=', Carbon::now()->subDays(7)->setTime(0, 0, 0)->toDateTimeString())
-         ->select('id','description','user_id','colorabble','type','group_id','anonym','title_pitch','created_at')->paginate(20);
+         ->select('id','description','user_id','colorabble','type','group_id','anonym','title_pitch','created_at','video')->paginate(20);
 
          $groupCheck = Group::where('id',$id)->first();
          if($groupCheck)
@@ -319,6 +341,12 @@ class GroupPostController extends Controller
 
 
         foreach ($data as $value) {
+            if($value->type == 2)
+                 {
+                    $value['video'] = env('DISPLAY_PATH') .'videoPost/'.$value->video;
+                 }
+            $row = GroupPost::withCount('comments')->find($value->id);
+            $value['comment'] = $row->comments_count;
             $value['createdAt'] = Carbon::parse($value->created_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
             $likeList = array();
             $dislikeList = array();
@@ -503,9 +531,13 @@ class GroupPostController extends Controller
         if($checkGroup->user_id == Auth::user()->id)
         {
             $data = GroupPost::where([['group_id','=',$id],['is_approved','=',0]])->orderBy('id','DESC')->whereDate('created_at', '>=', Carbon::now()->subDays(7)->setTime(0, 0, 0)->toDateTimeString())
-            ->select('id','description','user_id','colorabble','type','title_pitch')->get();
+            ->select('id','description','user_id','colorabble','type','title_pitch','video')->get();
    
            foreach ($data as $value) {
+            if($value->type == 2)
+            {
+               $value['video'] = env('DISPLAY_PATH') .'videoPost/'.$value->video;
+            }
                $userPost = GroupPost::with('images')->where('id',$value->id)->first();
                $group = Group::where('user_id',$value->user_id)->first();
                $user = User::where('id',$value->user_id)->first();

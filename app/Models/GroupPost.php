@@ -22,7 +22,8 @@ class GroupPost extends Model
         'type',
         'is_approved',
         'anonym',
-        'title_pitch'
+        'title_pitch',
+        'video'
     ];
 
     protected $hidden = [

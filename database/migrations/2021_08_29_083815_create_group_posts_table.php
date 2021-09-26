@@ -25,6 +25,7 @@ class CreateGroupPostsTable extends Migration
             $table->tinyInteger('is_approved');
             $table->tinyInteger('anonym');
             $table->string('title_pitch');
+            $table->string('video');
             $table->timestamps();
         });
     }
