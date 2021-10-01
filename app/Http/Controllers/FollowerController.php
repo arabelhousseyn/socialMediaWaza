@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Auth;
+use App\Models\notification;
 class FollowerController extends Controller
 {
     /**
@@ -60,6 +61,7 @@ class FollowerController extends Controller
             if($check)
             {
                 $delete = follower::where('id',$check->id)->delete();
+                notification::where([['user_id','=',Auth::user()->id],['morphable_id','=',$check->id]])->delete();
                 if($delete)
                 {
                     return response()->json(['success' => true,'following' => 0], 200);
@@ -68,11 +70,20 @@ class FollowerController extends Controller
             }else{
                 $following = follower::create([
                     'user_id' => Auth::user()->id,
-                    'follow_id' => $request->user_id
+                    'follow_id' => $request->user_id,
+                    'is_friend' => 0
                 ]);
+
                 if($following)
                 {
-                    return response()->json(['success' => true,'following' => 1], 200);
+                    $notification = notification::create([
+                        'user_id' => Auth::user()->id,
+                        'morphable_id' => $request->user_id,
+                        'type' => 4,
+                        'is_read' => 0
+                    ]);
+
+                    return response()->json(['success' => true,'following' => 1,'notification_id' => $notification->id], 200);
                 }
             }
           return response()->json(['success' => false], 200);
@@ -124,5 +135,19 @@ class FollowerController extends Controller
     public function destroy(follower $follower)
     {
         //
+    }
+
+    public function AcceptFriend($user_id)
+    {
+        $check = follower::where([['user-id','=',Auth::user()->id],['follow_id','=',$user_id]])->whereDate('created_at', '>=', Carbon::now()->subDays(7)->setTime(0, 0, 0)->toDateTimeString())->first();
+        if($check)
+        {
+            follower::where([['user-id','=',Auth::user()->id],['follow_id','=',$user_id]])->update([
+                'is_friend' => 1
+            ]);
+            return response()->json(['success' => true], 200);
+        }
+
+        return response()->json(['success' => false], 200);
     }
 }

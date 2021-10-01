@@ -17,6 +17,7 @@ class CreateFollowersTable extends Migration
             $table->id();
             $table->integer('user_id')->unsignedBigInteger();
             $table->integer('follow_id')->unsignedBigInteger();
+            $table->tinyInteger('is_friend');
             $table->timestamps();
         });
     }

@@ -18,6 +18,7 @@ class AmanaController extends Controller
      */
     public function index()
     {
+        // get amanas order by date which is the last id inserted with images and user information
         $data = Amana::with('images','user')->orderBy('id','DESC')->paginate(20);
         return response()->json($data, 200);
     }
@@ -40,6 +41,7 @@ class AmanaController extends Controller
      */
     public function store(Request $request)
     {
+        // insert amana with multiple image
         $validator = Validator::make($request->all(), [
             'title' => 'required|max:255',
             'description' => 'required',
@@ -111,9 +113,28 @@ class AmanaController extends Controller
      * @param  \App\Models\Amana  $amana
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Amana $amana)
+    public function update(Request $request, $id)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'description' => 'required',
+        ]);
+
+        if($validator->fails())
+        {
+            return response()->json(['success' => false], 200);
+        }
+
+        if($validator->validated())
+        {
+            $amana = Amana::where('id',$id)->update([
+                'description' => $request->description
+            ]);
+        if($amana)
+        {
+            return response()->json(['success' => true], 200);
+        }
+        return response()->json(['success' => false], 200);
+        }
     }
 
     /**
@@ -122,13 +143,19 @@ class AmanaController extends Controller
      * @param  \App\Models\Amana  $amana
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Amana $amana)
+    public function destroy($id)
     {
-        //
+        $amana = Amana::where('id',$id)->delete();
+        if($amana)
+        {
+            return response()->json(['success' => true], 200);
+        }
+        return response()->json(['success' => false], 200);
     }
 
     public function amanaByCategory($id)
-    { $tempImages = array();
+    { 
+        $tempImages = array();
         if($id == 0)
         {
             $data = Amana::whereDate('created_at', '>=', Carbon::now()->subDays(30)->setTime(0, 0, 0)->toDateTimeString())->
@@ -179,6 +206,5 @@ class AmanaController extends Controller
             $value['user_profession'] = $user->profession;
         }
         return response()->json($data, 200);
-
     }
 }

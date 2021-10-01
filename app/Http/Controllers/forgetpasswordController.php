@@ -27,6 +27,7 @@ class forgetpasswordController extends Controller
             if($user)
             {
                 $code = uniqid();
+                // to be changed
                 // $to = $request->email;
                 // $subject = "Code vèrification";
                 // $headers = "MIME-Version: 1.0" . "\r\n";

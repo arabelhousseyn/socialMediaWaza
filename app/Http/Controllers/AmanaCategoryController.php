@@ -16,6 +16,7 @@ class AmanaCategoryController extends Controller
     
     public function index()
     {
+        // get amana categories with selected rows order by date which is the last id inserted 
         return response()->json(AmanaCategory::select('id','title','path','created_at')->get(), 200);
     }
 
@@ -37,18 +38,25 @@ class AmanaCategoryController extends Controller
      */
     public function store(Request $request)
     {
+        // insert amana category
         $validator = Validator::make($request->all(), [
-            'title' => 'required|unique:amana_categories',
+            // 'title' => 'required|unique:amana_categories',
             'image' => 'required'
         ]);
 
         if($validator->fails())
         {
-            return response()->json(['success' => false], 200);
+            return response()->json(['success' => false], 200); // to be changed
         }
 
         if($validator->validated())
         {
+            $check  = AmanaCategory::where('title',$request->title)->first();
+            if($check)
+            {
+                return response()->json(['success' => false,"message" => 1], 200); 
+            }
+
             $path = '';
             $folderPath = env('MAIN_PATH') . "amanaCategory/";
                     $image_base64 = base64_decode($request->image);

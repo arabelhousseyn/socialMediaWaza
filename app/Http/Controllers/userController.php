@@ -8,6 +8,8 @@ use App\Models\FaceVerification;
 use Iman\Streamer\VideoStreamer;
 use Auth;
 use App\Models\Wilaya;
+use App\Models\GroupPost;
+use App\Models\Group;
 class userController extends Controller
 {
     public function approve($id)
@@ -50,10 +52,10 @@ class userController extends Controller
         return response()->json($users, 200);
     }
 
-    public function getInformationUser($id)
+    public function getInformationUser($id,$group_post_id = null)
     {
         $following = 0;
-        $user = User::where('id',$id)->select('id','fullName','profession','picture','email','phone','hide_phone','wilaya_id')->first();
+        $user = User::where('id',$id)->select('id','fullName','profession','picture','email','phone','hide_phone','wilaya_id','subName')->first();
         if($user)
         {
         $checkFollowing = User::where('id',$id)->with('followers')->first();
@@ -64,8 +66,31 @@ class userController extends Controller
                 break;
             }
         }
-        
-        $willaya = Wilaya::where('id',$user->wilaya_id)->first();
+        $post = GroupPost::find($group_post_id);
+        if($post)
+        {
+            $group = Group::find($post->group_id);
+            if($group)
+            {
+                if($group->user_id == $post->user_id)
+            {
+                if(strlen($user->subName) != 0)
+                {
+                 $user['picture'] = env('DISPLAY_PATH') .'groupImages/'.$group->cover;
+                 $user['fullName'] = $user->subName; 
+                }else{
+                    $user['picture'] = env('DISPLAY_PATH') .'profiles/'.$user->picture;
+                }
+            }else{
+                $user['picture'] = env('DISPLAY_PATH') .'profiles/'.$user->picture;
+            }
+            }else{
+                $user['picture'] = env('DISPLAY_PATH') .'profiles/'.$user->picture;
+            }
+        }else{
+            $user['picture'] = env('DISPLAY_PATH') .'profiles/'.$user->picture;
+        }
+        $willaya = Wilaya::findOrFail($user->wilaya_id);
         $user['wilaya_name'] = $willaya->name;
         if($user['hide_phone'] == 1)
         {
@@ -78,4 +103,32 @@ class userController extends Controller
         }
         return response()->json(['success' => false], 200);
     }
+
+
+    public function getAllUsersIds()
+   {
+    $users = User::pluck('id')->all();
+    return response()->json($users, 200);
+   }
+
+   public function getUserIdByAuth()
+   {
+       return response()->json(['user_id' => Auth::user()->id], 200);
+   }
+
+   public function searchForUser($name)
+   {
+       $data = User::where('fullName', 'LIKE', "%{$name}%")
+       ->select('id','fullName','profession','picture')->get();
+       foreach ($data as $value) {
+           $value->picture = env('DISPLAY_PATH') . 'profiles/' . $value->picture;
+       }
+       return response()->json($data, 200);
+   }
+
+   public function getCountOfUsersAccepted()
+   {
+       $count_users = User::where('is_verified',1)->count();
+       return response()->json(['count_users' => $count_users + 500], 200);
+   }
 }

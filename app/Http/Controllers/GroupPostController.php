@@ -14,6 +14,7 @@ use App\Models\followGroup;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use App\Services\GroupPostService;
+use App\Models\notification;
 class GroupPostController extends Controller
 {
     /**
@@ -239,7 +240,7 @@ class GroupPostController extends Controller
         if($id == 0)
         {
             $ids = array();
-            $filters = GroupPost::whereDate('created_at', '>=', Carbon::now()->subDays(7)->setTime(0, 0, 0)->toDateTimeString())
+            $filters = GroupPost::whereDate('created_at', '>=', Carbon::now()->subDays(30)->setTime(0, 0, 0)->toDateTimeString())
             ->get();
 
             foreach ($filters as $filter) {
@@ -317,10 +318,12 @@ class GroupPostController extends Controller
         }
         $follow = 0;
         $is_admin = 0;
-        $data = GroupPost::with('likesList')->where([['group_id','=',$id],['is_approved','=',1]])->orderBy('id','DESC')->whereDate('created_at', '>=', Carbon::now()->subDays(7)->setTime(0, 0, 0)->toDateTimeString())
+        $count_followers = 0;
+        $data = GroupPost::with('likesList')->where([['group_id','=',$id],['is_approved','=',1]])->orderBy('id','DESC')->whereDate('created_at', '>=', Carbon::now()->subDays(30)->setTime(0, 0, 0)->toDateTimeString())
          ->select('id','description','user_id','colorabble','type','group_id','anonym','title_pitch','created_at','video')->paginate(20);
 
          $groupCheck = Group::where('id',$id)->first();
+         $count_followers = followGroup::where('follow_id',$id)->count();
          if($groupCheck)
          {
             if($groupCheck->user_id  !== Auth::user()->id)
@@ -398,7 +401,7 @@ class GroupPostController extends Controller
             $value['groupName'] = '';
             $value['pictureGroup'] = '';
         }
-        $custom = collect(['following' => $follow,'is_admin' => $is_admin]);
+        $custom = collect(['following' => $follow,'is_admin' => $is_admin,'count_followers' => $count_followers]);
 
         $data = $custom->merge($data);
 
@@ -436,6 +439,13 @@ class GroupPostController extends Controller
                 'comment' => ($request->type == 2) ? $path : $request->comment,
                 'type' => $request->type,
             ]);
+
+            $notification = notification::create([
+                'user_id' => Auth::user()->id,
+                'morphable_id' => $request->group_post_id,
+                'type' => 2,
+                'is_read' => 0
+            ]);
             $data = $this->commentsByPost($request->group_post_id);
             return response()->json($data->original, 200);
         }
@@ -453,7 +463,14 @@ class GroupPostController extends Controller
             }else{
                 $check->update([
                     'type' => $request->type
-                ]);    
+                ]); 
+                
+                $notification = notification::create([
+                    'user_id' => Auth::user()->id,
+                    'morphable_id' => $request->group_post_id,
+                    'type' => ($request->type == 1) ? 0 : 1,
+                    'is_read' => 0
+                ]);
             }
         $data = $this->likeListByPost($request->group_post_id);
 
@@ -470,6 +487,12 @@ class GroupPostController extends Controller
         $likes = $group_post->likes + 1;
         $group_post->update([
             'likes' => $likes
+        ]);
+        $notification = notification::create([
+            'user_id' => Auth::user()->id,
+            'morphable_id' => $group_post->id,
+            'type' => 0,
+            'is_read' => 0
         ]); 
         $data = $this->likeListByPost($request->group_post_id);
 
@@ -520,6 +543,7 @@ class GroupPostController extends Controller
             $temp['pictureUser'] = $user->picture;
             $temp['fullName'] = $user->fullName;
             $temp['is_kaiztech_team'] = $user->is_kaiztech_team;
+            $temp['user_id'] = $comment->user_id;
             array_push($final,$temp);
         }    
          return response()->json($final, 200);

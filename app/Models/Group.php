@@ -17,7 +17,8 @@ class Group extends Model
         'gender',
         'minAge',
         'maxAge',
-        'group_universe_id'
+        'group_universe_id',
+        'large_cover'
     ];
 
     protected $hidden = [

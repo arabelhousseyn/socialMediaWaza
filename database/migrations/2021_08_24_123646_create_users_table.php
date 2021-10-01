@@ -33,6 +33,7 @@ class CreateUsersTable extends Migration
             $table->string('code_verification')->nullable();
             $table->tinyInteger('hide_phone');
             $table->tinyInteger('is_kaiztech_team');
+            $table->string('company');
             $table->rememberToken();
             $table->timestamps();
         });

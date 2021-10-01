@@ -25,7 +25,8 @@ use App\Http\Controllers\{
     CvLibraryController,
     ReportItaController,
     FollowerController,
-    FollowGroupController
+    FollowGroupController,
+    NotificationController
 };
 
 
@@ -56,11 +57,14 @@ Route::get('checkifapproved/{id}', [userController::class, 'checkIfApproved'])->
 Route::get('approve/{id}', [userController::class, 'approve'])->whereNumber('id');
 
 Route::get('usersnotverified', [userController::class, 'getUsersNotVeirifed']);
-
+Route::get('getAllUsersIds', [userController::class, 'getAllUsersIds']);
+Route::get('getCountOfUsersAccepted', [userController::class, 'getCountOfUsersAccepted']);
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
     // information user by id
-    Route::get('userInformation/{id}', [userController::class, 'getInformationUser'])->whereNumber('id')->name('userInformationApi');
+    Route::get('getUserIdByAuth', [userController::class, 'getUserIdByAuth']);
+    Route::get('userInformation/{id}/{group_post_id}', [userController::class, 'getInformationUser'])->whereNumber('id','group_post_id')->name('userInformationApi');
+    Route::get('searchForUser/{name}', [userController::class, 'searchForUser']);
     // innovation
     Route::get('getInnovationByDomain/{id}', [innovationController::class, 'getInnovationByDomain'])->whereNumber('id')->name('getInnovationByDomainApi');
     Route::post('funding', [innovationController::class, 'funding'])->name('fundingApi');
@@ -109,7 +113,18 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     // report ITA
     Route::resource('reportIta', ReportItaController::class);
     // follow
+    Route::get('acceptFriend/{user_id}',[FollowerController::class,'AcceptFriend']);
     Route::resource('follow', FollowerController::class);
     Route::resource('followGroup', FollowGroupController::class);
+    // notification
+    Route::get('getNotificationsNotRead/{id}/{type}',[NotificationController::class,'getNotificationsNotRead'])->whereNumber('id');
+    Route::get('getNotifications',[NotificationController::class,'getNotifications']);
+    Route::get('friendsAccepted',[NotificationController::class,'friendsAccepted']);
+    Route::get('getPureNotifcation/{id}',[NotificationController::class,'getPureNotifcation'])->whereNumber('id');
+    Route::get('InteractWithFriend/{id}/{statu}',[NotificationController::class,'InteractWithFriend'])->whereNumber('id','statu');
+    Route::get('getNotificationById/{id}',[NotificationController::class,'getNotificationById'])->whereNumber('id');
+    Route::get('getAddFriends',[NotificationController::class,'getAddFriends']);
+    Route::get('updateRead/{id}',[NotificationController::class,'updateRead'])->whereNumber('id');
+    Route::resource('notification', NotificationController::class);
 
 });

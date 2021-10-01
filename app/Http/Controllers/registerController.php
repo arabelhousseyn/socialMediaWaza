@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Traits\SendNotification;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\FaceVerification;
@@ -9,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 class registerController extends Controller
 {
+    use SendNotification;
     public function index(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -33,7 +35,7 @@ class registerController extends Controller
 
         if($validator->validated())
         {
-            
+
             $checkEmail = User::where('email',$request->email)->first();
 
             if(!$checkEmail)
@@ -41,7 +43,7 @@ class registerController extends Controller
                 $checkPhone = User::where('phone',$request->phone)->first();
                 if(!$checkPhone)
                 {
-                    
+
                     $path = '';
                     $folderPath = env('MAIN_PATH') . "profiles/";
                     $image_base64 = base64_decode($request->picture);
@@ -65,7 +67,8 @@ class registerController extends Controller
                         'receive_ads' => $request->receive_ads,
                         'token' => null,
                         'hide_phone' => $request->hide_phone,
-                        'is_kaiztech_team' => 0
+                        'is_kaiztech_team' => 0,
+                        'company' => (strlen($request->company) != 0) ? $request->company : ''
                     ]);
                     $usr = User::where('id',$user->id)->select('id','fullName','subName',
                     'dob','picture','gender','profession','wilaya_id','phone','email','is_freelancer',
@@ -76,7 +79,7 @@ class registerController extends Controller
                         'token' => $token
                     ]);
 
-                    return response()->json(['success' => true,'user' => $usr], 200);               
+                    return response()->json(['success' => true,'user' => $usr], 200);
                 }
                 return response()->json(['success' => false,'message' => 1], 200);
             }
@@ -134,7 +137,8 @@ class registerController extends Controller
         User::where('id',$request->id)->update([
             'is_verified' => 0
         ]);
-
+        
+        $this->sendNotification();
         return response()->json(['success' => true], 200);
         }
     }
@@ -160,7 +164,7 @@ class registerController extends Controller
         // $face = FaceDetection::extract('storage/app/uploads/' . $id1);
 
         // if($face->found) {
-        //     $face->save('storage/faces/out' . $id1); 
+        //     $face->save('storage/faces/out' . $id1);
         //   } else {
         //     return ['status' => 0];
         //   }
@@ -168,7 +172,7 @@ class registerController extends Controller
         //   $face = FaceDetection::extract('storage/app/uploads/' . $id2);
 
         // if($face->found) {
-        //     $face->save('storage/faces/out' . $id2); 
+        //     $face->save('storage/faces/out' . $id2);
         //   } else {
         //     return ['status' => 0];
         //   }
@@ -182,7 +186,7 @@ class registerController extends Controller
                    );
           $response = $facepp->execute('/compare',$params);
           $response = json_decode(json_encode($response));
-          
+
      if($response->http_code == 200){
     $data = json_decode($response->body);
     if(intval($data->confidence) <  intval(env('PERCENTAGE')))

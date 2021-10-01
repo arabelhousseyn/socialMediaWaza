@@ -36,7 +36,8 @@ class User extends Authenticatable
         'is_verified',
         'code_verification',
         'hide_phone',
-        'is_kaiztech_team'
+        'is_kaiztech_team',
+        'company'
     ];
 
     /**

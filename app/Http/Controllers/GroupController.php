@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Group;
 use Auth;
 use Illuminate\Support\Facades\Validator;
+use App\Models\notification;
 class GroupController extends Controller
 {
     /**
@@ -15,10 +16,18 @@ class GroupController extends Controller
      */
     public function index()
     {
+         /**
+         * merge between the the first group of user and add special groups by id then other groups in the last of collection
+         */
+
         $data = Group::where([['user_id','=',Auth::user()->id],['id','<>',100],['id','<>',99]])->select('id','name','cover')->orderBy('id','DESC')->paginate(20);
         $data2 = Group::where([['user_id','<>',Auth::user()->id],['id','<>',100],['id','<>',99]])->select('id','name','cover')->orderBy('id','DESC')->paginate(20);
+        $data3 = Group::where('id',100)->select('id','name','cover')->orderBy('id','DESC')->paginate(20);
+        $updatedItems = $data->merge($data3);
+        $data->setCollection($updatedItems);
         $updatedItems = $data->merge($data2);
         $data->setCollection($updatedItems);
+       
         return response()->json($data, 200);
     }
 
@@ -54,9 +63,7 @@ class GroupController extends Controller
         if($validator->validated())
         {
             $folderPath = env('MAIN_PATH') . "groupImages/";
-
-            if($request->type == 1)
-            {
+            $path1 = '';
                 $checkName = Group::where('name',$request->name)->first();
                 if($checkName)
                 {
@@ -67,42 +74,34 @@ class GroupController extends Controller
             $file = $folderPath . $path;
             file_put_contents($file, $image_base64);
 
-            $group = Group::create([
-                'name' => $request->name,
-                'user_id' => Auth::user()->id,
-                'cover' => $path,
-                'type' => $request->type,
-                'gender' => $request->gender,
-                'minAge' => $request->minAge,
-                'maxAge' => $request->maxAge,
-                'group_universe_id' => $request->group_universe_id,
-            ]);
-
-            return response()->json(['success' => true,'id' => $group->id,'image' => $path], 200);
+            if(strlen($request->large_cover) != 0)
+            {
+            $image_base64 = base64_decode($request->large_cover);
+            $path1 = uniqid() . '.jpg';
+            $file = $folderPath . $path1;
+            file_put_contents($file, $image_base64);
             }
 
-            $checkName = Group::where('name',$request->name)->first();
-                if($checkName)
-                {
-                    return response()->json(['success' => false,'message' => 1], 200);
-                }
-            $image_base64 = base64_decode($request->cover);
-            $path = uniqid() . '.jpg';
-            $file = $folderPath . $path;
-            file_put_contents($file, $image_base64);
-
             $group = Group::create([
                 'name' => $request->name,
                 'user_id' => Auth::user()->id,
                 'cover' => $path,
                 'type' => $request->type,
-                'gender' => null,
-                'minAge' => null,
-                'maxAge' => null,
+                'gender' => ($request->type == 0) ? $request->gender : null,
+                'minAge' => ($request->type == 0) ? $request->minAge : null,
+                'maxAge' => ($request->type == 0) ? $request->maxAge : null,
                 'group_universe_id' => $request->group_universe_id,
+                'large_cover' => $path1
             ]);
 
-            return response()->json(['success' => true,'id' => $group->id,'image' => $path], 200);
+            $notification = notification::create([
+                'user_id' => Auth::user()->id,
+                'morphable_id' => $group->id,
+                'type' => 3,
+                'is_read' => 0
+            ]);
+            
+            return response()->json(['success' => true,'id' => $group->id,'image' => $path,'notification_id' => $notification->id,'cover' => $path1], 200);
         }
     }
 
@@ -134,16 +133,17 @@ class GroupController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return 
+     * \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
     {
         $Group = Group::where('id',$id)->update($request);
         if($group)
         {
-            return response()->json(['success' => true], 200, $headers);
+            return response()->json(['success' => true], 200);
         }
-        return response()->json(['success' => false], 200, $headers);
+        return response()->json(['success' => false], 200);
     }
 
     /**
@@ -164,6 +164,10 @@ class GroupController extends Controller
 
     public function getgroupsByunivers($id)
     {
+        /**
+         * get groups by universe
+         * merge between the the first group of user and the second of other groups
+         */
         if($id == 0)
         {
             $data = Group::where([['user_id','=',Auth::user()->id],['id','<>',100],['id','<>',99]])->select('id','name','cover')->paginate(20);

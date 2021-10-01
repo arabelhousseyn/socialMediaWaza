@@ -136,10 +136,10 @@ class innovationController extends Controller
             $temp = $data->likesList;
             if(strlen($data->imageCompany) != 0)
             {
-                $data['pictureUser'] = $data->imageCompany;
+                $data['pictureUser'] = env('DISPLAY_PATH') . 'ImageCompany/' . $data->imageCompany;
                 $data['is_company'] = 1;
             }else{
-                $data['pictureUser'] = $user->picture;
+                $data['pictureUser'] = env('DISPLAY_PATH') . 'profiles/' . $user->picture;
                 $data['is_company'] = 0;
             }
             $data['is_kaiztech_team'] = $user->is_kaiztech_team;

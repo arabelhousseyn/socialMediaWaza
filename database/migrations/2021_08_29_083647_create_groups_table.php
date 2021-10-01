@@ -19,6 +19,7 @@ class CreateGroupsTable extends Migration
             $table->foreignId('user_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('group_universe_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
             $table->string('cover');
+            $table->string('large_cover');
             $table->tinyInteger('type');
             $table->tinyInteger('gender')->nullable();
             $table->integer('minAge')->nullable();
