@@ -268,4 +268,11 @@ class userController extends Controller
     $hi = Mail::to('hocine.arab1@hotmail.com')->send(new verificationMail($details));
     return response()->json($hi, 200);
    }
+
+   public function GetUserStatus() 
+   {
+    $user = User::find(Auth::id());
+    return response()->json(['status' => $user->is_verified], 200);
+   }
+
 }

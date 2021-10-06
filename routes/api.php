@@ -63,6 +63,7 @@ Route::get('getCountOfUsersAccepted', [userController::class, 'getCountOfUsersAc
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
     // information user by id
+    Route::get('statusUser', [userController::class, 'GetUserStatus']);
     Route::get('getUserIdByAuth', [userController::class, 'getUserIdByAuth']);
     Route::get('userInformation/{id}/{group_post_id}', [userController::class, 'getInformationUser'])->whereNumber('id','group_post_id')->name('userInformationApi');
     Route::get('searchForUser/{name?}', [userController::class, 'searchForUser']);
