@@ -264,22 +264,21 @@ class GroupPostController extends Controller
             $row = GroupPost::withCount('comments')->find($value->id);
             $value['comment'] = $row->comments_count;
             $value['createdAt'] = Carbon::parse($value->created_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
-            $likeList = array();
-            $dislikeList = array();
+            $countLikes = 0;
+            $countDislikes = 0;
             $temp = $value->likesList;
             foreach ($temp as $vl) {
+                if($vl->type == 1)
+                {
+                  $countLikes++;
+                }
                 if($vl->type == -1)
-           {
-               array_push($dislikeList,$vl->user_id);
-           }
-
-           if($vl->type == 1)
-           {
-            array_push($likeList,$vl->user_id);
-           }
+                {
+                  $countDislikes++;
+                }
             }
-            $value['dislikes'] = count($dislikeList);
-            $value['likes'] = count($likeList);
+            $value['dislikes'] = $countDislikes;
+            $value['likes'] = $countLikes;
 
             $userPost = GroupPost::with('images')->where('id',$value->id)->first();
             $user = User::where('id',$value->user_id)->first();
@@ -350,22 +349,21 @@ class GroupPostController extends Controller
             $row = GroupPost::withCount('comments')->find($value->id);
             $value['comment'] = $row->comments_count;
             $value['createdAt'] = Carbon::parse($value->created_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
-            $likeList = array();
-            $dislikeList = array();
+            $countLikes = 0;
+            $countDislikes = 0;
             $temp = $value->likesList;
             foreach ($temp as $vl) {
+                if($vl->type == 1)
+                {
+                  $countLikes++;
+                }
                 if($vl->type == -1)
-           {
-               array_push($dislikeList,$vl->user_id);
-           }
-
-           if($vl->type == 1)
-           {
-            array_push($likeList,$vl->user_id);
-           }
+                {
+                  $countDislikes++;
+                }
             }
-            $value['dislikes'] = count($dislikeList);
-            $value['likes'] = count($likeList);
+            $value['dislikes'] = $countDislikes;
+            $value['likes'] = $countLikes;
 
             $userPost = GroupPost::with('images')->where('id',$value->id)->first();
             $group = Group::where('id',$value->group_id)->first();
