@@ -7,8 +7,10 @@ use Illuminate\Http\Request;
 use Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
+use App\Traits\upload;
 class JobOfferController extends Controller
 {
+    use upload;
     /**
      * Display a listing of the resource.
      *
@@ -67,12 +69,7 @@ class JobOfferController extends Controller
         {
             if(strlen($request->image) != 0)
             {
-                $folderPath = 'JobOffersImages/';
-                $image = uniqid() . '.png';
-
-                $image_base64 = base64_decode($request->image);
-                $file = $folderPath . $image;
-                file_put_contents($file, $image_base64);
+                $image = $this->ImageUpload($request->image,'JobOffersImages');
             }
 
             $jobOffer = JobOffer::create([

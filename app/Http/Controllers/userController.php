@@ -12,8 +12,12 @@ use App\Models\GroupPost;
 use App\Models\Group;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
+use App\Mail\verificationMail;
+use Mail;
+use App\Traits\upload;
 class userController extends Controller
 {
+    use upload;
     public function approve($id)
     {
         $storage_face = env('STORAGE_FACES_URL');
@@ -178,11 +182,7 @@ class userController extends Controller
 
         if(strlen($request->picture) != 0)
         {
-            $folderPath = env('MAIN_PATH') . "profiles/";
-            $image_base64 = base64_decode($request->picture);
-            $path = uniqid() . '.jpg';
-            $file = $folderPath . $path;
-            file_put_contents($file, $image_base64);
+            $path = $this->ImageUpload($request->picture,'profiles');
         }
         $updated = User::where('id',Auth::user()->id)->update([
             "picture" => (strlen($path) != 0) ? $path : $user->picture,
@@ -233,31 +233,39 @@ class userController extends Controller
 
    public function test()
    {
-    $firebaseToken = User::pluck('device_token')->all();
-    $SERVER_API_KEY = 'AAAAtX5a_xg:APA91bFCW6XtWkj4OWmkEFLGruyjkcjSNaOpIpFkrWlbvyksPog2LaG08j8ZLiBbi8M3boxZouks9EKvYjDGtJzt27G4ZfkAco9jj_2LPiPwOd96KD_YuhYm0CohvgnT4IBsx4fy__Tk';
-    $data = [
-        "registration_ids" => $firebaseToken,
-        "notification" => [
-            "title" => 'Nouveaux invitation',
-            "body" => "test",
-            'image' => 'https://dashboard.waza.fun/waza-small.png',
-            'sound' => true,
-        ]
+    // $firebaseToken = User::pluck('device_token')->all();
+    // $SERVER_API_KEY = 'AAAAtX5a_xg:APA91bFCW6XtWkj4OWmkEFLGruyjkcjSNaOpIpFkrWlbvyksPog2LaG08j8ZLiBbi8M3boxZouks9EKvYjDGtJzt27G4ZfkAco9jj_2LPiPwOd96KD_YuhYm0CohvgnT4IBsx4fy__Tk';
+    // $data = [
+    //     "registration_ids" => $firebaseToken,
+    //     "notification" => [
+    //         "title" => 'Nouveaux invitation',
+    //         "body" => "test",
+    //         'image' => 'https://dashboard.waza.fun/waza-small.png',
+    //         'sound' => true,
+    //     ]
+    // ];
+    // $dataString = json_encode($data);
+    // $headers = [
+    //     'Authorization: key=' . $SERVER_API_KEY,
+    //     'Content-Type: application/json',
+    // ];
+    // $ch = curl_init();
+    // curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
+    // curl_setopt($ch, CURLOPT_POST, true);
+    // curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    // curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    // curl_setopt($ch, CURLOPT_POSTFIELDS, $dataString);
+    // $result = curl_exec($ch );
+    //     curl_close( $ch );
+    //     return $result;
+
+    $details = [
+        "title" => "test",
+        "body" => "test"
     ];
-    $dataString = json_encode($data);
-    $headers = [
-        'Authorization: key=' . $SERVER_API_KEY,
-        'Content-Type: application/json',
-    ];
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $dataString);
-    $result = curl_exec($ch );
-        curl_close( $ch );
-        return $result;
+
+    $hi = Mail::to('hocine.arab1@hotmail.com')->send(new verificationMail($details));
+    return response()->json($hi, 200);
    }
 }

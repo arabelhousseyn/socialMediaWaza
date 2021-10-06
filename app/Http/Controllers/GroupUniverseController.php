@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\GroupUniverse;
 use Illuminate\Support\Facades\Validator;
+use App\Traits\upload;
 class GroupUniverseController extends Controller
 {
+    use upload;
     /**
      * Display a listing of the resource.
      *
@@ -47,13 +49,7 @@ class GroupUniverseController extends Controller
 
         if($validator->validated())
         {
-            $path = '';
-            $folderPath = env('MAIN_PATH') . "groupUnivers/";
-            $image_base64 = base64_decode($request->cover);
-            $path = uniqid() . '.jpg';
-            $file = $folderPath . $path;
-            file_put_contents($file, $image_base64);
-            
+            $path = $this->ImageUpload($request->cover,'groupUnivers');
             GroupUniverse::create([
                 'name' => $request->name,
                 'cover' => $path

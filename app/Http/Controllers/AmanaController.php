@@ -9,8 +9,10 @@ use App\Models\User;
 use Auth;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
+use App\Traits\upload;
 class AmanaController extends Controller
 {
+    use upload;
     /**
      * Display a listing of the resource.
      *
@@ -68,17 +70,11 @@ class AmanaController extends Controller
             $images = explode(';ibaa;',$request->images);
             
             foreach ($images as $image) {
-                $path = '';
-        $folderPath = env('MAIN_PATH') . "amanaImages/";
-        $image_base64 = base64_decode($image);
-        $path = uniqid() . '.jpg';
-        $file = $folderPath . $path;
-        file_put_contents($file, $image_base64);
-
-            AmanaImage::create([
+                $path = $this->ImageUpload($image,'amanaImages');
+                AmanaImage::create([
                 'amana_id' => $amana->id,
                 'path' => $path
-            ]);
+                  ]);
             }
             return response()->json(['success' => true], 200);
         }  

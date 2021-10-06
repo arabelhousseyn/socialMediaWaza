@@ -12,8 +12,10 @@ use Carbon\Carbon;
 use ImageOptimizer;
 use Auth;
 use Illuminate\Support\Facades\Validator;
+use App\Traits\upload;
 class innovationController extends Controller
 {
+    use upload;
     /**
      * Display a listing of the resource.
      *
@@ -76,11 +78,7 @@ class innovationController extends Controller
 
                  if(strlen($request->imageCompany) != 0)
                  {
-                    $folderPath = env('MAIN_PATH') . "ImageCompany/";
-                    $image_base64 = base64_decode($request->imageCompany);
-                    $pathImageCompany = uniqid() . '.jpg';
-                    $file = $folderPath . $pathImageCompany;
-                    file_put_contents($file, $image_base64);
+                    $pathImageCompany = $this->ImageUpload($request->imageCompany,'ImageCompany');
                  }
 
                     $innovation = innovation::create([
@@ -99,17 +97,12 @@ class innovationController extends Controller
 
                    $images = explode(';ibaa;',$request->images);
                    foreach ($images as $image) {
-                    $pathImage = uniqid() . '.jpg';
-                    $folderPathImage = env('MAIN_PATH') . "innovationImages/";
-                    $image_base64 = base64_decode($image);
-                    $file = $folderPathImage . $pathImage;
-                    file_put_contents($file, $image_base64);
+                    $pathImage = $this->ImageUpload($image,'innovationImages');
                            $check = innovationImage::create([
                                'path' => $pathImage,
                                'innovation_id' => $innovation->id,
                            ]);
                    }
-
                    if($check)
                    {
                        return response()->json(['success' => true,'id' => $innovation->id], 200);
@@ -342,11 +335,7 @@ class innovationController extends Controller
         if(strlen($request->pathBusinessPlan) != 0)
                  {
                    // $pdf = gzdecode(base64_decode($request->pathBusinessPlan));
-                    $folderPath = env('MAIN_PATH') . "bussinesPlan/";
-                    $image_base64 = base64_decode($request->pathBusinessPlan);
-                    $pathPdf = uniqid() . '.pdf';
-                    $file = $folderPath . $pathPdf;
-                    file_put_contents($file, $image_base64);
+                   $pathPdf = $this->ImageUpload($request->pathBusinessPlan,'bussinesPlan');
                  }
                 $update = innovation::where('id',$request->id)->update([
                      'is_financed' => 1,

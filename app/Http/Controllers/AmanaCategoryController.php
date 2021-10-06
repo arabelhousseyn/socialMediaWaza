@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\AmanaCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Traits\upload;
 class AmanaCategoryController extends Controller
 {
+    use upload;
     /**
      * Display a listing of the resource.
      *
@@ -54,15 +56,10 @@ class AmanaCategoryController extends Controller
             $check  = AmanaCategory::where('title',$request->title)->first();
             if($check)
             {
-                return response()->json(['success' => false,"message" => 1], 200); 
+                return response()->json(['success' => false,"message" => 1], 200); // to be changed
             }
 
-            $path = '';
-            $folderPath = env('MAIN_PATH') . "amanaCategory/";
-                    $image_base64 = base64_decode($request->image);
-                    $path = uniqid() . '.jpg';
-                    $file = $folderPath . $path;
-                    file_put_contents($file, $image_base64);
+            $path = $this->ImageUpload($request->image,'amanaCategory');
 
             $category = AmanaCategory::create([
                 'title' => $request->title,

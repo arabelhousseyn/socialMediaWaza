@@ -8,9 +8,10 @@ use Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\notification;
 use App\Traits\SendNotification;
+use App\Traits\upload;
 class GroupController extends Controller
 {
-    use SendNotification;
+    use SendNotification,upload;
     /**
      * Display a listing of the resource.
      *
@@ -64,24 +65,18 @@ class GroupController extends Controller
 
         if($validator->validated())
         {
-            $folderPath = env('MAIN_PATH') . "groupImages/";
             $path1 = '';
                 $checkName = Group::where('name',$request->name)->first();
                 if($checkName)
                 {
                     return response()->json(['success' => false,'message' => 1], 200);
                 }
-            $image_base64 = base64_decode($request->cover);
-            $path = uniqid() . '.jpg';
-            $file = $folderPath . $path;
-            file_put_contents($file, $image_base64);
+
+            $path = $this->ImageUpload($request->cover,'groupImages');
 
             if(strlen($request->large_cover) != 0)
             {
-            $image_base64 = base64_decode($request->large_cover);
-            $path1 = uniqid() . '.jpg';
-            $file = $folderPath . $path1;
-            file_put_contents($file, $image_base64);
+            $path1 = $this->ImageUpload($request->large_cover,'groupImages');
             }
 
             $group = Group::create([

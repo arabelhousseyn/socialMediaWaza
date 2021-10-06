@@ -8,8 +8,10 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Auth;
 use Illuminate\Support\Facades\Validator;
+use App\Traits\upload;
 class FreelanceController extends Controller
 {
+    use upload;
     /**
      * Display a listing of the resource.
      *
@@ -21,7 +23,7 @@ class FreelanceController extends Controller
         foreach ($data as $value) {
             $user = User::where('id',$value->user_id)->first();
             $value['user'] = $user->fullName;
-            $value['pictureUser'] = $user->picture;
+            $value['pictureUser'] = env('DISPLAY_PATH') . 'profiles/' . $user->picture;
             $value['is_kaiztech_team'] = $user->is_kaiztech_team;
         }
         return response()->json($data, 200);
@@ -90,8 +92,7 @@ class FreelanceController extends Controller
          if($data)
          {
             $user = User::where('id',$data->user_id)->first();
-
-            $data['pictureUser'] = $user->picture;
+            $data['pictureUser'] = env('DISPLAY_PATH') . 'profiles/' . $user->picture;
             $data['is_kaiztech_team'] = $user->is_kaiztech_team;
             $data['profession'] = $user->profession;
             return response()->json(['success' => true,'data' => $data], 200);

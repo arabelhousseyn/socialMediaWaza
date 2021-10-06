@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\innovationDomain;
 use Illuminate\Support\Facades\Validator;
+use App\Traits\upload;
 class innovationdomainController extends Controller
 {
+    use upload;
     /**
      * Display a listing of the resource.
      *
@@ -53,13 +55,8 @@ class innovationdomainController extends Controller
             {
                 return response()->json(['success' => false,'message' => 1], 200);
             }
-
-            $folderPath = env('MAIN_PATH') . "innovationDomainImages/";
-            $image_base64 = base64_decode($request->image);
-            $path = uniqid() . '.jpg';
-            $file = $folderPath . $path;
-            file_put_contents($file, $image_base64);
-
+            $path = $this->ImageUpload($request->image,'innovationDomainImages');
+            
                 $domain = innovationDomain::create([
                     'title' => $request->title,
                     'image' => $path,

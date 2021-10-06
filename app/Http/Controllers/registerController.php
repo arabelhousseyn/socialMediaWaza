@@ -8,9 +8,11 @@ use App\Models\User;
 use App\Models\FaceVerification;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use App\Traits\upload;
 class registerController extends Controller
 {
-    use SendNotification;
+    use SendNotification,upload;
+
     public function index(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -44,13 +46,7 @@ class registerController extends Controller
                 $checkPhone = User::where('phone',$request->phone)->first();
                 if(!$checkPhone)
                 {
-
-                    $path = '';
-                    $folderPath = env('MAIN_PATH') . "profiles/";
-                    $image_base64 = base64_decode($request->picture);
-                    $path = uniqid() . '.jpg';
-                    $file = $folderPath . $path;
-                    file_put_contents($file, $image_base64);
+                    $path = $this->ImageUpload($request->picture,'profiles');
 
                         $user = User::create([
                         'fullName' => $request->fullName,
@@ -104,17 +100,8 @@ class registerController extends Controller
 
         if($validator->validated())
         {
-            $id1 = uniqid() . '.jpg';
-        $id2 = uniqid() . '.jpg';
-
-        $folderPath = env('MAIN_PATH') . "uploads/";
-        $image_base64 = base64_decode($request->image1);
-        $file = $folderPath . $id1;
-        file_put_contents($file, $image_base64);
-
-        $image_base64 = base64_decode($request->image2);
-        $file = $folderPath . $id2;
-        file_put_contents($file, $image_base64);
+            $id1 = $this->ImageUpload($request->image1,'uploads');
+            $id2 = $this->ImageUpload($request->image2,'uploads');
 
         // $response = $this->faceDetection($request);
         // if($response->status)

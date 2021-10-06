@@ -8,8 +8,10 @@ use Illuminate\Http\Request;
 use Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
+use App\Traits\upload;
 class CvLibraryController extends Controller
 {
+    use upload;
     /**
      * Display a listing of the resource.
      *
@@ -21,7 +23,8 @@ class CvLibraryController extends Controller
         foreach ($data as $value) {
             $user = User::where('id',$value->user_id)->first();
             $value['user'] = $user->fullName;
-            $value['pictureUser'] = $user->picture;
+            $value['pictureUser'] = env('DISPLAY_PATH') . 'profiles/' . $user->picture;
+            $value['path'] = env('DISPLAY_PATH') . 'CvLibraryImages/' . $value->path;
             $value['is_kaiztech_team'] = $user->is_kaiztech_team;
             $value['profession'] = $user->profession;
         }
@@ -69,19 +72,13 @@ class CvLibraryController extends Controller
         {
             if(strlen($request->image) != 0)
             {
-                $folderPath = env('MAIN_PATH') . 'CvLibraryImages/';
-                $image = uniqid() . '.png';
-
-                $image_base64 = base64_decode($request->image);
-                $file = $folderPath . $image;
-                file_put_contents($file, $image_base64);
+                $image = $this->ImageUpload($request->image,'CvLibraryImages');
             }
 
             $cvLibrary = CvLibrary::create([
                 'user_id' => Auth::user()->id,
                 'FullName' => $request->FullName,
-                'path' => (strlen($image) != 0) ? 'https://dev.waza.fun/CvLibraryImages/'. $image 
-                : 'https://dev.waza.fun/profiles/'.Auth::user()->picture,
+                'path' => (strlen($image) != 0) ?$image : Auth::user()->picture,
                 'dob' => $request->dob,
                 'arabic' => $request->arabic,
                 'english' => $request->english,
@@ -127,9 +124,10 @@ class CvLibraryController extends Controller
          {
             $user = User::where('id',$data->user_id)->first();
 
-            $data['pictureUser'] = $user->picture;
+            $data['pictureUser'] = env('DISPLAY_PATH') . 'profiles/' . $user->picture;
             $data['is_kaiztech_team'] = $user->is_kaiztech_team;
             $data['profession'] = $user->profession;
+            $data['path'] = env('DISPLAY_PATH') . 'CvLibraryImages/' . $data->path;
             return response()->json(['success' => true,'data' => $data], 200);
          }
          return response()->json(['success' => false], 200);

@@ -15,8 +15,10 @@ use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use App\Services\GroupPostService;
 use App\Models\notification;
+use App\Traits\upload;
 class GroupPostController extends Controller
 {
+    use upload;
     /**
      * Display a listing of the resource.
      *
@@ -75,19 +77,10 @@ class GroupPostController extends Controller
                 }
             }
 
-            if($request->colorabble == 0 && $request->type == 0)
-            {
-                return response()->json(['success' => false], 200);
-            }
-
             
             if(strlen($request->video) != 0)
             {
-                    $folderPath = env('MAIN_PATH') . "videoPost/";
-                    $video_base64 = base64_decode($request->video);
-                    $videoPath = uniqid() . '.mp4';
-                    $file = $folderPath . $videoPath;
-                    file_put_contents($file, $video_base64);
+                $videoPath = $this->VideoUpload($request->video,'videoPost');
             }
 
             $post = GroupPost::create([
@@ -108,12 +101,7 @@ class GroupPostController extends Controller
             {
                 $images = explode(';ibaa;',$request->images);
                 foreach ($images as $image) {
-                    $folderPath = env('MAIN_PATH') . "postImages/";
-                    $image_base64 = base64_decode($image);
-                    $path = uniqid() . '.jpg';
-                    $file = $folderPath . $path;
-                    file_put_contents($file, $image_base64);
-    
+                    $path = $this->ImageUpload($image,'postImages');
                     GroupPostImage::create([
                         'path' => $path,
                         'group_post_id' => $post->id
