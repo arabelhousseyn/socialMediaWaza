@@ -109,7 +109,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
       Route::get('getAllJobs', [JobOfferController::class, 'getAll']);
       Route::resource('jobOffer', JobOfferController::class);
       // cv library
-     Route::resource('cvLibrary', CvLibraryController::class);
+      Route::resource('cvLibrary', CvLibraryController::class);
 
     //Category
     Route::get('listingByCategory/{id}/{pos}', [ListingController::class, 'listingByCategory'])->whereNumber('id', 'pos');
