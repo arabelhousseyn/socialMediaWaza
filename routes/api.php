@@ -116,7 +116,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::resource('categories', CategoryController::class);
     Route::resource('listings', ListingController::class);
     // report
-    Route::post('reporttest', [ReportController::class, 'test']);
     Route::resource('report', ReportController::class);
     // report ITA
     Route::resource('reportIta', ReportItaController::class);
