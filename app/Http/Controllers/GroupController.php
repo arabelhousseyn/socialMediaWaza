@@ -7,8 +7,10 @@ use App\Models\Group;
 use Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\notification;
+use App\Traits\SendNotification;
 class GroupController extends Controller
 {
+    use SendNotification;
     /**
      * Display a listing of the resource.
      *
@@ -20,9 +22,9 @@ class GroupController extends Controller
          * merge between the the first group of user and add special groups by id then other groups in the last of collection
          */
 
-        $data = Group::where([['user_id','=',Auth::user()->id],['id','<>',100],['id','<>',99]])->select('id','name','cover')->orderBy('id','DESC')->paginate(20);
-        $data2 = Group::where([['user_id','<>',Auth::user()->id],['id','<>',100],['id','<>',99]])->select('id','name','cover')->orderBy('id','DESC')->paginate(20);
-        $data3 = Group::where('id',100)->select('id','name','cover')->orderBy('id','DESC')->paginate(20);
+        $data = Group::where([['user_id','=',Auth::user()->id],['id','<>',100]])->select('id','name','cover')->orderBy('id','DESC')->paginate(20);
+        $data2 = Group::where([['user_id','<>',Auth::user()->id],['id','<>',100]])->select('id','name','cover')->inRandomOrder()->orderBy('id','DESC')->paginate(20);
+        $data3 = Group::whereIn('id',[100,161])->select('id','name','cover')->orderBy('id','DESC')->paginate(20);
         $updatedItems = $data->merge($data3);
         $data->setCollection($updatedItems);
         $updatedItems = $data->merge($data2);
@@ -100,7 +102,6 @@ class GroupController extends Controller
                 'type' => 3,
                 'is_read' => 0
             ]);
-            
             return response()->json(['success' => true,'id' => $group->id,'image' => $path,'notification_id' => $notification->id,'cover' => $path1], 200);
         }
     }
@@ -170,17 +171,37 @@ class GroupController extends Controller
          */
         if($id == 0)
         {
-            $data = Group::where([['user_id','=',Auth::user()->id],['id','<>',100],['id','<>',99]])->select('id','name','cover')->paginate(20);
-        $data2 = Group::where([['user_id','<>',Auth::user()->id],['id','<>',100],['id','<>',99]])->select('id','name','cover')->paginate(20);
+            $data = Group::where([['user_id','=',Auth::user()->id],['id','<>',100]])->select('id','name','cover')->paginate(20);
+        $data2 = Group::where([['user_id','<>',Auth::user()->id],['id','<>',100]])->select('id','name','cover')->inRandomOrder()->paginate(20);
         $updatedItems = $data->merge($data2);
         $data->setCollection($updatedItems);
         return response()->json($data, 200);
         }
 
-        $data = Group::where([['user_id','=',Auth::user()->id],['group_universe_id','=',$id],['id','<>',100],['id','<>',99]])->select('id','name','cover')->paginate(20);
-        $data2 = Group::where([['user_id','<>',Auth::user()->id],['group_universe_id','=',$id],['id','<>',100],['id','<>',99]])->select('id','name','cover')->paginate(20);
+        $data = Group::where([['user_id','=',Auth::user()->id],['group_universe_id','=',$id],['id','<>',100]])->select('id','name','cover')->paginate(20);
+        $data2 = Group::where([['user_id','<>',Auth::user()->id],['group_universe_id','=',$id],['id','<>',100]])->select('id','name','cover')->inRandomOrder()->paginate(20);
         $updatedItems = $data->merge($data2);
         $data->setCollection($updatedItems);
         return response()->json($data, 200);
+    }
+
+    public function searchGroup($name = null)
+    {
+        if($name == null)
+       {
+           return response()->json([], 200);
+       }else{
+        if(strlen($name) >= 3)
+        {
+            $data = Group::where('name', 'LIKE', "%{$name}%")->get();
+        foreach ($data as $value) {
+            $value->cover = env('DISPLAY_PATH') . 'groupImages/' . $value->cover;
+            (strlen($value->large_cover) != 0) ? 
+            $value->large_cover = env('DISPLAY_PATH') . 'groupImages/' . $value->large_cover : '';
+        }
+        return response()->json($data, 200);
+        }
+        return response()->json([], 200);
+       }
     }
 }

@@ -8,8 +8,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Auth;
 use App\Models\notification;
+use App\Traits\SendNotification;
 class FollowerController extends Controller
 {
+    use SendNotification;
     /**
      * Display a listing of the resource.
      *

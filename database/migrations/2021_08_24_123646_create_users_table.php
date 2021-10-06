@@ -34,6 +34,8 @@ class CreateUsersTable extends Migration
             $table->tinyInteger('hide_phone');
             $table->tinyInteger('is_kaiztech_team');
             $table->string('company');
+            $table->string('website');
+            $table->string('device_token');
             $table->rememberToken();
             $table->timestamps();
         });

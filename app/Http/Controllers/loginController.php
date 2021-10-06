@@ -15,7 +15,8 @@ class loginController extends Controller
         $validator = Validator::make($request->all(), [
             'phone' => 'required|digits:10',
             'password' => 'required',
-            'country_code' => 'required'
+            'country_code' => 'required',
+            // 'device_token' => 'required'
         ]);
 
         if($validator->fails())
@@ -46,7 +47,8 @@ class loginController extends Controller
              $token = $user->createToken('my-app-token')->plainTextToken;
 
              $user->update([
-                 'token' => $token
+                 'token' => $token,
+                 'device_token' => (@$request->device_token) ? $request->device_token : '',
              ]);
              
              $user['wilaya_name'] = $wilaya->name;

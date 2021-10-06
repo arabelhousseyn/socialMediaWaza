@@ -10,6 +10,8 @@ use Auth;
 use App\Models\Wilaya;
 use App\Models\GroupPost;
 use App\Models\Group;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
 class userController extends Controller
 {
     public function approve($id)
@@ -55,9 +57,10 @@ class userController extends Controller
     public function getInformationUser($id,$group_post_id = null)
     {
         $following = 0;
-        $user = User::where('id',$id)->select('id','fullName','profession','picture','email','phone','hide_phone','wilaya_id','subName')->first();
+        $user = User::where('id',$id)->select('id','fullName','profession','picture','email','phone','hide_phone','wilaya_id','subName','is_kaiztech_team','website')->first();
         if($user)
         {
+        $user['fullName'] = $user->subName; 
         $checkFollowing = User::where('id',$id)->with('followers')->first();
         foreach ($checkFollowing->followers as $follow) {
             if($follow->id == Auth::user()->id)
@@ -77,7 +80,6 @@ class userController extends Controller
                 if(strlen($user->subName) != 0)
                 {
                  $user['picture'] = env('DISPLAY_PATH') .'groupImages/'.$group->cover;
-                 $user['fullName'] = $user->subName; 
                 }else{
                     $user['picture'] = env('DISPLAY_PATH') .'profiles/'.$user->picture;
                 }
@@ -116,19 +118,146 @@ class userController extends Controller
        return response()->json(['user_id' => Auth::user()->id], 200);
    }
 
-   public function searchForUser($name)
+   public function searchForUser($name = null)
    {
-       $data = User::where('fullName', 'LIKE', "%{$name}%")
-       ->select('id','fullName','profession','picture')->get();
-       foreach ($data as $value) {
-           $value->picture = env('DISPLAY_PATH') . 'profiles/' . $value->picture;
+       if($name == null)
+       {
+           return response()->json([], 200);
+       }else{
+        if(strlen($name) >= 3)
+        {
+            $data = User::where('fullName', 'LIKE', "%{$name}%")
+        ->select('id','fullName','profession','picture')->get();
+        foreach ($data as $value) {
+            $value->picture = env('DISPLAY_PATH') . 'profiles/' . $value->picture;
+        }
+        return response()->json($data, 200);
+        }
+        return response()->json([], 200);
        }
-       return response()->json($data, 200);
    }
 
    public function getCountOfUsersAccepted()
    {
-       $count_users = User::where('is_verified',1)->count();
-       return response()->json(['count_users' => $count_users + 500], 200);
+       $count_users = User::count();
+       return response()->json(['count_users' => $count_users], 200);
+   }
+
+   public function update(Request $request)
+   {
+    $path = '';
+    $validator = Validator::make($request->all(), [
+        'subName' => 'required|max:255',
+        'profession' => 'required|max:255',
+        'phone' => 'required|digits:10', 
+        'email' => 'required|email:rfc,dns,filter',
+        'is_freelancer' => 'required',
+        'receive_ads' => 'required',
+        'hide_phone' => 'required'
+    ]);
+    if($validator->fails())
+    {
+        return response()->json(['success' => false], 200);
+    }
+    if($validator->validated())
+    {
+        $user = User::find(Auth::user()->id);
+
+        $checkEmail = User::where([['id','<>',Auth::user()->id],['email','=',$request->email]])->first();
+        $checkPhone = User::where([['id','<>',Auth::user()->id],['phone','=',$request->phone]])->first();
+
+        if($checkPhone)
+        {
+            return response()->json(['success' => false,'message' => 1], 200);
+        }
+
+        if($checkEmail)
+        {
+            return response()->json(['success' => false,'message' => 2], 200);
+        }
+
+        if(strlen($request->picture) != 0)
+        {
+            $folderPath = env('MAIN_PATH') . "profiles/";
+            $image_base64 = base64_decode($request->picture);
+            $path = uniqid() . '.jpg';
+            $file = $folderPath . $path;
+            file_put_contents($file, $image_base64);
+        }
+        $updated = User::where('id',Auth::user()->id)->update([
+            "picture" => (strlen($path) != 0) ? $path : $user->picture,
+            'subName' => $request->subName,
+            'profession' => $request->profession,
+            'phone' => $request->phone,
+            'email' => $request->email,
+            'website' => strlen($request->website != 0) ? $request->website : $user->website,
+            'receive_ads' => $request->receive_ads,
+            'hide_phone' => $request->hide_phone,
+            'is_freelancer' => $request->is_freelancer,
+        ]);
+        if($updated)
+        {
+            return response()->json(['success' => true], 200);
+        }
+        return response()->json(['success' => "noway"], 200);
+    }
+   }
+
+   public function searchGlobal($name = null)
+   {
+    if($name == null)
+    {
+        return response()->json([], 200);
+    }else{
+     if(strlen($name) >= 3)
+     {
+         $data = User::where('fullName', 'LIKE', "%{$name}%")
+     ->select('id','fullName','profession','picture')->get();
+     foreach ($data as $value) {
+         $value->picture = env('DISPLAY_PATH') . 'profiles/' . $value->picture;
+         $value['type_record'] = 0;
+     }
+
+     $data2 = Group::where('name', 'LIKE', "%{$name}%")->get();
+     foreach ($data2 as $value) {
+         $value->cover = env('DISPLAY_PATH') . 'groupImages/' . $value->cover;
+         $value->large_cover = env('DISPLAY_PATH') . 'groupImages/' . $value->large_cover;
+         $value['type_record'] = 1;
+     }
+       $updatedItems = $data->merge($data2);
+       return response()->json($updatedItems, 200);
+     }
+     return response()->json([], 200);
+    }
+   }
+
+   public function test()
+   {
+    $firebaseToken = User::pluck('device_token')->all();
+    $SERVER_API_KEY = 'AAAAtX5a_xg:APA91bFCW6XtWkj4OWmkEFLGruyjkcjSNaOpIpFkrWlbvyksPog2LaG08j8ZLiBbi8M3boxZouks9EKvYjDGtJzt27G4ZfkAco9jj_2LPiPwOd96KD_YuhYm0CohvgnT4IBsx4fy__Tk';
+    $data = [
+        "registration_ids" => $firebaseToken,
+        "notification" => [
+            "title" => 'Nouveaux invitation',
+            "body" => "test",
+            'image' => 'https://dashboard.waza.fun/waza-small.png',
+            'sound' => true,
+        ]
+    ];
+    $dataString = json_encode($data);
+    $headers = [
+        'Authorization: key=' . $SERVER_API_KEY,
+        'Content-Type: application/json',
+    ];
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $dataString);
+    $result = curl_exec($ch );
+        curl_close( $ch );
+        return $result;
    }
 }

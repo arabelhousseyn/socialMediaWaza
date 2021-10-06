@@ -157,6 +157,11 @@ class innovationController extends Controller
             $data['dislikeList'] = $dislikeList;
             $data['likeList'] = $likeList;
 
+            if(strlen($data->pathBusinessPlan) != 0)
+            {
+                $data['pathBusinessPlan'] = env('DISPLAY_PATH') . 'bussinesPlan/' . $data->pathBusinessPlan;
+            }
+
             return response()->json(['success' => true,'data' => $data], 200);
          }
          return response()->json(['success' => false], 200);

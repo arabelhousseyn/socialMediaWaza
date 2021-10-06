@@ -25,7 +25,8 @@ class registerController extends Controller
             'password' => 'required|min:8|max:255',
             'is_freelancer' => 'required',
             'receive_ads' => 'required',
-            'hide_phone' => 'required'
+            'hide_phone' => 'required',
+            // 'device_token' => 'required'
         ]);
 
         if($validator->fails())
@@ -63,12 +64,14 @@ class registerController extends Controller
                         'email' => $request->email,
                         'password' =>Hash::make($request->password),
                         'is_freelancer' => $request->is_freelancer,
-                        'is_verified' => 0,
+                        'is_verified' => 1,
                         'receive_ads' => $request->receive_ads,
                         'token' => null,
                         'hide_phone' => $request->hide_phone,
                         'is_kaiztech_team' => 0,
-                        'company' => (strlen($request->company) != 0) ? $request->company : ''
+                        'company' => (strlen($request->company) != 0) ? $request->company : '',
+                        'website' => '',
+                        'device_token' => ($request->device_token) ? $request->device_token : '',
                     ]);
                     $usr = User::where('id',$user->id)->select('id','fullName','subName',
                     'dob','picture','gender','profession','wilaya_id','phone','email','is_freelancer',
@@ -135,7 +138,7 @@ class registerController extends Controller
         ]);
 
         User::where('id',$request->id)->update([
-            'is_verified' => 0
+            'is_verified' => 1
         ]);
         
         $this->sendNotification();

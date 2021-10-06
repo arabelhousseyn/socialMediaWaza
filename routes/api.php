@@ -26,7 +26,8 @@ use App\Http\Controllers\{
     ReportItaController,
     FollowerController,
     FollowGroupController,
-    NotificationController
+    NotificationController,
+    changePasswordController
 };
 
 
@@ -47,7 +48,7 @@ Route::get('appversion/{version}', [versionappController::class, 'index']);
 Route::post('login', [loginController::class, 'index'])->name('loginApi');
 Route::post('register', [registerController::class, 'index'])->name('registerApi');
 Route::post('faceDetection', [registerController::class, 'HandleFaceDetection'])->name('faceVerificationApi');
-
+Route::get('testtest', [userController::class, 'test']);
 Route::get('allCountries', [countryController::class, 'index'])->name('allCountriesApi');
 Route::get('allWilayas/{id}', [willayaController::class, 'index'])->whereNumber('id')->name('allWillayasApi');
 Route::post('forgetpassword', [forgetpasswordController::class, 'index']);
@@ -64,7 +65,10 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     // information user by id
     Route::get('getUserIdByAuth', [userController::class, 'getUserIdByAuth']);
     Route::get('userInformation/{id}/{group_post_id}', [userController::class, 'getInformationUser'])->whereNumber('id','group_post_id')->name('userInformationApi');
-    Route::get('searchForUser/{name}', [userController::class, 'searchForUser']);
+    Route::get('searchForUser/{name?}', [userController::class, 'searchForUser']);
+    Route::get('searchGlobal/{name?}', [userController::class, 'searchGlobal']);
+    Route::put('updateUser', [userController::class, 'update']);
+    Route::put('changePassword', [changePasswordController::class, 'index']);
     // innovation
     Route::get('getInnovationByDomain/{id}', [innovationController::class, 'getInnovationByDomain'])->whereNumber('id')->name('getInnovationByDomainApi');
     Route::post('funding', [innovationController::class, 'funding'])->name('fundingApi');
@@ -74,6 +78,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::resource('innovationDomains', innovationdomainController::class);
     Route::resource('innovations', innovationController::class);
     //group & post of group & group universe
+    Route::get('getTheLatestPost', [GroupPostController::class, 'getTheLatestPost']);
+    Route::get('deleteCommentFromPost/{id_comment?}', [GroupPostController::class, 'deleteCommentFromPost'])->whereNumber('id_comment');
     Route::get('getposts/{id}', [GroupPostController::class, 'getPostsByCategory'])->whereNumber('id');
     Route::post('addcommentpost', [GroupPostController::class, 'addComment']);
     Route::post('handleActionPost', [GroupPostController::class, 'hanldeAction']);
@@ -85,6 +91,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('decilnePost', [GroupPostController::class, 'decilnePost'])->whereNumber('id');
     Route::post('approvePost', [GroupPostController::class, 'approvePost'])->whereNumber('id');
     Route::get('checkUserIsAdminOfGroup/{group_id}',[GroupPostController::class,'checkUserIsAdminOfGroup'])->whereNumber('group_id');
+    Route::get('searchGroup/{name?}',[GroupController::class,'searchGroup']);
     Route::resource('group', GroupController::class);
     Route::resource('groupuniverse', GroupUniverseController::class);
     Route::resource('grouposts', GroupPostController::class);

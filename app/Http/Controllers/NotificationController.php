@@ -13,8 +13,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Auth;
 use Carbon\Carbon;
+use App\Traits\SendNotification;
 class NotificationController extends Controller
 {
+    use SendNotification;
     /**
      * Display a listing of the resource.
      *
@@ -184,11 +186,13 @@ class NotificationController extends Controller
                 {
                     if($group->type == 1 && Auth::user()->id != $group->user_id)
                 {
+                        $message = $group->name . ' vient d\'être créé ! decouvrir ce contenu';
                         $final['id'] = $data->id;
-                        $final['message'] = $group->name . ' vient d\'être créé ! decouvrir ce contenu';
+                        $final['message'] = $message;
                         $final['group_id'] = $group->id;
                         $final['type'] = 1;
                         $final['picture'] = env('DISPLAY_PATH') .'groupImages/'. $group->cover;
+                        $this->sendNotificationForNewCreatedGroup($message,$data->user_id);
                 }
                 return response()->json($final, 200);
                 }
@@ -198,10 +202,12 @@ class NotificationController extends Controller
             {
                 $user = User::where('id',$data->user_id)->first();
                 $receive = User::where('id',$data->morphable_id)->first();
+                $message = $user->fullName . ' souhaite vous ajouter a son réseaux';
                     $final['id'] = $data->id;
-                    $final['message'] = $user->fullName . ' souhaite vous ajouter a son réseaux';
+                    $final['message'] = $message;
                     $final['type'] = 4;
                     $final['picture'] = env('DISPLAY_PATH') .'profiles/'. $user->picture;
+                    $this->sendNotificationForAddFriend($message,$data->morphable_id);
             return response()->json($final, 200);
             }
 
@@ -237,14 +243,18 @@ class NotificationController extends Controller
             $temp = array();
             $user = User::where('id',$value->user_id)->first();
             $recevie = User::where('id',$value->morphable_id)->first();
-                if(Auth::user()->id == $recevie->id)
+                if($recevie)
+                {
+                    if(Auth::user()->id == $recevie->id)
             {
                     $temp['id'] = $value->id;
+                    $temp['user_id'] = $user->id;
                     $temp['message'] = $user->fullName . ' souhaite vous ajouter a son réseaux';
                     $temp['type'] = 4;
                     $temp['picture'] = env('DISPLAY_PATH') .'profiles/'. $user->picture;
                     $final[] = $temp;
             }
+                }
         }
         return response()->json($final, 200);
     }
