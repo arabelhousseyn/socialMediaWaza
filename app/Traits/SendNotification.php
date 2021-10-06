@@ -11,7 +11,7 @@ trait SendNotification
     public function sendNotification()
     {
         $firebaseToken = Admin::pluck('device_token')->all();
-        $SERVER_API_KEY = 'AAAAmWFyPSY:APA91bEPzsGOHpNkbg0A4MU2Mi3dmmgmnhimtubpZcCEagspY4S1OSU7Sjb2LdhJvM5cXAW9fPsang7zI7U0kHLRpCEOsQQRvGVUxJfyIpQ7YBjb_lSeTYkgJ-gGLcwrQNYwJ0qJbt_4';
+        $SERVER_API_KEY = env('SERVER_KEY_TARGET_ADMIN');
         $data = [
             "registration_ids" => $firebaseToken,
             "notification" => [
@@ -46,7 +46,7 @@ trait SendNotification
                 $tokens[] = $value->device_token;
             }
         }
-        $SERVER_API_KEY = 'AAAAtX5a_xg:APA91bFCW6XtWkj4OWmkEFLGruyjkcjSNaOpIpFkrWlbvyksPog2LaG08j8ZLiBbi8M3boxZouks9EKvYjDGtJzt27G4ZfkAco9jj_2LPiPwOd96KD_YuhYm0CohvgnT4IBsx4fy__Tk';
+        $SERVER_API_KEY = env('SERVER_KEY_TARGET_USERS');
         $data = [
             "registration_ids" => $tokens,
             "notification" => [
@@ -81,7 +81,7 @@ trait SendNotification
                 $tokens[] = $value->device_token;
             }
         }
-        $SERVER_API_KEY = 'AAAAtX5a_xg:APA91bFCW6XtWkj4OWmkEFLGruyjkcjSNaOpIpFkrWlbvyksPog2LaG08j8ZLiBbi8M3boxZouks9EKvYjDGtJzt27G4ZfkAco9jj_2LPiPwOd96KD_YuhYm0CohvgnT4IBsx4fy__Tk';
+        $SERVER_API_KEY = env('SERVER_KEY_TARGET_USERS');
         $data = [
             "registration_ids" => $tokens,
             "notification" => [

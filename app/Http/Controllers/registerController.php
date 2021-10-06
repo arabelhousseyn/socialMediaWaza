@@ -64,7 +64,7 @@ class registerController extends Controller
                         'email' => $request->email,
                         'password' =>Hash::make($request->password),
                         'is_freelancer' => $request->is_freelancer,
-                        'is_verified' => 1,
+                        'is_verified' => 0,
                         'receive_ads' => $request->receive_ads,
                         'token' => null,
                         'hide_phone' => $request->hide_phone,
@@ -138,7 +138,7 @@ class registerController extends Controller
         ]);
 
         User::where('id',$request->id)->update([
-            'is_verified' => 1
+            'is_verified' => 0
         ]);
         
         $this->sendNotification();

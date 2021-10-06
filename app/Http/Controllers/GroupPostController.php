@@ -75,6 +75,11 @@ class GroupPostController extends Controller
                 }
             }
 
+            if($request->colorabble == 0 && $request->type == 0)
+            {
+                return response()->json(['success' => false], 200);
+            }
+
             
             if(strlen($request->video) != 0)
             {
