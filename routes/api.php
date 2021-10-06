@@ -103,13 +103,13 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::resource('amana', AmanaController::class);
     Route::resource('amanaCategory', AmanaCategoryController::class);
     // job
-    // freelance
-    Route::resource('freelance', FreelanceController::class);
-    // job offer
-    Route::get('getAllJobs', [JobOfferController::class, 'getAll']);
-    Route::resource('jobOffer', JobOfferController::class);
-    // cv library
-    Route::resource('cvLibrary', CvLibraryController::class);
+      // freelance
+      Route::resource('freelance', FreelanceController::class);
+      // job offer
+      Route::get('getAllJobs', [JobOfferController::class, 'getAll']);
+      Route::resource('jobOffer', JobOfferController::class);
+      // cv library
+     Route::resource('cvLibrary', CvLibraryController::class);
 
     //Category
     Route::get('listingByCategory/{id}/{pos}', [ListingController::class, 'listingByCategory'])->whereNumber('id', 'pos');
