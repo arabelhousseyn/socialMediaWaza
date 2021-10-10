@@ -2,8 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\{
-    versionappController,
+// v1 of api 
+use App\Http\Controllers\V1\Api\{
     loginController,
     registerController,
     countryController,
@@ -29,6 +29,7 @@ use App\Http\Controllers\{
     NotificationController,
     changePasswordController
 };
+use App\Http\Controllers\versionappController;
 
 
 /*

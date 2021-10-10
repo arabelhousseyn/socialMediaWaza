@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\V1\Api;
 
 use App\Models\JobOffer;
 use Illuminate\Http\Request;
