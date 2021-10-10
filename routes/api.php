@@ -79,6 +79,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::resource('innovationDomains', innovationdomainController::class);
     Route::resource('innovations', innovationController::class);
     //group & post of group & group universe
+    Route::get('infoGroup/{group_id?}', [GroupController::class, 'infoGroup'])->whereNumber('group_id');
     Route::get('getTheLatestPost', [GroupPostController::class, 'getTheLatestPost']);
     Route::get('deleteCommentFromPost/{id_comment?}', [GroupPostController::class, 'deleteCommentFromPost'])->whereNumber('id_comment');
     Route::get('getposts/{id}', [GroupPostController::class, 'getPostsByCategory'])->whereNumber('id');

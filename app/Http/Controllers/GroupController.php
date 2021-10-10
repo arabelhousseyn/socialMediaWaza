@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Group;
+use App\Models\followGroup;
 use Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\notification;
@@ -198,5 +199,21 @@ class GroupController extends Controller
         }
         return response()->json([], 200);
        }
+    }
+
+
+    public function infoGroup($group_id = null)
+    {
+        $final = array();
+        $data = Group::find($group_id);
+        if($data)
+        {
+            $countNumberFollowers = followGroup::where('follow_id',$group_id)->count();
+            $final['cover'] = (strlen($data->large_cover) != 0) ? 
+              env('DISPLAY_PATH') . 'groupImages/' . $data->large_cover : '';
+            $final['countNumberFollowers'] = $countNumberFollowers;
+            return response()->json($final, 200);
+        }
+        return response()->json(['success' => false], 200);
     }
 }

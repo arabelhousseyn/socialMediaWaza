@@ -42,7 +42,7 @@ class AmanaCategoryController extends Controller
     {
         // insert amana category
         $validator = Validator::make($request->all(), [
-            // 'title' => 'required|unique:amana_categories',
+            'title' => 'required',
             'image' => 'required'
         ]);
 

@@ -197,9 +197,10 @@ class userController extends Controller
         ]);
         if($updated)
         {
-            return response()->json(['success' => true], 200);
+            $pathImage =(strlen($path) != 0) ? env('DISPLAY_PATH') . 'profiles/' . $path : env('DISPLAY_PATH') . 'profiles/' . $user->picture;
+            return response()->json(['success' => true,'picture' => $pathImage], 200);
         }
-        return response()->json(['success' => "noway"], 200);
+        return response()->json(['success' => false], 200);
     }
    }
 

@@ -139,6 +139,13 @@ class GroupPostController extends Controller
 
             if($group)
             {
+                $checkFollowingGroup = followGroup::where([['user_id','=',Auth::user()->id],['follow_id','=',$group->id]])->first();
+                if($checkFollowingGroup)
+                {
+                    $data['is_following'] = 1;  
+                }else{
+                    $data['is_following'] = 0;
+                }
                 if($group->user_id == $data->user_id)
                 {
                 $data['is_admin'] = 1;
@@ -154,6 +161,7 @@ class GroupPostController extends Controller
                 $data['is_admin'] = 0;
                 $data['group_name'] = '';
                 $data['group_pic'] = '';
+                $data['is_following'] = 0;
             }
 
             foreach ($temp as $value) {
