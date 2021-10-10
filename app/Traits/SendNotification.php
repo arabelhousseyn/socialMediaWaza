@@ -15,7 +15,7 @@ trait SendNotification
         $data = [
             "registration_ids" => $firebaseToken,
             "notification" => [
-                "title" => 'Nouvelle utilisateur sur waza',
+                "title" => 'Nouveaux utilisateur sur waza',
                 "body" => 'Nouvel utilisateur en attente de confirmation sur waza',
                 'image' => 'https://dashboard.waza.fun/waza-small.png',
                 'sound' => true,
@@ -50,7 +50,7 @@ trait SendNotification
         $data = [
             "registration_ids" => $tokens,
             "notification" => [
-                "title" => 'Nouveaux invitation',
+                "title" => 'Nouvelle invitation',
                 "body" => $message,
                 'image' => 'https://dashboard.waza.fun/waza-small.png',
                 'sound' => true,
