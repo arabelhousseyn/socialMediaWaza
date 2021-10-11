@@ -39,7 +39,6 @@ class User extends Authenticatable
         'is_kaiztech_team',
         'company',
         'website',
-        'password',
         'device_token'
     ];
 
@@ -52,7 +51,8 @@ class User extends Authenticatable
         'created_at',
         'updated_at',
         'remember_token',
-        'code_verification'
+        'code_verification',
+        'password'
     ];
 
     public function verification()

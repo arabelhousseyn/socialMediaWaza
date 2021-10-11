@@ -64,7 +64,7 @@ class userController extends Controller
         $user = User::where('id',$id)->select('id','fullName','profession','picture','email','phone','hide_phone','wilaya_id','subName','is_kaiztech_team','website')->first();
         if($user)
         {
-        $user['fullName'] = $user->subName; 
+        $user['fullName'] = (strlen($user->subName)!=0) ? $user->subName : $user->fullName; 
         $checkFollowing = User::where('id',$id)->with('followers')->first();
         foreach ($checkFollowing->followers as $follow) {
             if($follow->id == Auth::user()->id)

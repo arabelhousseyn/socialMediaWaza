@@ -118,44 +118,63 @@ class NotificationController extends Controller
 
     public function getNotifications()
     {
+        $ids = array();
         $final = array();
         $data = notification::where('is_read',0)->whereDate('created_at', '>=', Carbon::now()->subDays(7)->setTime(0, 0, 0)->toDateTimeString())->get();
         foreach ($data as $value) {
             $temp = array();
-            // if($value->type == 0 || $value->type == 1)
-            // {
-            //     $user = User::where('id',$value->user_id)->first();
-            //     $likes = GroupPostLike::where('group_post_id',$value->morphable_id)->get();
-            //     foreach ($likes as $like) {
-            //       $post = GroupPost::find($like);
-            //       if($post->user_id == Auth::user()->id)
-            //       {
-            //         $temp['id'] = $value->id;
-            //         $temp['message'] = $user->fullName . ' interagir à votre publication';
-            //         $temp['post_id'] = $post->id;
-            //         $temp['type'] = 0;
-            //         $temp['picture'] = env('DISPLAY_PATH') .'profiles/'. $user->picture;
-            //         $final[] = $temp;
-            //       } 
-            //     }
-            // }
-            //     if($value->type == 2)
-            // {
-            //     $user = User::where('id',$value->user_id)->first();
-            //     $comments = GroupPostComment::where('group_post_id',$value->morphable_id)->get();
-            //     foreach ($comments as $comment) {
-            //       $post = GroupPost::find($comment->group_post_id);
-            //       if($post->user_id == Auth::user()->id)
-            //       {
-            //           $temp['id'] = $value->id;
-            //           $temp['message'] = $user->fullName . ' commenter votre publication';
-            //           $temp['post_id'] = $post->id;
-            //           $temp['type'] = 1;
-            //           $temp['picture'] = env('DISPLAY_PATH') .'profiles/'. $user->picture;
-            //           $final[] = $temp;
-            //       } 
-            //     }
-            // }
+            if($value->type == 0 || $value->type == 1)
+            {
+                $likes = GroupPostLike::where('group_post_id',$value->morphable_id)->get();
+                if(count($likes) <= 5)
+                {
+                    foreach ($likes as $like) {
+                        $post = GroupPost::find($value->morphable_id);
+                        if($post->user_id == Auth::user()->id && $like->user_id != Auth::user()->id)
+                        {
+                              $user = User::where('id',$like->user_id)->first();
+                              $temp['id'] = $value->id;
+                              $temp['message'] = $user->fullName . ' interagir à votre publication';
+                              $temp['post_id'] = $post->id;
+                              $temp['type'] = 0;
+                              $temp['picture'] = env('DISPLAY_PATH') .'profiles/'. $user->picture;
+                              $final[] = $temp;
+                        } 
+                      }
+                }else{
+                    $temp['id'] = $value->id;
+                    $temp['message'] = '+5 interagir à votre publication';
+                    $temp['post_id'] = $value->morphable_id;
+                    $temp['type'] = 0;
+                    $final[] = $temp;  
+                }
+            }
+                if($value->type == 2)
+            {
+                $comments = GroupPostComment::where('group_post_id',$value->morphable_id)->get();
+                if(count($comments) <= 5)
+                {
+                    foreach ($comments as $comment) {
+                        $post = GroupPost::find($comment->group_post_id);
+                        if($post->user_id == Auth::user()->id && $comment->user_id != Auth::user()->id)
+                        {
+                          $user = User::where('id',$comment->user_id)->first();
+                            $temp['id'] = $value->id;
+                            $temp['message'] = $user->fullName . ' commentez votre publication';
+                            $temp['post_id'] = $post->id;
+                            $temp['type'] = 1;
+                            $temp['picture'] = env('DISPLAY_PATH') .'profiles/'. $user->picture;
+                            $final[] = $temp;
+                        } 
+                      }
+                }else{
+                    $temp['id'] = $value->id;
+                    $temp['message'] = '+5 à commentez votre publication';
+                    $temp['post_id'] = $post->id;
+                    $temp['type'] = 0;
+                    $final[] = $temp;  
+                }
+            }
             if($value->type == 3)
             {
                 $user = User::where('id',$value->user_id)->first();
@@ -197,13 +216,53 @@ class NotificationController extends Controller
         return response()->json($final, 200);
     }
 
-    public function getNotificationById($id)
+    public function getNotificationById($id,$type)
     {
         $final = array();
         $data = notification::where('id',$id)->first();
         if($data)
         {
-            if($data->type == 3)
+            if($type == 0)
+            {
+                if($data->type == 0 || $data->type == 1)
+            {
+                $user = User::where('id',$data->user_id)->first();
+                    if(Auth::user()->id)
+                {
+                        $message = $user->fullName . ' interagir à votre publication';
+                        $final['id'] = $data->id;
+                        $final['message'] = $message;
+                        $final['type'] = 1;
+                        $final['post_id'] = $data->morphable_id;
+                        $final['picture'] = env('DISPLAY_PATH') .'profiles/'. $user->picture;
+                        $this->InteractWithPost($data->user_id,$message);
+                }
+                return response()->json($final, 200);
+            }
+            }
+
+            if($type == 2)
+            {
+                if($data->type == 2)
+            {
+                $user = User::where('id',$data->user_id)->first();
+                    if(Auth::user()->id)
+                {
+                        $message = $user->fullName . ' commentez à votre publication';
+                        $final['id'] = $data->id;
+                        $final['message'] = $message;
+                        $final['type'] = 1;
+                        $final['post_id'] = $data->morphable_id;
+                        $final['picture'] = env('DISPLAY_PATH') .'profiles/'. $user->picture;
+                        $this->commentPost($data->user_id,$message);
+                }
+                return response()->json($final, 200);
+            }
+            }
+
+            if($type == 3)
+            {
+                if($data->type == 3)
             {
                 $user = User::where('id',$data->user_id)->first();
                 $group = Group::where('id',$data->morphable_id)->first();
@@ -222,8 +281,11 @@ class NotificationController extends Controller
                 return response()->json($final, 200);
                 }
             }
+            }
 
-            if($data->type == 4)
+            if($type == 4)
+            {
+                if($data->type == 4)
             {
                 $user = User::where('id',$data->user_id)->first();
                 $receive = User::where('id',$data->morphable_id)->first();
@@ -234,6 +296,7 @@ class NotificationController extends Controller
                     $final['picture'] = env('DISPLAY_PATH') .'profiles/'. $user->picture;
                     $this->sendNotificationForAddFriend($message,$data->morphable_id);
             return response()->json($final, 200);
+            }
             }
 
             return response()->json(['success' => false], 200);
@@ -336,6 +399,13 @@ class NotificationController extends Controller
     public function getNotificationsNotRead($id,$type)
     {
         switch ($type) {
+
+            case 0:
+                $data = notification::where([['is_read','=',0],['morphable_id','=',$id],['type','=',0],['type','=',1]])
+    ->orderBy('id','DESC')->count();
+    return response()->json(['countNotification' => $data], 200);
+                break;
+
             case 3:
                 $data = notification::where([['is_read','=',0],['user_id','=',$id],['type','=',3]])
         ->orderBy('id','DESC')->count();
@@ -358,17 +428,20 @@ class NotificationController extends Controller
     public function friendsAccepted()
     {
         $final = array();
-        $notifications = notification::where([['user_id','=',Auth::user()->id],['type','=',4]])->get();
+        $notifications = notification::where([['user_id','=',Auth::user()->id],['type','=',4]])->orderBy('id','DESC')->LIMIT(1)->get();
         foreach ($notifications as $notification) {
             $temp = array();
             $follower = follower::where([['user_id','=',Auth::user()->id],['follow_id','=',$notification->morphable_id]])->first();
             if($follower->is_friend == 1)
             {
                 $user = User::find($notification->morphable_id);
-                $temp['message'] = $user->fullName . ' accept votre invitation';
+                $message = $user->fullName . ' Fait désormais partie de votre réseaux';
+                $temp['id'] = $notification->id;
+                $temp['message'] = $message;
                 $temp['type'] = 4;
                 $temp['picture'] = env('DISPLAY_PATH') .'profiles/'. $user->picture;
                 $final[] = $temp;
+                $this->friendAccepted($notification->user_id,$message);
             }
         }
         return response()->json($final, 200);

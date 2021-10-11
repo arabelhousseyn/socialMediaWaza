@@ -131,7 +131,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('friendsAccepted',[NotificationController::class,'friendsAccepted']);
     Route::get('getPureNotifcation/{id}',[NotificationController::class,'getPureNotifcation'])->whereNumber('id');
     Route::get('InteractWithFriend/{id}/{statu}',[NotificationController::class,'InteractWithFriend'])->whereNumber('id','statu');
-    Route::get('getNotificationById/{id}',[NotificationController::class,'getNotificationById'])->whereNumber('id');
+    Route::get('getNotificationById/{id}/{type}',[NotificationController::class,'getNotificationById'])->whereNumber('id','type');
     Route::get('getAddFriends',[NotificationController::class,'getAddFriends']);
     Route::get('updateRead/{id}',[NotificationController::class,'updateRead'])->whereNumber('id');
     Route::resource('notification', NotificationController::class);
