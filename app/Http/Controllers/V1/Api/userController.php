@@ -4,16 +4,18 @@ namespace App\Http\Controllers\V1\Api;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\notification;
+use App\Models\Group;
 use App\Models\FaceVerification;
 use Iman\Streamer\VideoStreamer;
 use Auth;
 use App\Models\Wilaya;
 use App\Models\GroupPost;
-use App\Models\Group;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use App\Mail\verificationMail;
 use Mail;
+use Carbon\Carbon;
 use App\Traits\upload;
 class userController extends Controller
 {
@@ -111,10 +113,39 @@ class userController extends Controller
     }
 
 
-    public function getAllUsersIds()
+    public function getAllUsersIds($notification_id = null)
    {
-    $users = User::pluck('id')->all();
-    return response()->json($users, 200);
+       $notification = notification::where("id",$notification_id)->first();
+       if($notification)
+       {
+           $group = Group::find($notification->morphable_id);
+           if($group->gender == null && $group->gender != 0)
+           {
+            $users = User::pluck('id')->all();
+            return response()->json($users, 200);
+           }else{
+               // filter users
+               $ids = array();
+               $users = User::all();
+               foreach ($users as $user) {
+                   $age = Carbon::parse($user->dob)->age;
+                   if($age >= $group->minAge && $age <= $group->maxAge)
+                   {
+                    if($group->gender == 2)
+                    {
+                        $ids[] = $user->id;
+                    }else{
+                       if($group->gender == $user->gender)
+                       {
+                         $ids[] = $user->id;
+                       } 
+                    }
+                   }
+               }
+               return response()->json($ids, 200);
+           }
+       }
+       return response()->json(['success' => false], 200);
    }
 
    public function getUserIdByAuth()
@@ -154,10 +185,7 @@ class userController extends Controller
         'subName' => 'required|max:255',
         'profession' => 'required|max:255',
         'phone' => 'required|digits:10', 
-        'email' => 'required|email:rfc,dns,filter',
-        'is_freelancer' => 'required',
-        'receive_ads' => 'required',
-        'hide_phone' => 'required'
+        'email' => 'required|email:rfc,dns,filter'
     ]);
     if($validator->fails())
     {
@@ -190,10 +218,7 @@ class userController extends Controller
             'profession' => $request->profession,
             'phone' => $request->phone,
             'email' => $request->email,
-            'website' => strlen($request->website != 0) ? $request->website : $user->website,
-            'receive_ads' => $request->receive_ads,
-            'hide_phone' => $request->hide_phone,
-            'is_freelancer' => $request->is_freelancer,
+            'website' => strlen($request->website != 0) ? $request->website : $user->website
         ]);
         if($updated)
         {

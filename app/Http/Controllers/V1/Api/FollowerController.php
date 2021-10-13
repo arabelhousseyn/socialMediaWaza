@@ -147,7 +147,8 @@ class FollowerController extends Controller
             follower::where([['user-id','=',Auth::user()->id],['follow_id','=',$user_id]])->update([
                 'is_friend' => 1
             ]);
-            return response()->json(['success' => true], 200);
+            $notification = notification::where([['user-id','=',Auth::user()->id],['follow_id','=',$user_id]])->first();
+            return response()->json(['success' => true,'notification_id' => $notification->id], 200);
         }
 
         return response()->json(['success' => false], 200);

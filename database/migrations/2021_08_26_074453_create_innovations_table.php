@@ -23,6 +23,7 @@ class CreateInnovationsTable extends Migration
             $table->bigInteger('likes');
             $table->tinyInteger('type');
             $table->string('imageCompany');
+            $table->tinyInteger('status');
             $table->foreignId('user_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('innovation_domain_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
             $table->timestamps();

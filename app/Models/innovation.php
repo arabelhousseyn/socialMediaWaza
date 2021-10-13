@@ -23,7 +23,8 @@ class innovation extends Model
         'innovation_domain_id',
         'likes',
         'type',
-        'imageCompany'
+        'imageCompany',
+        'status'
     ];
 
     protected $hidden = [
@@ -58,8 +59,8 @@ class innovation extends Model
     public function scopeSelective($query,$innovation_domain_id)
     {
 
-        return ($innovation_domain_id == 0) ? $query->select('id','title','user_id','type','imageCompany')->orderBy('id','DESC')
+        return ($innovation_domain_id == 0) ? $query->select('id','title','user_id','type','imageCompany')->where('status',1)->orderBy('id','DESC')
         : $query->select('id','title','user_id','type','imageCompany','created_at')
-        ->where('innovation_domain_id','=',$innovation_domain_id)->orderBy('id','DESC');
+        ->where([['innovation_domain_id','=',$innovation_domain_id],['status','=',0]])->orderBy('id','DESC');
     }
 }

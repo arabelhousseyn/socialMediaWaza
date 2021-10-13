@@ -93,6 +93,7 @@ class innovationController extends Controller
                         'type' => $request->type,
                         'imageCompany' =>$pathImageCompany,
                         'innovation_domain_id' => $request->innovation_domain_id,
+                        'status' => 0
                     ]);
 
                    $images = explode(';ibaa;',$request->images);
