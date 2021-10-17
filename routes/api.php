@@ -83,7 +83,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     //group & post of group & group universe
     Route::get('infoGroup/{group_id?}', [GroupController::class, 'infoGroup'])->whereNumber('group_id');
     Route::get('getTheLatestPost', [GroupPostController::class, 'getTheLatestPost']);
-    Route::get('deleteCommentFromPost/{id_comment?}', [GroupPostController::class, 'deleteCommentFromPost'])->whereNumber('id_comment');
+    Route::get('deleteCommentFromPost/{id_comment?}/{group_post_id?}', [GroupPostController::class, 'deleteCommentFromPost'])->whereNumber('id_comment','group_post_id');
     Route::get('getposts/{id}', [GroupPostController::class, 'getPostsByCategory'])->whereNumber('id');
     Route::post('addcommentpost', [GroupPostController::class, 'addComment']);
     Route::post('handleActionPost', [GroupPostController::class, 'hanldeAction']);

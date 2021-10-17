@@ -737,13 +737,12 @@ class GroupPostController extends Controller
             return response()->json($post, 200);
     }
 
-    public function deleteCommentFromPost($id_comment = null)
+    public function deleteCommentFromPost($id_comment = null,$group_post_id = null)
     {
-        $comment = GroupPostComment::find($id_comment);
-        $delete = GroupPostComment::where('id',$id_comment)->delete();
-        if($delete)
+        $deleted = GroupPostComment::where('id',$id_comment)->delete();
+        if($deleted)
         {
-            $data = $this->commentsByPost($comment->group_post_id);
+            $data = $this->commentsByPost($group_post_id);
             return response()->json($data, 200);
         }
         return response()->json(['success' => false], 200);
