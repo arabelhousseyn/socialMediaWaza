@@ -96,6 +96,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('approvePost', [GroupPostController::class, 'approvePost'])->whereNumber('id');
     Route::get('checkUserIsAdminOfGroup/{group_id}',[GroupPostController::class,'checkUserIsAdminOfGroup'])->whereNumber('group_id');
     Route::get('searchGroup/{name?}',[GroupController::class,'searchGroup']);
+    Route::put('updateComment/{comment_id?}',[GroupPostController::class,'updateComment'])->whereNumber('comment_id');
     Route::resource('group', GroupController::class);
     Route::resource('groupuniverse', GroupUniverseController::class);
     Route::resource('grouposts', GroupPostController::class);
@@ -137,5 +138,4 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('getAddFriends',[NotificationController::class,'getAddFriends']);
     Route::get('updateRead/{id}',[NotificationController::class,'updateRead'])->whereNumber('id');
     Route::resource('notification', NotificationController::class);
-
 });

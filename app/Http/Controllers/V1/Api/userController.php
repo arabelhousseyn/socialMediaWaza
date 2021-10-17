@@ -16,10 +16,13 @@ use Illuminate\Support\Facades\Hash;
 use App\Mail\verificationMail;
 use Mail;
 use Carbon\Carbon;
-use App\Traits\upload;
+use App\Traits\{
+    upload,
+    middlewares
+};
 class userController extends Controller
 {
-    use upload;
+    use upload,middlewares;
     public function approve($id)
     {
         $storage_face = env('STORAGE_FACES_URL');
@@ -63,10 +66,9 @@ class userController extends Controller
     public function getInformationUser($id,$group_post_id = null)
     {
         $following = 0;
-        $user = User::where('id',$id)->select('id','fullName','profession','picture','email','phone','hide_phone','wilaya_id','subName','is_kaiztech_team','website')->first();
+        $user = User::where('id',$id)->select('id','fullName','profession','picture','email','phone','hide_phone','wilaya_id','subName','is_kaiztech_team','website','is_freelancer','receive_ads')->first();
         if($user)
         {
-        $user['fullName'] = (strlen($user->subName)!=0) ? $user->subName : $user->fullName; 
         $checkFollowing = User::where('id',$id)->with('followers')->first();
         foreach ($checkFollowing->followers as $follow) {
             if($follow->id == Auth::user()->id)
@@ -85,6 +87,7 @@ class userController extends Controller
             {
                 if(strlen($user->subName) != 0)
                 {
+                $user['fullName'] = (strlen($user->subName)!=0) ? $user->subName : $user->fullName; 
                  $user['picture'] = env('DISPLAY_PATH') .'groupImages/'.$group->cover;
                 }else{
                     $user['picture'] = env('DISPLAY_PATH') .'profiles/'.$user->picture;
@@ -166,7 +169,15 @@ class userController extends Controller
         foreach ($data as $value) {
             $value->picture = env('DISPLAY_PATH') . 'profiles/' . $value->picture;
         }
-        return response()->json($data, 200);
+
+        $data2 = User::where('subName', 'LIKE', "%{$name}%")
+     ->select('id','fullName','profession','picture')->get();
+     foreach ($data2 as $value) {
+         $value->picture = env('DISPLAY_PATH') . 'profiles/' . $value->picture;
+     }
+
+       $updatedItems = $data->merge($data2);
+        return response()->json($updatedItems, 200);
         }
         return response()->json([], 200);
        }
@@ -182,7 +193,6 @@ class userController extends Controller
    {
     $path = '';
     $validator = Validator::make($request->all(), [
-        'subName' => 'required|max:255',
         'profession' => 'required|max:255',
         'phone' => 'required|digits:10', 
         'email' => 'required|email:rfc,dns,filter'
@@ -214,7 +224,7 @@ class userController extends Controller
         }
         $updated = User::where('id',Auth::user()->id)->update([
             "picture" => (strlen($path) != 0) ? $path : $user->picture,
-            'subName' => $request->subName,
+            'subName' => (strlen($request->subName) != 0) ? $request->subName : '',
             'profession' => $request->profession,
             'phone' => $request->phone,
             'email' => $request->email,
@@ -222,7 +232,7 @@ class userController extends Controller
         ]);
         if($updated)
         {
-            $pathImage =(strlen($path) != 0) ? env('DISPLAY_PATH') . 'profiles/' . $path : env('DISPLAY_PATH') . 'profiles/' . $user->picture;
+            $pathImage =(strlen($path) != 0) ? env('DISPLAY_PATH') . 'profiles/' . $path : '';
             return response()->json(['success' => true,'picture' => $pathImage], 200);
         }
         return response()->json(['success' => false], 200);
@@ -237,6 +247,10 @@ class userController extends Controller
     }else{
      if(strlen($name) >= 3)
      {
+         $final = array();
+         $user = User::find(Auth::user()->id);
+         $age = Carbon::parse($user->dob)->age;
+         $ids = array();
          $data = User::where('fullName', 'LIKE', "%{$name}%")
      ->select('id','fullName','profession','picture')->get();
      foreach ($data as $value) {
@@ -244,14 +258,33 @@ class userController extends Controller
          $value['type_record'] = 0;
      }
 
-     $data2 = Group::where('name', 'LIKE', "%{$name}%")->get();
-     foreach ($data2 as $value) {
-         $value->cover = env('DISPLAY_PATH') . 'groupImages/' . $value->cover;
-         $value->large_cover = env('DISPLAY_PATH') . 'groupImages/' . $value->large_cover;
-         $value['type_record'] = 1;
+     $groups = Group::where('name', 'LIKE', "%{$name}%")->get();
+     foreach ($groups as $group) {
+        $check = $this->checkIfEligible($age,$user->gender,$group->id);
+            if($check)
+            {
+                $ids[] = $group->id;
+            }
      }
+
+     $data3 = User::where('subName', 'LIKE', "%{$name}%")
+     ->select('id','fullName','profession','picture')->get();
+     foreach ($data3 as $value) {
+         $value->picture = env('DISPLAY_PATH') . 'profiles/' . $value->picture;
+         $value['type_record'] = 0;
+     }
+
+     $data2 = Group::whereIn('id',$ids)->get();
+
+     foreach ($data2 as $value) {
+        $value->cover = env('DISPLAY_PATH') . 'groupImages/' . $value->cover;
+        $value->large_cover = env('DISPLAY_PATH') . 'groupImages/' . $value->large_cover;
+        $value['type_record'] = 1;
+     }
+
        $updatedItems = $data->merge($data2);
-       return response()->json($updatedItems, 200);
+       $updatedItems2 = $data3->merge($updatedItems);
+       return response()->json($updatedItems2, 200);
      }
      return response()->json([], 200);
     }

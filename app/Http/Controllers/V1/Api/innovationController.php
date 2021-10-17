@@ -224,7 +224,6 @@ class innovationController extends Controller
         if($id == 0)
         {
             $data = innovation::with('likesList')->selective($id)->paginate(20);
-        
         foreach ($data as $value) {
             $value['createdAt'] = Carbon::parse($value->created_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
             $tempImages = array();

@@ -48,7 +48,7 @@ class loginController extends Controller
 
              $user->update([
                  'token' => $token,
-                 'device_token' => (@$request->device_token) ? $request->device_token : '',
+                 'device_token' => (@$request->device_token) ? $request->device_token : $user->device_token,
              ]);
              
              $user['wilaya_name'] = $wilaya->name;

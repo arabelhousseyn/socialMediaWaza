@@ -39,18 +39,13 @@ trait SendNotification
     public function sendNotificationForAddFriend($message,$user_id)
     {
         $tokens = array();
-        $users = User::all();
-        foreach ($users as $value) {
-            if($value->id == $user_id)
-            {
-                $tokens[] = $value->device_token;
-            }
-        }
+        $user = User::find($user_id);
+        $tokens[] = $user->device_token;
         $SERVER_API_KEY = env('SERVER_KEY_TARGET_USERS');
         $data = [
             "registration_ids" => $tokens,
             "notification" => [
-                "title" => 'Nouvelle invitation',
+                "title" => 'invitation',
                 "body" => $message,
                 'image' => 'https://dashboard.waza.fun/waza-small.png',
                 'sound' => true,
@@ -74,13 +69,9 @@ trait SendNotification
     public function sendNotificationForNewCreatedGroup($message,$user_id)
     {
         $tokens = array();
-        $users = User::all();
-        foreach ($users as $value) {
-            if($value->id != $user_id)
-            {
-                $tokens[] = $value->device_token;
-            }
-        }
+        $user = User::find($user_id);
+        $tokens[] = $user->device_token;
+
         $SERVER_API_KEY = env('SERVER_KEY_TARGET_USERS');
         $data = [
             "registration_ids" => $tokens,

@@ -28,7 +28,7 @@ class CreateInnovationsTable extends Migration
             $table->foreignId('innovation_domain_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
             $table->timestamps();
         });
-        DB::statement("ALTER TABLE innovations ADD audio LONGBLOB DEFAULT NULL");
+        DB::statement("ALTER TABLE innovations ADD audio LONGBLOB DEFAULT NULL"); // do this because the default laravel binary doesn't support the long blob
     }
 
     /**

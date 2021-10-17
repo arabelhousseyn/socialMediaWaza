@@ -18,6 +18,7 @@ class CreateNotificationsTable extends Migration
             $table->foreignId('user_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
             $table->integer('morphable_id')->unsignedBigInteger();
             $table->integer('type')->unsignedBigInteger();
+            $table->integer('affiliate')->unsignedBigInteger();
             $table->tinyInteger('is_read');
             $table->timestamps();
         });

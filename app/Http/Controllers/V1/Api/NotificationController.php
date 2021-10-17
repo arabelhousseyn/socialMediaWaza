@@ -122,7 +122,7 @@ class NotificationController extends Controller
         $final = array();
         $breakInteraction = array();
         $breakComment = array();
-        $data = notification::where('is_read',0)->orderBy('id','DESC')->whereDate('created_at', '>=', Carbon::now()->subDays(1)->setTime(0, 0, 0)->toDateTimeString())->get();
+        $data = notification::where('is_read',0)->orderBy('id','DESC')->whereDate('updated_at', '>=', Carbon::now()->subDays(1)->setTime(0, 0, 0)->toDateTimeString())->get();
         foreach ($data as $value) {
             $temp = array();
             if($value->type == 0 || $value->type == 1)
@@ -143,6 +143,7 @@ class NotificationController extends Controller
                               $temp['post_id'] = $post->id;
                               $temp['user_id'] = $like->user_id;
                               $temp['type'] = 0;
+                              $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
                               $temp['picture'] = env('DISPLAY_PATH') .'profiles/'. $user->picture;
                               $final[] = $temp;
                         } 
@@ -152,6 +153,7 @@ class NotificationController extends Controller
                     $temp['message'] = '+5 ont interagi sur votre publication';
                     $temp['post_id'] = $value->morphable_id;
                     $temp['type'] = 1;
+                    $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
                     $final[] = $temp;  
                 }
                 $breakInteraction[] = $value->morphable_id;
@@ -174,6 +176,7 @@ class NotificationController extends Controller
                             $temp['message'] = $user->fullName . ' commentez votre publication';
                             $temp['user_id'] = $comment->user_id;
                             $temp['type'] = 0;
+                            $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
                             $temp['picture'] = env('DISPLAY_PATH') .'profiles/'. $user->picture;
                             $final[] = $temp;
                         } 
@@ -182,6 +185,7 @@ class NotificationController extends Controller
                     $temp['id'] = $value->id;
                     $temp['message'] = '+5 ont commentez sur votre publication';
                     $temp['post_id'] = $post->id;
+                    $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
                     $temp['type'] = 1;
                     $final[] = $temp;  
                     $breakComment[] = $value->morphable_id;
@@ -202,6 +206,7 @@ class NotificationController extends Controller
             $temp['message'] = $group->name . ' vient d\'être créé ! découvrez ce contenu';
             $temp['group_id'] = $group->id;
             $temp['type'] = 0;
+            $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
             $temp['picture'] = env('DISPLAY_PATH') .'groupImages/'. $group->cover;
             $final[] = $temp;
            }else{
@@ -215,6 +220,7 @@ class NotificationController extends Controller
             $temp['message'] = $group->name . ' vient d\'être créé ! découvrez ce contenu';
             $temp['group_id'] = $group->id;
             $temp['type'] = 0;
+            $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
             $temp['picture'] = env('DISPLAY_PATH') .'groupImages/'. $group->cover;
             $final[] = $temp;
                     }else{
@@ -224,6 +230,7 @@ class NotificationController extends Controller
                         $temp['message'] = $group->name . ' vient d\'être créé ! découvrez ce contenu';
                         $temp['group_id'] = $group->id;
                         $temp['type'] = 0;
+                        $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
                         $temp['picture'] = env('DISPLAY_PATH') .'groupImages/'. $group->cover;
                         $final[] = $temp;
                        } 
@@ -246,6 +253,7 @@ class NotificationController extends Controller
                 $temp['message'] = $user->fullName . ' accepte votre invitation';
                 $temp['type'] = 0;
                 $temp['user_id'] = $user->id;
+                $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
                 $temp['picture'] = env('DISPLAY_PATH') .'profiles/'. $user->picture;
                 $final[] = $temp;
             }
@@ -338,6 +346,22 @@ class NotificationController extends Controller
                     $final['type'] = 4;
                     $final['picture'] = env('DISPLAY_PATH') .'profiles/'. $user->picture;
                     $this->sendNotificationForAddFriend($message,$data->morphable_id);
+            return response()->json($final, 200);
+            }
+            }
+
+            if($type == 5)
+            {
+                if($data->type == 4)
+            {
+                $receive = User::where('id',$data->user_id)->first();
+                $user = User::where('id',$data->morphable_id)->first();
+                $message = $user->fullName . ' Accepte votre invitation';
+                    $final['id'] = $data->id;
+                    $final['message'] = $message;
+                    $final['type'] = 4;
+                    $final['picture'] = env('DISPLAY_PATH') .'profiles/'. $user->picture;
+                    $this->sendNotificationForAddFriend($message,$data->user_id);
             return response()->json($final, 200);
             }
             }

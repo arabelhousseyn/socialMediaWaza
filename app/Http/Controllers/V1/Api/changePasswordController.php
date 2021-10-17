@@ -12,8 +12,9 @@ class changePasswordController extends Controller
     public function index(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            "old_password" => 'required|min:8|max:255',
-            "new_password" => 'required|min:8|max:255',
+            'is_freelancer' => 'required',
+            'receive_ads' => 'required',
+            'hide_phone' => 'required',
         ]);
         if($validator->fails())
         {
@@ -27,15 +28,28 @@ class changePasswordController extends Controller
                 if(Hash::check($request->old_password, $user->password))
                 {
                    $updatePasswword = User::where('id',Auth::user()->id)->update([
-                       'password' => Hash::make($request->new_password)
+                       'password' => Hash::make($request->new_password),
+                       'is_freelancer' => $request->is_freelancer,
+                       'receive_ads' => $request->receive_ads,
+                       'hide_phone' => $request->hide_phone,
                    ]); 
                    if($updatePasswword)
                    {
                     return response()->json(['success' => true], 200);
                    }
                    return response()->json(['success' => false], 200);
+                }else{
+                    $update = User::where('id',Auth::user()->id)->update([
+                        'is_freelancer' => $request->is_freelancer,
+                        'receive_ads' => $request->receive_ads,
+                        'hide_phone' => $request->hide_phone,
+                    ]);
+                    if($update)
+                    {
+                        return response()->json(['success' => true,'password' => 'échec'], 200);
+                    }
+                    return response()->json(['success' => false], 200);
                 }
-                return response()->json(['success' => false], 200);
             }
             return response()->json(['success' => false], 200);
         }

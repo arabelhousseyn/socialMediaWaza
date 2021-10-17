@@ -12,7 +12,8 @@ class notification extends Model
         'user_id',
         'morphable_id',
         'type',
-        'is_read'
+        'is_read',
+        //'affiliate'
     ];
 
     protected $hidden = [

@@ -749,6 +749,30 @@ class GroupPostController extends Controller
         return response()->json(['success' => false], 200);
     }
 
+    public function updateComment(Request $request,$comment_id = null)
+    {
+        $validator = Validator::make($request->all(), [
+            'comment' => 'required'
+        ]);
+
+        if($validator->fails())
+        {
+            return response()->json(['success' => false], 200);
+        }
+
+        if($validator->validated())
+        {
+            $comment = GroupPostComment::where('id',$comment_id)->update([
+                'comment' => $request->comment
+            ]);
+            if($comment)
+            {
+                return response()->json(['success' => true], 200);
+            }
+            return response()->json(['success' => false], 200);
+        }
+    }
+
 
     
 }

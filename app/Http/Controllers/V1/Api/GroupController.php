@@ -8,11 +8,16 @@ use App\Models\followGroup;
 use Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\notification;
-use App\Traits\SendNotification;
-use App\Traits\upload;
+use App\Models\User;
+use App\Traits\{
+    SendNotification,
+    upload,
+    middlewares
+};
+use Carbon\Carbon;
 class GroupController extends Controller
 {
-    use SendNotification,upload;
+    use SendNotification,upload,middlewares;
     /**
      * Display a listing of the resource.
      *
@@ -23,15 +28,28 @@ class GroupController extends Controller
          /**
          * merge between the the first group of user and add special groups by id then other groups in the last of collection
          */
+        $ids = array();
+        $count = Group::count();
+        $count += 10;
+        $user = User::find(Auth::user()->id);
+        $age = Carbon::parse($user->dob)->age;
 
-        $data = Group::where([['user_id','=',Auth::user()->id],['id','<>',100]])->select('id','name','cover')->orderBy('id','DESC')->paginate(20);
-        $data2 = Group::where([['user_id','<>',Auth::user()->id],['id','<>',100]])->select('id','name','cover')->inRandomOrder()->orderBy('id','DESC')->paginate(20);
+        $data = Group::where([['user_id','=',Auth::user()->id],['id','<>',100],['id','<>',161]])->select('id','name','cover')->orderBy('id','DESC')->paginate(20);
+        $groups = Group::where([['user_id','<>',Auth::user()->id],['id','<>',100],['id','<>',161]])->orderBy('id','DESC')->get();
         $data3 = Group::whereIn('id',[100,161])->select('id','name','cover')->orderBy('id','DESC')->paginate(20);
+
+        foreach ($groups as $group) {
+            $check = $this->checkIfEligible($age,$user->gender,$group->id);
+            if($check)
+            {
+                $ids[] = $group->id;
+            }
+         }
+         $data2 = Group::whereIn('id',$ids)->select('id','name','cover')->inRandomOrder()->orderBy('id','DESC')->paginate($count);
         $updatedItems = $data->merge($data3);
         $data->setCollection($updatedItems);
         $updatedItems = $data->merge($data2);
         $data->setCollection($updatedItems);
-       
         return response()->json($data, 200);
     }
 
