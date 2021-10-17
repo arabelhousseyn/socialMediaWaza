@@ -449,7 +449,8 @@ class GroupPostController extends Controller
                 'user_id' => Auth::user()->id,
                 'morphable_id' => $request->group_post_id,
                 'type' => 2,
-                'is_read' => 0
+                'is_read' => 0,
+                //'affiliate' => 0,
             ]);
             $data = $this->commentsByPost($request->group_post_id);
             return response()->json($data->original, 200);
@@ -474,7 +475,8 @@ class GroupPostController extends Controller
                     'user_id' => Auth::user()->id,
                     'morphable_id' => $request->group_post_id,
                     'type' => ($request->type == 1) ? 0 : 1,
-                    'is_read' => 0
+                    'is_read' => 0,
+                    //'affiliate' => 0,
                 ]);
             }
         $data = $this->likeListByPost($request->group_post_id);
@@ -497,7 +499,8 @@ class GroupPostController extends Controller
             'user_id' => Auth::user()->id,
             'morphable_id' => $group_post->id,
             'type' => 0,
-            'is_read' => 0
+            'is_read' => 0,
+            //'affiliate' => 0,
         ]); 
         $data = $this->likeListByPost($request->group_post_id);
 

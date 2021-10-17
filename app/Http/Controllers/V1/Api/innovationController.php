@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\V1\Api;
 
 use Illuminate\Http\Request;
-use App\Models\innovation;
-use App\Models\innovationDomain;
-use App\Models\innovationImage;
-use App\Models\innovationLike;
-use App\Models\User;
+use App\Models\{
+    innovation,
+    innovationDomain,
+    innovationImage,
+    innovationLike,
+    User,
+    notification
+};
 use Carbon\Carbon;
 use ImageOptimizer;
 use Auth;
@@ -376,6 +379,14 @@ class innovationController extends Controller
             'innovation_id' => $request->innovation_id,
             'type' => $request->type
         ]);
+
+        // $notification = notification::create([
+        //     'user_id' => Auth::user()->id,
+        //     'morphable_id' => $request->innovation_id,
+        //     'type' => 0,
+        //     'is_read' => 0,
+        //     //'affiliate' => 1,
+        // ]);
 
         $group_post = innovation::findOrFail($request->innovation_id);
         $likes = $group_post->likes + 1;
