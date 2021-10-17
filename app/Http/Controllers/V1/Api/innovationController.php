@@ -277,22 +277,22 @@ class innovationController extends Controller
         foreach ($data as $value) {
             $value['createdAt'] = Carbon::parse($value->created_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
             $tempImages = array();
-            $likeList = array();
-            $dislikeList = array();
+            $likeCount = 0;
+            $dislikeCount = 0;
             $temp = $value->likesList;
             foreach ($temp as $vl) {
                 if($vl->type == -1)
            {
-               array_push($dislikeList,$vl->user_id);
+              $dislikeCount++; 
            }
 
            if($vl->type == 1)
            {
-            array_push($likeList,$vl->user_id);
+              $likeCount++; 
            }
             }
-            $value['dislikes'] = count($dislikeList);
-            $value['likes'] = count($likeList);
+            $value['dislikes'] = $dislikeCount;
+            $value['likes'] = $likeCount;
             $userInnovation = innovation::with('images')->where('id',$value->id)->first();
             $user = User::where('id',$value->user_id)->first();
             if(count($userInnovation->images) > 5)
