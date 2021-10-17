@@ -13,10 +13,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Auth;
 use Carbon\Carbon;
-use App\Traits\SendNotification;
+use App\Traits\{
+    SendNotification,
+    middlewares
+};
 class NotificationController extends Controller
 {
-    use SendNotification;
+    use SendNotification,middlewares;
     /**
      * Display a listing of the resource.
      *
@@ -200,15 +203,18 @@ class NotificationController extends Controller
                 {
                     if(Auth::user()->id != $group->user_id)
                 {
-           if($group->gender == null && $group->gender != 0)
+           if($group->gender == null)
            {
-            $temp['id'] = $value->id;
-            $temp['message'] = $group->name . ' vient d\'être créé ! découvrez ce contenu';
-            $temp['group_id'] = $group->id;
-            $temp['type'] = 0;
-            $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
-            $temp['picture'] = env('DISPLAY_PATH') .'groupImages/'. $group->cover;
-            $final[] = $temp;
+               if(strval($group->gender) != 0)
+               {
+                $temp['id'] = $value->id;
+                $temp['message'] = $group->name . ' vient d\'être créé ! découvrez ce contenu';
+                $temp['group_id'] = $group->id;
+                $temp['type'] = 0;
+                $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
+                $temp['picture'] = env('DISPLAY_PATH') .'groupImages/'. $group->cover;
+                $final[] = $temp;
+               }
            }else{
                // filter users
                    $age = Carbon::parse(Auth::user()->dob)->age;
