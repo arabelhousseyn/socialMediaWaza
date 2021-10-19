@@ -20,6 +20,8 @@ use App\Traits\{
     upload,
     middlewares
 };
+use Str;
+use Illuminate\Support\Facades\DB;
 class userController extends Controller
 {
     use upload,middlewares;
@@ -66,9 +68,10 @@ class userController extends Controller
     public function getInformationUser($id,$group_post_id = null)
     {
         $following = 0;
-        $user = User::where('id',$id)->select('id','fullName','profession','picture','email','phone','hide_phone','wilaya_id','subName','is_kaiztech_team','website','is_freelancer','receive_ads')->first();
+        $user = User::where('id',$id)->select('id','fullName','profession','picture','email','phone','hide_phone','wilaya_id','is_kaiztech_team','website','is_freelancer','receive_ads')->first();
         if($user)
         {
+        
         $checkFollowing = User::where('id',$id)->with('followers')->first();
         foreach ($checkFollowing->followers as $follow) {
             if($follow->id == Auth::user()->id)
@@ -85,21 +88,15 @@ class userController extends Controller
             {
                 if($group->user_id == $post->user_id)
             {
-                if(strlen($user->subName) != 0)
-                {
-                $user['fullName'] = (strlen($user->subName)!=0) ? $user->subName : $user->fullName; 
-                 $user['picture'] = env('DISPLAY_PATH') .'groupImages/'.$group->cover;
-                }else{
-                    $user['picture'] = env('DISPLAY_PATH') .'profiles/'.$user->picture;
-                }
+                    $user['picture'] = $user->picture;
             }else{
-                $user['picture'] = env('DISPLAY_PATH') .'profiles/'.$user->picture;
+                $user['picture'] = $user->picture;
             }
             }else{
-                $user['picture'] = env('DISPLAY_PATH') .'profiles/'.$user->picture;
+                $user['picture'] = $user->picture;
             }
         }else{
-            $user['picture'] = env('DISPLAY_PATH') .'profiles/'.$user->picture;
+            $user['picture'] = $user->picture;
         }
         $willaya = Wilaya::findOrFail($user->wilaya_id);
         $user['wilaya_name'] = $willaya->name;
@@ -166,18 +163,8 @@ class userController extends Controller
         {
             $data = User::where('fullName', 'LIKE', "%{$name}%")
         ->select('id','fullName','profession','picture')->get();
-        foreach ($data as $value) {
-            $value->picture = env('DISPLAY_PATH') . 'profiles/' . $value->picture;
-        }
 
-        $data2 = User::where('subName', 'LIKE', "%{$name}%")
-     ->select('id','fullName','profession','picture')->get();
-     foreach ($data2 as $value) {
-         $value->picture = env('DISPLAY_PATH') . 'profiles/' . $value->picture;
-     }
-
-       $updatedItems = $data->merge($data2);
-        return response()->json($updatedItems, 200);
+        return response()->json($data, 200);
         }
         return response()->json([], 200);
        }
@@ -223,8 +210,7 @@ class userController extends Controller
             $path = $this->ImageUpload($request->picture,'profiles');
         }
         $updated = User::where('id',Auth::user()->id)->update([
-            "picture" => (strlen($path) != 0) ? $path : $user->picture,
-            'subName' => (strlen($request->subName) != 0) ? $request->subName : '',
+            "picture" => (strlen($path) != 0) ? env('DISPLAY_PATH') .'profiles/'. $path : $user->picture,
             'profession' => $request->profession,
             'phone' => $request->phone,
             'email' => $request->email,
@@ -232,7 +218,7 @@ class userController extends Controller
         ]);
         if($updated)
         {
-            $pathImage =(strlen($path) != 0) ? env('DISPLAY_PATH') . 'profiles/' . $path : '';
+            $pathImage =(strlen($path) != 0) ? $path : '';
             return response()->json(['success' => true,'picture' => $pathImage], 200);
         }
         return response()->json(['success' => false], 200);
@@ -254,7 +240,6 @@ class userController extends Controller
          $data = User::where('fullName', 'LIKE', "%{$name}%")
      ->select('id','fullName','profession','picture')->get();
      foreach ($data as $value) {
-         $value->picture = env('DISPLAY_PATH') . 'profiles/' . $value->picture;
          $value['type_record'] = 0;
      }
 
@@ -267,24 +252,14 @@ class userController extends Controller
             }
      }
 
-     $data3 = User::where('subName', 'LIKE', "%{$name}%")
-     ->select('id','fullName','profession','picture')->get();
-     foreach ($data3 as $value) {
-         $value->picture = env('DISPLAY_PATH') . 'profiles/' . $value->picture;
-         $value['type_record'] = 0;
-     }
-
      $data2 = Group::whereIn('id',$ids)->get();
 
      foreach ($data2 as $value) {
-        $value->cover = env('DISPLAY_PATH') . 'groupImages/' . $value->cover;
-        $value->large_cover = env('DISPLAY_PATH') . 'groupImages/' . $value->large_cover;
         $value['type_record'] = 1;
      }
 
        $updatedItems = $data->merge($data2);
-       $updatedItems2 = $data3->merge($updatedItems);
-       return response()->json($updatedItems2, 200);
+       return response()->json($updatedItems, 200);
      }
      return response()->json([], 200);
     }
@@ -332,6 +307,40 @@ class userController extends Controller
    {
     $user = User::find(Auth::id());
     return response()->json(['status' => $user->is_verified], 200);
+   }
+
+   public function getProfiles($name = null)
+   {
+       $professionsMerged = array();
+       $professions = array();
+       $data = User::where('profession', 'LIKE', "%{$name}%")
+       ->select('profession')->get();
+
+       foreach ($data as $value) {
+        $professionsMerged[] = Str::lower($value->profession);
+       }
+
+       $professionsMerged = array_count_values($professionsMerged);
+
+       foreach ($professionsMerged as $key => $value) {
+          $professions[] = $key; 
+       }
+
+       return response()->json($professions, 200);  
+   }
+
+   public function changePath()
+   {
+       $data = DB::table('users')->get();
+       foreach ($data as $value) {
+           $path = env('DISPLAY_PATH') .'profiles/'. $value->picture;
+
+            DB::table('users')->where('id',$value->id)->update([
+                'picture' => $path
+            ]);   
+       }
+
+       return response()->json(['success' => true], 200);
    }
 
 }

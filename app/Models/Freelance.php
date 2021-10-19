@@ -10,7 +10,7 @@ class Freelance extends Model
     use HasFactory;
     protected $fillable = [
         'user_id',
-        'job_offer_id',
+        'profil',
         'description',
         'date',
         'duration',

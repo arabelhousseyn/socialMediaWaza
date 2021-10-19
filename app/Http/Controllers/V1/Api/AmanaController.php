@@ -73,7 +73,7 @@ class AmanaController extends Controller
                 $path = $this->ImageUpload($image,'amanaImages');
                 AmanaImage::create([
                 'amana_id' => $amana->id,
-                'path' => $path
+                'path' => env('DISPLAY_PATH').'amanaImages/'. $path
                   ]);
             }
             return response()->json(['success' => true], 200);
@@ -111,6 +111,7 @@ class AmanaController extends Controller
      */
     public function update(Request $request, $id)
     {
+        // update amana
         $validator = Validator::make($request->all(), [
             'description' => 'required',
         ]);
@@ -141,6 +142,7 @@ class AmanaController extends Controller
      */
     public function destroy($id)
     {
+        // delete amana 
         $amana = Amana::where('id',$id)->delete();
         if($amana)
         {
@@ -154,6 +156,7 @@ class AmanaController extends Controller
         $tempImages = array();
         if($id == 0)
         {
+            // get all amana in main screen 
             $data = Amana::whereDate('created_at', '>=', Carbon::now()->subDays(30)->setTime(0, 0, 0)->toDateTimeString())->
             select('id','title','user_id','description','abbreviation','amana_category_id','created_at')->orderBy('id','DESC')->paginate(20);
             foreach ($data as $value) {
@@ -178,7 +181,7 @@ class AmanaController extends Controller
             }
         return response()->json($data, 200);
         }
-
+        // get amana in specific category 
         $data = Amana::whereDate('created_at', '>=', Carbon::now()->subDays(30)->setTime(0, 0, 0)->toDateTimeString())->
         where('amana_category_id',$id)->select('id','title','user_id','description','abbreviation','amana_category_id','created_at')->orderBy('id','DESC')->paginate(20);
         foreach ($data as $value) {
@@ -197,7 +200,7 @@ class AmanaController extends Controller
             }
             $value['countImages'] = count($userAmana->images);
             $value['user'] = $user->fullName;
-            $value['pictureUser'] = $user->picture;
+            $value['pictureUser'] =  $user->picture;
             $value['is_kaiztech_team'] = $user->is_kaiztech_team;
             $value['user_profession'] = $user->profession;
         }

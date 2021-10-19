@@ -59,7 +59,7 @@ class innovationdomainController extends Controller
             
                 $domain = innovationDomain::create([
                     'title' => $request->title,
-                    'image' => $path,
+                    'image' => env('DISPLAY_PATH') .'innovationDomainImages/'. $path,
                     'type' => 0,
                 ]);
 

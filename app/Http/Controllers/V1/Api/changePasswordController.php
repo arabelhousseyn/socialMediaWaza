@@ -11,6 +11,7 @@ class changePasswordController extends Controller
 {
     public function index(Request $request)
     {
+        // change password for current account
         $validator = Validator::make($request->all(), [
             'is_freelancer' => 'required',
             'receive_ads' => 'required',

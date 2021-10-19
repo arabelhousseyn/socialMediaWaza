@@ -38,6 +38,7 @@ class FollowGroupController extends Controller
      */
     public function store(Request $request)
     {
+        // follow group
         $validator = Validator::make($request->all(), [
             'group_id' => 'required'
         ]);

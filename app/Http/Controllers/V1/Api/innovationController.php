@@ -94,7 +94,7 @@ class innovationController extends Controller
                         'user_id' => Auth::user()->id,
                         'likes' => 0,
                         'type' => $request->type,
-                        'imageCompany' =>$pathImageCompany,
+                        'imageCompany' =>(strlen($pathImageCompany) != 0) ? env('DISPLAY_PATH') .'ImageCompany/'.$pathImageCompany : '',
                         'innovation_domain_id' => $request->innovation_domain_id,
                         'status' => 0
                     ]);
@@ -103,7 +103,7 @@ class innovationController extends Controller
                    foreach ($images as $image) {
                     $pathImage = $this->ImageUpload($image,'innovationImages');
                            $check = innovationImage::create([
-                               'path' => $pathImage,
+                               'path' => env('DISPLAY_PATH') .'innovationImages/'. $pathImage,
                                'innovation_id' => $innovation->id,
                            ]);
                    }
@@ -129,14 +129,13 @@ class innovationController extends Controller
             $user = User::where('id',$data->user_id)->first();
             $likeList = array();
             $dislikeList = array();
-            
             $temp = $data->likesList;
             if(strlen($data->imageCompany) != 0)
             {
-                $data['pictureUser'] = env('DISPLAY_PATH') . 'ImageCompany/' . $data->imageCompany;
+                $data->user->picture = $data->imageCompany;
                 $data['is_company'] = 1;
             }else{
-                $data['pictureUser'] = env('DISPLAY_PATH') . 'profiles/' . $user->picture;
+                $data->user->picture = $data->user->picture;
                 $data['is_company'] = 0;
             }
             $data['is_kaiztech_team'] = $user->is_kaiztech_team;
@@ -153,11 +152,6 @@ class innovationController extends Controller
             }
             $data['dislikeList'] = $dislikeList;
             $data['likeList'] = $likeList;
-
-            if(strlen($data->pathBusinessPlan) != 0)
-            {
-                $data['pathBusinessPlan'] = env('DISPLAY_PATH') . 'bussinesPlan/' . $data->pathBusinessPlan;
-            }
 
             return response()->json(['success' => true,'data' => $data], 200);
          }
@@ -262,9 +256,9 @@ class innovationController extends Controller
             $value['user'] = $user->fullName;
             if(strlen($value->imageCompany) != 0)
             {
-                $value['pictureUser'] = env('DISPLAY_PATH') . 'ImageCompany/' . $value->imageCompany;
+                $value['pictureUser'] = $value->imageCompany;
             }else{
-                $value['pictureUser'] = env('DISPLAY_PATH') . 'profiles/'.$user->picture;
+                $value['pictureUser'] = $user->picture;
             }
             $value['is_kaiztech_team'] = $user->is_kaiztech_team;
         }
@@ -308,9 +302,9 @@ class innovationController extends Controller
             $value['user'] = $user->fullName;
             if(strlen($value->imageCompany) != 0)
             {
-                $value['pictureUser'] = env('DISPLAY_PATH') . 'ImageCompany/' . $value->imageCompany;
+                $value['pictureUser'] = $value->imageCompany;
             }else{
-                $value['pictureUser'] = env('DISPLAY_PATH') . 'profiles/' . $user->picture;
+                $value['pictureUser'] = $user->picture;
             }
             $value['is_kaiztech_team'] = $user->is_kaiztech_team;
         }
@@ -343,7 +337,7 @@ class innovationController extends Controller
                 $update = innovation::where('id',$request->id)->update([
                      'is_financed' => 1,
                      'financementAmount' => $request->financementAmount,
-                     'pathBusinessPlan' => $pathPdf
+                     'pathBusinessPlan' => env('DISPLAY_PATH') .'bussinesPlan/'. $pathPdf
                  ]);
 
                  if(!$update)

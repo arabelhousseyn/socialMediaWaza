@@ -18,8 +18,9 @@ class AmanaCategoryController extends Controller
     
     public function index()
     {
-        // get amana categories with selected rows order by date which is the last id inserted 
-        return response()->json(AmanaCategory::select('id','title','path','created_at')->get(), 200);
+        // get amana categories with selected rows order by date which is the last id inserted
+        $data =  AmanaCategory::select('id','title','path','created_at')->get();
+        return response()->json($data, 200);
     }
 
     /**
@@ -63,7 +64,7 @@ class AmanaCategoryController extends Controller
 
             $category = AmanaCategory::create([
                 'title' => $request->title,
-                'path' => $path,
+                'path' => env('DISPLAY_PATH').'amanaCategory/'.$path,
                 'type' => 0,
             ]);
             return response()->json(['success' => true,"amana_category_id" => $category->id], 200);

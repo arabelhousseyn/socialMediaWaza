@@ -19,11 +19,12 @@ class FreelanceController extends Controller
      */
     public function index()
     {
+        // get all freelancers
         $data = Freelance::orderBy('id','DESC')->select('id','description','user_id','job_offer_id')->paginate(20);
         foreach ($data as $value) {
             $user = User::where('id',$value->user_id)->first();
             $value['user'] = $user->fullName;
-            $value['pictureUser'] = env('DISPLAY_PATH') . 'profiles/' . $user->picture;
+            $value['pictureUser'] = $user->picture;
             $value['is_kaiztech_team'] = $user->is_kaiztech_team;
         }
         return response()->json($data, 200);
@@ -47,9 +48,10 @@ class FreelanceController extends Controller
      */
     public function store(Request $request)
     {
+        // insert freelancer
         $validator = Validator::make($request->all(), [
-            'job_offer_id' => 'required',
             'description' => 'required',
+            'profil' => 'required',
             'date' => 'required|date',
             'duration' => 'required',
             'area' => 'required'
@@ -67,7 +69,7 @@ class FreelanceController extends Controller
         {
             $freelance = Freelance::create([
                 'user_id' => Auth::user()->id,
-                'job_offer_id' => $request->job_offer_id,
+                'profil' => $request->profil,
                 'description' => $request->description,
                 'date' => $request->date,
                 'duration' => $request->duration,
@@ -88,11 +90,12 @@ class FreelanceController extends Controller
      */
     public function show($id)
     {
+        // show details of freelancer
         $data = Freelance::find($id);
          if($data)
          {
             $user = User::where('id',$data->user_id)->first();
-            $data['pictureUser'] = env('DISPLAY_PATH') . 'profiles/' . $user->picture;
+            $data['pictureUser'] = $user->picture;
             $data['is_kaiztech_team'] = $user->is_kaiztech_team;
             $data['profession'] = $user->profession;
             return response()->json(['success' => true,'data' => $data], 200);

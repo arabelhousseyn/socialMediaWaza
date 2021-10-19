@@ -16,6 +16,7 @@ class CreateCvLibrariesTable extends Migration
         Schema::create('cv_libraries', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
+            // $table->foreignId('cv_library_id')->constrained()->onUpdate('cascade')->onDelete('cascade'); comment out this for adding it in new model cv_library_views
             $table->string('path');
             $table->string('FullName');
             $table->date('dob');

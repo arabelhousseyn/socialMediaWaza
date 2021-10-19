@@ -76,7 +76,7 @@ class JobOfferController extends Controller
                 'user_id' =>Auth::user()->id,
                 'name_company' => $request->name_company,
                 'path' => (strlen($image) != 0) ? 'https://dev.waza.fun/JobOffersImages/'. $image 
-                : 'https://dev.waza.fun/profiles/'.Auth::user()->picture,
+                : Auth::user()->picture,
                 'sector' => $request->sector,
                 'address' => $request->address,
                 'job' => $request->job,

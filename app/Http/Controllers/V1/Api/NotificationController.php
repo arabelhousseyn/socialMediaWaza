@@ -147,7 +147,7 @@ class NotificationController extends Controller
                               $temp['user_id'] = $like->user_id;
                               $temp['type'] = 0;
                               $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
-                              $temp['picture'] = env('DISPLAY_PATH') .'profiles/'. $user->picture;
+                              $temp['picture'] = $user->picture;
                               $final[] = $temp;
                         } 
                       }
@@ -180,7 +180,7 @@ class NotificationController extends Controller
                             $temp['user_id'] = $comment->user_id;
                             $temp['type'] = 0;
                             $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
-                            $temp['picture'] = env('DISPLAY_PATH') .'profiles/'. $user->picture;
+                            $temp['picture'] = $user->picture;
                             $final[] = $temp;
                         } 
                       }
@@ -260,7 +260,7 @@ class NotificationController extends Controller
                 $temp['type'] = 0;
                 $temp['user_id'] = $user->id;
                 $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
-                $temp['picture'] = env('DISPLAY_PATH') .'profiles/'. $user->picture;
+                $temp['picture'] = $user->picture;
                 $final[] = $temp;
             }
             }
@@ -290,7 +290,7 @@ class NotificationController extends Controller
                         $final['message'] = $message;
                         $final['type'] = 1;
                         $final['user_id'] = $data->morphable_id;
-                        $final['picture'] = env('DISPLAY_PATH') .'profiles/'. $user->picture;
+                        $final['picture'] = $user->picture;
                         $this->InteractWithPost($post->user_id,$message);
                 }
                 return response()->json($final, 200);
@@ -310,7 +310,7 @@ class NotificationController extends Controller
                         $final['message'] = $message;
                         $final['type'] = 1;
                         $final['post_id'] = $data->morphable_id;
-                        $final['picture'] = env('DISPLAY_PATH') .'profiles/'. $user->picture;
+                        $final['picture'] = $user->picture;
                         $this->commentPost($post->user_id,$message);
                 }
                 return response()->json($final, 200);
@@ -348,9 +348,9 @@ class NotificationController extends Controller
                 $receive = User::where('id',$data->morphable_id)->first();
                 $message = $user->fullName . ' souhaite vous ajouter a son réseaux';
                     $final['id'] = $data->id;
-                    $final['message'] = $message;
+                    $final['fullName'] = $user->fullName;
                     $final['type'] = 4;
-                    $final['picture'] = env('DISPLAY_PATH') .'profiles/'. $user->picture;
+                    $final['picture'] = $user->picture;
                     $this->sendNotificationForAddFriend($message,$data->morphable_id);
             return response()->json($final, 200);
             }
@@ -366,7 +366,7 @@ class NotificationController extends Controller
                     $final['id'] = $data->id;
                     $final['message'] = $message;
                     $final['type'] = 4;
-                    $final['picture'] = env('DISPLAY_PATH') .'profiles/'. $user->picture;
+                    $final['picture'] = $user->picture;
                     $this->sendNotificationForAddFriend($message,$data->user_id);
             return response()->json($final, 200);
             }
@@ -436,7 +436,7 @@ class NotificationController extends Controller
     public function getAddFriends()
     {
         $final = array();
-        $data = notification::where([['is_read','=',0],['type','=',4]])->get();
+        $data = notification::where([['is_read','=',0],['type','=',4]])->orderBy('id','DESC')->get();
         foreach ($data as $value) {
             $temp = array();
             $user = User::where('id',$value->user_id)->first();
@@ -447,9 +447,8 @@ class NotificationController extends Controller
             {
                     $temp['id'] = $value->id;
                     $temp['user_id'] = $user->id;
-                    $temp['message'] = $user->fullName . ' souhaite vous ajouter a son réseaux';
-                    $temp['type'] = 4;
-                    $temp['picture'] = env('DISPLAY_PATH') .'profiles/'. $user->picture;
+                    $temp['fullName'] = $user->fullName;
+                    $temp['picture'] = $user->picture;
                     $final[] = $temp;
             }
                 }
@@ -528,7 +527,7 @@ class NotificationController extends Controller
                 $temp['id'] = $notification->id;
                 $temp['message'] = $message;
                 $temp['type'] = 4;
-                $temp['picture'] = env('DISPLAY_PATH') .'profiles/'. $user->picture;
+                $temp['picture'] = $user->picture;
                 $final[] = $temp;
                 $this->friendAccepted($notification->user_id,$message);
             }

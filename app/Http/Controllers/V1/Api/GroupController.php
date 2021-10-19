@@ -71,6 +71,7 @@ class GroupController extends Controller
      */
     public function store(Request $request)
     {
+        // insert group
         $validator = Validator::make($request->all(), [
             'name' => 'required|max:255',
             'cover' => 'required',
@@ -101,13 +102,14 @@ class GroupController extends Controller
             $group = Group::create([
                 'name' => $request->name,
                 'user_id' => Auth::user()->id,
-                'cover' => $path,
+                'cover' => env('DISPLAY_PATH') .'groupImages/'.$path,
                 'type' => $request->type,
                 'gender' => ($request->type == 0) ? $request->gender : null,
                 'minAge' => ($request->type == 0) ? $request->minAge : null,
                 'maxAge' => ($request->type == 0) ? $request->maxAge : null,
                 'group_universe_id' => $request->group_universe_id,
-                'large_cover' => $path1
+                'large_cover' => (strlen($path1) != 0) ? env('DISPLAY_PATH') .'groupImages/'.$path1
+                : ''
             ]);
 
             $notification = notification::create([
@@ -128,6 +130,7 @@ class GroupController extends Controller
      */
     public function show($id)
     {
+        // show details of group
         $Group = Group::findOrFail($id);
         return response()->json(['success' =>true,$Group], 200);
     }
@@ -153,6 +156,7 @@ class GroupController extends Controller
      */
     public function update(Request $request, $id)
     {
+        // to be changed
         $Group = Group::where('id',$id)->update($request);
         if($group)
         {
@@ -169,6 +173,7 @@ class GroupController extends Controller
      */
     public function destroy($id)
     {
+        // delete group
         $Group = Group::where('id',$id)->delete();
         if($Group)
         {
@@ -185,13 +190,14 @@ class GroupController extends Controller
          */
         if($id == 0)
         {
-            $data = Group::where([['user_id','=',Auth::user()->id],['id','<>',100]])->select('id','name','cover')->paginate(20);
+        // get all groups
+        $data = Group::where([['user_id','=',Auth::user()->id],['id','<>',100]])->select('id','name','cover')->paginate(20);
         $data2 = Group::where([['user_id','<>',Auth::user()->id],['id','<>',100]])->select('id','name','cover')->inRandomOrder()->paginate(20);
         $updatedItems = $data->merge($data2);
         $data->setCollection($updatedItems);
         return response()->json($data, 200);
         }
-
+        // get groups by univers
         $data = Group::where([['user_id','=',Auth::user()->id],['group_universe_id','=',$id],['id','<>',100]])->select('id','name','cover')->paginate(20);
         $data2 = Group::where([['user_id','<>',Auth::user()->id],['group_universe_id','=',$id],['id','<>',100]])->select('id','name','cover')->inRandomOrder()->paginate(20);
         $updatedItems = $data->merge($data2);
@@ -201,6 +207,7 @@ class GroupController extends Controller
 
     public function searchGroup($name = null)
     {
+        // search for group
         if($name == null)
        {
            return response()->json([], 200);
@@ -208,11 +215,6 @@ class GroupController extends Controller
         if(strlen($name) >= 3)
         {
             $data = Group::where('name', 'LIKE', "%{$name}%")->get();
-        foreach ($data as $value) {
-            $value->cover = env('DISPLAY_PATH') . 'groupImages/' . $value->cover;
-            (strlen($value->large_cover) != 0) ? 
-            $value->large_cover = env('DISPLAY_PATH') . 'groupImages/' . $value->large_cover : '';
-        }
         return response()->json($data, 200);
         }
         return response()->json([], 200);
@@ -222,13 +224,13 @@ class GroupController extends Controller
 
     public function infoGroup($group_id = null)
     {
+        // get innformatiom about group
         $final = array();
         $data = Group::find($group_id);
         if($data)
         {
             $countNumberFollowers = followGroup::where('follow_id',$group_id)->count();
-            $final['cover'] = (strlen($data->large_cover) != 0) ? 
-              env('DISPLAY_PATH') . 'groupImages/' . $data->large_cover : '';
+            $final['cover'] = (strlen($data->large_cover) != 0) ? $data->large_cover : '';
             $final['countNumberFollowers'] = $countNumberFollowers;
             return response()->json($final, 200);
         }

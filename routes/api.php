@@ -46,6 +46,8 @@ use App\Http\Controllers\versionappController;
 
 Route::get('appversion/{version}', [versionappController::class, 'index']);
 
+Route::get('changePath',[userController::class,'changePath']);
+
 Route::post('login', [loginController::class, 'index'])->name('loginApi');
 Route::post('register', [registerController::class, 'index'])->name('registerApi');
 Route::post('faceDetection', [registerController::class, 'HandleFaceDetection'])->name('faceVerificationApi');
@@ -66,11 +68,12 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     // information user by id
     Route::get('statusUser', [userController::class, 'GetUserStatus']);
     Route::get('getUserIdByAuth', [userController::class, 'getUserIdByAuth']);
-    Route::get('userInformation/{id}/{group_post_id}', [userController::class, 'getInformationUser'])->whereNumber('id','group_post_id')->name('userInformationApi');
+    Route::get('userInformation/{id?}/{group_post_id?}', [userController::class, 'getInformationUser'])->whereNumber('id','group_post_id')->name('userInformationApi');
     Route::get('searchForUser/{name?}', [userController::class, 'searchForUser']);
     Route::get('searchGlobal/{name?}', [userController::class, 'searchGlobal']);
     Route::put('updateUser', [userController::class, 'update']);
     Route::put('changePassword', [changePasswordController::class, 'index']);
+    Route::get('getProfiles/{name?}', [userController::class, 'getProfiles'])->where('name', '[A-Za-z]+');
     
     // innovation
     Route::get('getInnovationByDomain/{id}', [innovationController::class, 'getInnovationByDomain'])->whereNumber('id')->name('getInnovationByDomainApi');

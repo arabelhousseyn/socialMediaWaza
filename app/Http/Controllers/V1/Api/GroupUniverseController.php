@@ -16,7 +16,8 @@ class GroupUniverseController extends Controller
      */
     public function index()
     {
-        return response()->json(GroupUniverse::all(), 200);
+        $data = GroupUniverse::all();
+        return response()->json($data, 200);
     }
 
     /**
@@ -52,7 +53,7 @@ class GroupUniverseController extends Controller
             $path = $this->ImageUpload($request->cover,'groupUnivers');
             GroupUniverse::create([
                 'name' => $request->name,
-                'cover' => $path
+                'cover' => env('DISPLAY_PATH') .'groupUnivers/'.$path
             ]);
             return response()->json(['success' => true], 200);
         }        

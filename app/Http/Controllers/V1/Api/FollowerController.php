@@ -40,6 +40,8 @@ class FollowerController extends Controller
      */
     public function store(Request $request)
     {
+        // add friend 
+
         $validator = Validator::make($request->all(), [
             'user_id' => 'required'
         ]);
@@ -141,6 +143,7 @@ class FollowerController extends Controller
 
     public function AcceptFriend($user_id)
     {
+        // accept friend
         $check = follower::where([['user-id','=',Auth::user()->id],['follow_id','=',$user_id]])->whereDate('created_at', '>=', Carbon::now()->subDays(7)->setTime(0, 0, 0)->toDateTimeString())->first();
         if($check)
         {

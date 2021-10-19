@@ -16,7 +16,7 @@ class CreateFreelancesTable extends Migration
         Schema::create('freelances', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
-            $table->foreignId('job_offer_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
+            $table->string('profil');
             $table->longText('description');
             $table->date('date');
             $table->string('duration');

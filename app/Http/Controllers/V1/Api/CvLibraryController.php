@@ -9,6 +9,7 @@ use Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use App\Traits\upload;
+use Carbon\Carbon;
 class CvLibraryController extends Controller
 {
     use upload;
@@ -19,12 +20,12 @@ class CvLibraryController extends Controller
      */
     public function index()
     {
-        $data = CvLibrary::select('id','path','user_id')->orderBy('id','DESC')->paginate(20);
+        // get all cv libraries  
+        $data = CvLibrary::select('id','path','user_id')->whereDate('created_at', '>=', Carbon::now()->subDays(7)->setTime(0, 0, 0)->toDateTimeString())->orderBy('id','DESC')->paginate(20); // to be changed with('user')
         foreach ($data as $value) {
             $user = User::where('id',$value->user_id)->first();
             $value['user'] = $user->fullName;
-            $value['pictureUser'] = env('DISPLAY_PATH') . 'profiles/' . $user->picture;
-            $value['path'] = env('DISPLAY_PATH') . 'CvLibraryImages/' . $value->path;
+            $value['pictureUser'] = $user->picture;
             $value['is_kaiztech_team'] = $user->is_kaiztech_team;
             $value['profession'] = $user->profession;
         }
@@ -49,6 +50,7 @@ class CvLibraryController extends Controller
      */
     public function store(Request $request)
     {
+        // insert cv library 
         $image = '';
 
         $validator = Validator::make($request->all(), [
@@ -78,7 +80,8 @@ class CvLibraryController extends Controller
             $cvLibrary = CvLibrary::create([
                 'user_id' => Auth::user()->id,
                 'FullName' => $request->FullName,
-                'path' => (strlen($image) != 0) ?$image : Auth::user()->picture,
+                'path' => (strlen($image) != 0) ?env('DISPLAY_PATH') .'CvLibraryImages/'.$image 
+                : Auth::user()->picture,
                 'dob' => $request->dob,
                 'arabic' => $request->arabic,
                 'english' => $request->english,
@@ -119,15 +122,15 @@ class CvLibraryController extends Controller
      */
     public function show($id)
     {
+        // show details of cv library
         $data = CvLibrary::with('experiences')->find($id);
          if($data)
          {
             $user = User::where('id',$data->user_id)->first();
 
-            $data['pictureUser'] = env('DISPLAY_PATH') . 'profiles/' . $user->picture;
+            $data['pictureUser'] = $user->picture;
             $data['is_kaiztech_team'] = $user->is_kaiztech_team;
             $data['profession'] = $user->profession;
-            $data['path'] = env('DISPLAY_PATH') . 'CvLibraryImages/' . $data->path;
             return response()->json(['success' => true,'data' => $data], 200);
          }
          return response()->json(['success' => false], 200);

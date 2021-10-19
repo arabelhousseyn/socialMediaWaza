@@ -50,9 +50,9 @@ class registerController extends Controller
 
                         $user = User::create([
                         'fullName' => $request->fullName,
-                        'subName' => (strlen($request->subName) != 0) ? $request->subName : '',
+                        'subName' => '',
                         'dob' => $request->dob,
-                        'picture' => $path,
+                        'picture' => env('DISPLAY_PATH') .'profiles/'. $path,
                         'gender' => $request->gender,
                         'profession' => $request->profession,
                         'wilaya_id' => $request->wilaya_id,
@@ -69,7 +69,7 @@ class registerController extends Controller
                         'website' => '',
                         'device_token' => ($request->device_token) ? $request->device_token : '',
                     ]);
-                    $usr = User::where('id',$user->id)->select('id','fullName','subName',
+                    $usr = User::where('id',$user->id)->select('id','fullName',
                     'dob','picture','gender','profession','wilaya_id','phone','email','is_freelancer',
                     'is_verified','receive_ads','token')->first();
                     $token = $usr->createToken('my-app-token')->plainTextToken;
