@@ -507,21 +507,6 @@ class GroupPostController extends Controller
         return response()->json(['data' => $data->original,'notification_id' => $notification->id], 200);
     }
 
-    public function deleteNotificationByGroupPostId($group_post_id = null)
-    {
-        $deleted = notification::where([['user_id','=',Auth::user()->id],['morphable_id','=',$group_post_id],['type','=',0]])->delete();
-                if(!$deleted)
-                {
-                    $deleted2 = notification::where([['user_id','=',Auth::user()->id],['morphable_id','=',$group_post_id],['type','=',1]])->delete();
-                    if($deleted2)
-                    {
-                        return response()->json(['success' => true], 200);
-                    }
-                    return response()->json(['success' => false], 200);   
-                }
-                return response()->json(['success' => true], 200);
-    }
-
     public function likeListByPost($id)
     {
         $data = GroupPost::with('user','likesList')->find($id);
