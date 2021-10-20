@@ -92,7 +92,6 @@ class GroupPostController extends Controller
                 'description' => (strlen($request->description) != 0) ? $request->description : '',
                 'source' => ($request->source == null) ? '' : $request->source,
                 'colorabble' => $request->colorabble,
-                'likes' => 0,
                 'type' => $request->type,
                 'is_approved' => $is_approved,
                 'anonym' => $request->anonym,
@@ -450,7 +449,7 @@ class GroupPostController extends Controller
                 //'affiliate' => 0,
             ]);
             $data = $this->commentsByPost($request->group_post_id);
-            return response()->json($data->original, 200);
+            return response()->json(['data' => $data->original,'notification_id' => $notification->id], 200);
         }
     }
 
@@ -462,28 +461,32 @@ class GroupPostController extends Controller
         {
             if($request->type == $check->type)
             {
+                GroupPostLike::where([['user_id','=',Auth::user()->id],['group_post_id','=',$request->group_post_id],['type','=',$request->type]])->delete();  
+                notification::where([['user_id','=',Auth::user()->id],['morphable_id','=',$request->group_post_id],['type','=',$request->type]])->delete();
+            }else{
+
                 $deleted = notification::where([['user_id','=',Auth::user()->id],['morphable_id','=',$request->group_post_id],['type','=',0]])->delete();
                 if(!$deleted)
                 {
                     notification::where([['user_id','=',Auth::user()->id],['morphable_id','=',$request->group_post_id],['type','=',1]])->delete();
                 }
-                GroupPostLike::where([['user_id','=',Auth::user()->id],['group_post_id','=',$request->group_post_id]])->delete();  
-            }else{
+
                 $check->update([
                     'type' => $request->type
                 ]); 
-                
-                $notification = notification::create([
-                    'user_id' => Auth::user()->id,
-                    'morphable_id' => $request->group_post_id,
-                    'type' => ($request->type == 1) ? 0 : 1,
-                    'is_read' => 0,
-                    //'affiliate' => 0,
-                ]);
             }
+            
+            $notification = notification::create([
+                'user_id' => Auth::user()->id,
+                'morphable_id' => $request->group_post_id,
+                'type' => ($request->type == 1) ? 0 : 1,
+                'is_read' => 0,
+                //'affiliate' => 0,
+            ]);
+
         $data = $this->likeListByPost($request->group_post_id);
 
-        return response()->json($data->original, 200);
+        return response()->json(['data' => $data->original,'notification_id' => $notification->id], 200);
         }
 
         $like = GroupPostLike::create([
@@ -492,21 +495,31 @@ class GroupPostController extends Controller
             'type' => $request->type
         ]);
 
-        $group_post = GroupPost::findOrFail($request->group_post_id);
-        $likes = $group_post->likes + 1;
-        $group_post->update([
-            'likes' => $likes
-        ]);
         $notification = notification::create([
             'user_id' => Auth::user()->id,
-            'morphable_id' => $group_post->id,
+            'morphable_id' => $request->group_post_id,
             'type' => 0,
             'is_read' => 0,
             //'affiliate' => 0,
         ]); 
         $data = $this->likeListByPost($request->group_post_id);
 
-        return response()->json($data->original, 200);
+        return response()->json(['data' => $data->original,'notification_id' => $notification->id], 200);
+    }
+
+    public function deleteNotificationByGroupPostId($group_post_id = null)
+    {
+        $deleted = notification::where([['user_id','=',Auth::user()->id],['morphable_id','=',$group_post_id],['type','=',0]])->delete();
+                if(!$deleted)
+                {
+                    $deleted2 = notification::where([['user_id','=',Auth::user()->id],['morphable_id','=',$group_post_id],['type','=',1]])->delete();
+                    if($deleted2)
+                    {
+                        return response()->json(['success' => true], 200);
+                    }
+                    return response()->json(['success' => false], 200);   
+                }
+                return response()->json(['success' => true], 200);
     }
 
     public function likeListByPost($id)
@@ -734,6 +747,7 @@ class GroupPostController extends Controller
         $deleted = GroupPostComment::where('id',$id_comment)->delete();
         if($deleted)
         {
+            notification::where([['user_id','=',Auth::user()->id],['morphable_id','=',$group_post_id],['type','=',2]])->delete();
             $data = $this->commentsByPost($group_post_id);
             return response()->json($data, 200);
         }

@@ -16,7 +16,7 @@ class loginController extends Controller
             'phone' => 'required|digits:10',
             'password' => 'required',
             'country_code' => 'required',
-            // 'device_token' => 'required'
+            'device_token' => 'required'
         ]);
 
         if($validator->fails())

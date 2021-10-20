@@ -20,7 +20,6 @@ class CreateGroupPostsTable extends Migration
             $table->longText('description');
             $table->string('source');
             $table->tinyInteger('colorabble');
-            $table->string('likes');
             $table->tinyInteger('type');
             $table->tinyInteger('is_approved');
             $table->tinyInteger('anonym');

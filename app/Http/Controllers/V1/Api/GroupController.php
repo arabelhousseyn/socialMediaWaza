@@ -177,6 +177,7 @@ class GroupController extends Controller
         $Group = Group::where('id',$id)->delete();
         if($Group)
         {
+            notification::where([['morphable_id','=',$id],['type','=',3]])->delete();
             return response()->json(['success' => true], 200);
         }
         return response()->json(['success' => false], 200);

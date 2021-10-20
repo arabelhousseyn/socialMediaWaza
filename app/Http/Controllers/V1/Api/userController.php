@@ -18,13 +18,14 @@ use Mail;
 use Carbon\Carbon;
 use App\Traits\{
     upload,
-    middlewares
+    middlewares,
+    SendNotification
 };
 use Str;
 use Illuminate\Support\Facades\DB;
 class userController extends Controller
 {
-    use upload,middlewares;
+    use upload,middlewares,SendNotification;
     public function approve($id)
     {
         $storage_face = env('STORAGE_FACES_URL');
@@ -48,6 +49,11 @@ class userController extends Controller
         $user = User::find($id);
         if($user)
         {
+            if($user->is_verified == 1)
+            {
+                $this->pushNotificarionForSingleUser();
+            }
+
             return response()->json(['success' => $user->is_verified,'UserId' => $id], 200);
         }
         return response()->json(['success' => 0], 200);
@@ -119,10 +125,13 @@ class userController extends Controller
        if($notification)
        {
            $group = Group::find($notification->morphable_id);
-           if($group->gender == null && $group->gender != 0)
+           if($group->gender == null)
            {
-            $users = User::pluck('id')->all();
+            if(strval($group->gender) != 0)
+            {
+                $users = User::pluck('id')->all();
             return response()->json($users, 200);
+            }
            }else{
                // filter users
                $ids = array();
@@ -267,40 +276,34 @@ class userController extends Controller
 
    public function test()
    {
-    // $firebaseToken = User::pluck('device_token')->all();
-    // $SERVER_API_KEY = 'AAAAtX5a_xg:APA91bFCW6XtWkj4OWmkEFLGruyjkcjSNaOpIpFkrWlbvyksPog2LaG08j8ZLiBbi8M3boxZouks9EKvYjDGtJzt27G4ZfkAco9jj_2LPiPwOd96KD_YuhYm0CohvgnT4IBsx4fy__Tk';
-    // $data = [
-    //     "registration_ids" => $firebaseToken,
-    //     "notification" => [
-    //         "title" => 'Nouveaux invitation',
-    //         "body" => "test",
-    //         'image' => 'https://dashboard.waza.fun/waza-small.png',
-    //         'sound' => true,
-    //     ]
-    // ];
-    // $dataString = json_encode($data);
-    // $headers = [
-    //     'Authorization: key=' . $SERVER_API_KEY,
-    //     'Content-Type: application/json',
-    // ];
-    // $ch = curl_init();
-    // curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
-    // curl_setopt($ch, CURLOPT_POST, true);
-    // curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    // curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    // curl_setopt($ch, CURLOPT_POSTFIELDS, $dataString);
-    // $result = curl_exec($ch );
-    //     curl_close( $ch );
-    //     return $result;
-
-    $details = [
-        "title" => "test",
-        "body" => "test"
+    $tokens = array();
+    $user = User::find(25);
+        $tokens[] = $user->device_token;
+    $SERVER_API_KEY = 'AAAAtX5a_xg:APA91bFCW6XtWkj4OWmkEFLGruyjkcjSNaOpIpFkrWlbvyksPog2LaG08j8ZLiBbi8M3boxZouks9EKvYjDGtJzt27G4ZfkAco9jj_2LPiPwOd96KD_YuhYm0CohvgnT4IBsx4fy__Tk';
+    $data = [
+        "registration_ids" => $tokens,
+        "notification" => [
+            "title" => 'Nouveaux invitation',
+            "body" => "test",
+            'image' => 'https://dashboard.waza.fun/waza-small.png',
+            'sound' => true,
+        ]
     ];
-
-    $hi = Mail::to('hocine.arab1@hotmail.com')->send(new verificationMail($details));
-    return response()->json($hi, 200);
+    $dataString = json_encode($data);
+    $headers = [
+        'Authorization: key=' . $SERVER_API_KEY,
+        'Content-Type: application/json',
+    ];
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $dataString);
+    $result = curl_exec($ch );
+        curl_close( $ch );
+        return $result;
    }
 
    public function GetUserStatus() 
@@ -327,6 +330,12 @@ class userController extends Controller
        }
 
        return response()->json($professions, 200);  
+   }
+
+   public function pushNotificarionForSingleUser()
+   {
+       $this->forApprovedUser(Auth::user()->id,'Congratulations! You\'re officially a member of WAZA');
+       return response()->json(['success' => true], 200);
    }
 
    public function changePath()

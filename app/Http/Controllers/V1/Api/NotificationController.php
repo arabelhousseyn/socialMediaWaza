@@ -133,31 +133,55 @@ class NotificationController extends Controller
                 // check if morphable_id is repeated
                 if(!in_array($value->morphable_id,$breakInteraction))
                 {
-                    $likes = GroupPostLike::where('group_post_id',$value->morphable_id)->get();
-                if(count($likes) <= 5)
+                    $post = GroupPost::with('images','likesList')->find($value->morphable_id);
+                if(count($post->likesList) <= 5)
                 {
-                    foreach ($likes as $like) {
-                        $post = GroupPost::find($value->morphable_id);
+                    foreach ($post->likesList as $like) {
                         if($post->user_id == Auth::user()->id && $like->user_id != Auth::user()->id)
                         {
                               $user = User::where('id',$like->user_id)->first();
                               $temp['id'] = $value->id;
-                              $temp['message'] = $user->fullName . ' interagir à votre publication';
-                              $temp['post_id'] = $post->id;
+                              $temp['message'] ='a interagi avec votre publication';
+                              $temp['sub_message'] = $user->fullName;
+                              $temp['link_id'] = $value->morphable_id;
                               $temp['user_id'] = $like->user_id;
-                              $temp['type'] = 0;
+                              $temp['type'] = 1;
                               $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
-                              $temp['picture'] = $user->picture;
+                              if(count($post->images) > 0)
+                              {
+                                $temp['link_cover'] = $post->images[0]->path;
+                              }else{
+                                $temp['link_cover'] = '';  
+                              }
                               $final[] = $temp;
                         } 
                       }
                 }else{
-                    $temp['id'] = $value->id;
-                    $temp['message'] = '+5 ont interagi sur votre publication';
-                    $temp['post_id'] = $value->morphable_id;
-                    $temp['type'] = 1;
-                    $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
-                    $final[] = $temp;  
+
+                    if($post->user_id == Auth::user()->id)
+                        {
+                            $likes = count($post->likesList);
+                            $last_user = User::find($post->likesList[$likes - 1]->user_id);
+                            $temp['id'] = $value->id;
+                            $temp['message'] = 'ont interagi sur votre publication';
+                            if($last_user->id == Auth::user()->id)
+                            {
+                                $last_user = User::find($post->likesList[$likes - 2]->user_id);
+                                $temp['sub_message'] = strval($last_user->fullName . ' et '. $likes - 1 . ' autres personnes');
+                            }else{
+                                $temp['sub_message'] = strval($last_user->fullName . ' et '. $likes - 1 . ' autres personnes');
+                            }
+                            $temp['link_id'] = $value->morphable_id;
+                            $temp['type'] = 1;
+                            if(count($post->images) > 0)
+                              {
+                                $temp['link_cover'] = $post->images[0]->path;
+                              }else{
+                                $temp['link_cover'] = '';  
+                              }
+                            $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
+                            $final[] = $temp;  
+                        } 
                 }
                 $breakInteraction[] = $value->morphable_id;
                 }
@@ -167,32 +191,56 @@ class NotificationController extends Controller
                 // check if morphable_id is repeated
                 if(!in_array($value->morphable_id,$breakComment))
                 {
-                    $comments = GroupPostComment::where('group_post_id',$value->morphable_id)->get();
-                if(count($comments) <= 5)
+                    $post = GroupPost::with('images','comments')->find($value->morphable_id);
+                if(count($post->comments) <= 5)
                 {
-                    foreach ($comments as $comment) {
-                        $post = GroupPost::find($comment->group_post_id);
+                    foreach ($post->comments as $comment) {
                         if($post->user_id == Auth::user()->id && $comment->user_id != Auth::user()->id)
                         {
                           $user = User::where('id',$comment->user_id)->first();
                             $temp['id'] = $value->id;
-                            $temp['message'] = $user->fullName . ' commentez votre publication';
+                            $temp['message'] ='a commenté sur votre publication';
+                            $temp['sub_message'] =$user->fullName;
                             $temp['user_id'] = $comment->user_id;
-                            $temp['type'] = 0;
+                            $temp['link_id'] = $value->morphable_id;
+                            $temp['type'] = 2;
                             $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
-                            $temp['picture'] = $user->picture;
+                            if(count($post->images) > 0)
+                              {
+                                $temp['link_cover'] = $post->images[0]->path;
+                              }else{
+                                $temp['link_cover'] = '';  
+                              }
                             $final[] = $temp;
                         } 
                       }
                 }else{
+                    if($post->user_id == Auth::user()->id)
+                        {
+                    $comments = count($post->comments);
+                    $last_user = User::find($post->comments[$comments - 1]->user_id);
                     $temp['id'] = $value->id;
-                    $temp['message'] = '+5 ont commentez sur votre publication';
-                    $temp['post_id'] = $post->id;
+                    $temp['message'] = 'ont commenté sur votre publication';
+                    if($last_user->id == Auth::user()->id)
+                            {
+                                $last_user = User::find($post->comments[$comments - 2]->user_id);
+                                $temp['sub_message'] = strval($last_user->fullName . ' et '. $comments - 1 . ' autres personnes');
+                            }else{
+                                $temp['sub_message'] = strval($last_user->fullName . ' et '. $comments - 1 . ' autres personnes');
+                            }
+                    $temp['link_id'] = $value->morphable_id;
+                    if(count($post->images) > 0)
+                              {
+                                $temp['link_cover'] = $post->images[0]->path;
+                              }else{
+                                $temp['link_cover'] = '';  
+                              }
                     $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
-                    $temp['type'] = 1;
-                    $final[] = $temp;  
-                    $breakComment[] = $value->morphable_id;
+                    $temp['type'] = 2;
+                    $final[] = $temp; 
+                        }  
                 }
+                $breakComment[] = $value->morphable_id;
                 }
             }
             if($value->type == 3)
@@ -208,11 +256,12 @@ class NotificationController extends Controller
                if(strval($group->gender) != 0)
                {
                 $temp['id'] = $value->id;
-                $temp['message'] = $group->name . ' vient d\'être créé ! découvrez ce contenu';
-                $temp['group_id'] = $group->id;
-                $temp['type'] = 0;
+                $temp['message'] ='vient d\'être créé ! découvrez ce contenu';
+                $temp['sub_message'] = $group->name;
+                $temp['link_id'] = $group->id;
+                $temp['type'] = 3;
                 $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
-                $temp['picture'] = env('DISPLAY_PATH') .'groupImages/'. $group->cover;
+                $temp['link_cover'] = $group->cover;
                 $final[] = $temp;
                }
            }else{
@@ -223,21 +272,23 @@ class NotificationController extends Controller
                     if($group->gender == 2)
                     {
                         $temp['id'] = $value->id;
-            $temp['message'] = $group->name . ' vient d\'être créé ! découvrez ce contenu';
-            $temp['group_id'] = $group->id;
-            $temp['type'] = 0;
-            $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
-            $temp['picture'] = env('DISPLAY_PATH') .'groupImages/'. $group->cover;
-            $final[] = $temp;
+                        $temp['message'] ='vient d\'être créé ! découvrez ce contenu';
+                        $temp['sub_message'] = $group->name;
+                        $temp['link_id'] = $group->id;
+                        $temp['type'] = 3;
+                        $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
+                        $temp['link_cover'] = $group->cover;
+                        $final[] = $temp;
                     }else{
                        if($group->gender == $user->gender)
                        {
                         $temp['id'] = $value->id;
                         $temp['message'] = $group->name . ' vient d\'être créé ! découvrez ce contenu';
-                        $temp['group_id'] = $group->id;
-                        $temp['type'] = 0;
+                        $temp['sub_message'] = $group->name;
+                        $temp['link_id'] = $group->id;
+                        $temp['type'] = 3;
                         $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
-                        $temp['picture'] = env('DISPLAY_PATH') .'groupImages/'. $group->cover;
+                        $temp['link_cover'] = $group->cover;
                         $final[] = $temp;
                        } 
                     }
@@ -256,11 +307,12 @@ class NotificationController extends Controller
             {
                 $user = User::find($value->morphable_id);
                 $temp['id'] = $value->id;
-                $temp['message'] = $user->fullName . ' accepte votre invitation';
-                $temp['type'] = 0;
-                $temp['user_id'] = $user->id;
+                $temp['message'] ='a accepté votre invitation';
+                $temp['sub_message'] = $user->fullName;
+                $temp['type'] = 4;
+                $temp['link_id'] = $user->id;
                 $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
-                $temp['picture'] = $user->picture;
+                $temp['link_cover'] = '';
                 $final[] = $temp;
             }
             }
@@ -282,8 +334,6 @@ class NotificationController extends Controller
                 if($data->type == 0 || $data->type == 1)
             {
                 $user = User::where('id',$data->user_id)->first();
-                    if(Auth::user()->id)
-                {
                     $post = GroupPost::find($data->morphable_id);
                         $message = $user->fullName . ' interagi sur votre publication';
                         $final['id'] = $data->id;
@@ -292,8 +342,7 @@ class NotificationController extends Controller
                         $final['user_id'] = $data->morphable_id;
                         $final['picture'] = $user->picture;
                         $this->InteractWithPost($post->user_id,$message);
-                }
-                return response()->json($final, 200);
+                return response()->json(['data' => $final,'user_id' => $post->user_id], 200);
             }
             }
 
@@ -302,8 +351,7 @@ class NotificationController extends Controller
                 if($data->type == 2)
             {
                 $user = User::where('id',$data->user_id)->first();
-                    if(Auth::user()->id)
-                {
+
                     $post = GroupPost::find($data->morphable_id);
                         $message = $user->fullName . ' commentez sur votre publication';
                         $final['id'] = $data->id;
@@ -312,8 +360,7 @@ class NotificationController extends Controller
                         $final['post_id'] = $data->morphable_id;
                         $final['picture'] = $user->picture;
                         $this->commentPost($post->user_id,$message);
-                }
-                return response()->json($final, 200);
+                        return response()->json(['data' => $final,'user_id' => $post->user_id], 200);
             }
             }
 
@@ -333,7 +380,7 @@ class NotificationController extends Controller
                         $final['message'] = $message;
                         $final['group_id'] = $group->id;
                         $final['type'] = 1;
-                        $final['picture'] = env('DISPLAY_PATH') .'groupImages/'. $group->cover;
+                        $final['picture'] = $group->cover;
                 }
                 return response()->json($final, 200);
                 }
@@ -352,7 +399,7 @@ class NotificationController extends Controller
                     $final['type'] = 4;
                     $final['picture'] = $user->picture;
                     $this->sendNotificationForAddFriend($message,$data->morphable_id);
-            return response()->json($final, 200);
+            return response()->json(['data' => $final,'user_id' => $receive->id], 200);
             }
             }
 
@@ -368,7 +415,7 @@ class NotificationController extends Controller
                     $final['type'] = 4;
                     $final['picture'] = $user->picture;
                     $this->sendNotificationForAddFriend($message,$data->user_id);
-            return response()->json($final, 200);
+                    return response()->json(['data' => $final,'user_id' => $receive->id], 200);
             }
             }
 
@@ -379,18 +426,22 @@ class NotificationController extends Controller
 
     public function sendPushNotification($notification_id = null)
     {
-        $notification = notification::where("id",$notification_id)->first();
-       if($notification)
-       {
+        $notification = notification::find($notification_id);
            $group = Group::find($notification->morphable_id);
            $message = $group->name . ' vient d\'être créé ! decouvrir ce contenu';
-           if($group->gender == null && $group->gender != 0)
+           if($group->gender == null)
            {
-            $users = User::pluck('id')->all();
-            foreach ($users as $user) {
-                $this->sendNotificationForNewCreatedGroup($message,$user->id);
-            }
-            return response()->json(['success' => true], 200);
+            if(strval($group->gender) != 0)
+                {
+                    $users = User::all();
+                foreach ($users as $user) {
+                    if(strlen($user->device_token) != 0)
+                    {
+                        $this->sendNotificationForNewCreatedGroup($message,$user->id);
+                    }
+                  }
+                return response()->json(['success' => true], 200); 
+                }
            }else{
                $users = User::all();
                foreach ($users as $user) {
@@ -410,8 +461,7 @@ class NotificationController extends Controller
                }
                return response()->json(['success' => true], 200);
            }
-       }
-       return response()->json(['success' => false], 200);
+
     }
 
     public function getPureNotifcation($id)
@@ -441,6 +491,11 @@ class NotificationController extends Controller
             $temp = array();
             $user = User::where('id',$value->user_id)->first();
             $recevie = User::where('id',$value->morphable_id)->first();
+            $follower = follower::where([['user_id','=',$value->user_id],['follow_id','=',$value->morphable_id]])->first();
+            if($follower)
+            {
+                if($follower->is_friend != 1 && $follower->is_friend != -1)
+            {
                 if($recevie)
                 {
                     if(Auth::user()->id == $recevie->id)
@@ -449,53 +504,43 @@ class NotificationController extends Controller
                     $temp['user_id'] = $user->id;
                     $temp['fullName'] = $user->fullName;
                     $temp['picture'] = $user->picture;
+                    $temp['createdAt'] = Carbon::parse($value->created_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();;
                     $final[] = $temp;
             }
                 }
+            }
+            }
         }
         return response()->json($final, 200);
     }
 
-    public function InteractWithFriend($id,$statu)
+    public function InteractWithFriend($user_id,$statu)
     {
         switch ($statu) {
-            case 0:
-                $notification = notification::where('id',$id)->first();
-                if($notification)
+            case 1:
+                $check = follower::where([['user_id','=',$user_id],['follow_id','=',Auth::user()->id]])->first();
+                if($check && @$check->is_friend == 0)
                 {
-                    $check = follower::where([['user_id','=',$notification->user_id],['follow_id','=',$notification->morphable_id]])->first();
-                if($check && $notification->type == 4 && @$check->is_friend == 0)
-                {
-                    follower::where([['user_id','=',$notification->user_id],['follow_id','=',$notification->morphable_id]])->update([
+                    follower::where([['user_id','=',$user_id],['follow_id','=',Auth::user()->id]])->update([
                         'is_friend' => 1
                     ]);
-                    // notification::where('id',$id)->update([
-                    //     'is_read' => 1
-                    // ]);
+
                     return response()->json(['success' => true], 200);
                 }
                 return response()->json(['success' => false], 200);
+
+                break;
+                case 0:
+                    $check = follower::where([['user_id','=',$user_id],['follow_id','=',Auth::user()->id]])->first();
+                if($check && @$check->is_friend == 0)
+                {
+                    follower::where([['user_id','=',$user_id],['follow_id','=',Auth::user()->id]])->update([
+                        'is_friend' => -1
+                    ]);
+
+                    return response()->json(['success' => true], 200);
                 }
                 return response()->json(['success' => false], 200);
-                break;
-                case 1:
-                    $notification = notification::where('id',$id)->first();
-                     if($notification)
-                     {
-                        $check = follower::where([['user_id','=',$notification->user_id],['follow_id','=',$notification->morphable_id]])->first();
-                        if($check && $notification->type == 4 && @$check->is_friend == 0)
-                        {
-                            follower::where([['user_id','=',$notification->user_id],['follow_id','=',$notification->morphable_id]])->update([
-                                'is_friend' => -1
-                            ]);
-                            notification::where('id',$id)->update([
-                                'is_read' => 1
-                            ]);
-                            return response()->json(['success' => true], 200);
-                        }
-                        return response()->json(['success' => false], 200);
-                     }
-                     return response()->json(['success' => false], 200);
                     break;
             
             default:

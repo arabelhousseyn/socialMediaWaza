@@ -17,7 +17,6 @@ class GroupPost extends Model
         'image',
         'description',
         'source',
-        'likes',
         'colorabble',
         'type',
         'is_approved',

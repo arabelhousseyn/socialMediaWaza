@@ -74,6 +74,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::put('updateUser', [userController::class, 'update']);
     Route::put('changePassword', [changePasswordController::class, 'index']);
     Route::get('getProfiles/{name?}', [userController::class, 'getProfiles'])->where('name', '[A-Za-z]+');
+    Route::get('pushNotificarionForSingleUser', [userController::class, 'pushNotificarionForSingleUser']);
     
     // innovation
     Route::get('getInnovationByDomain/{id}', [innovationController::class, 'getInnovationByDomain'])->whereNumber('id')->name('getInnovationByDomainApi');
@@ -136,7 +137,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('friendsAccepted',[NotificationController::class,'friendsAccepted']);
     Route::get('getPureNotifcation/{notification_id}',[NotificationController::class,'getPureNotifcation'])->whereNumber('notification_id');
     Route::get('sendPushNotification/{notification_id}',[NotificationController::class,'sendPushNotification'])->whereNumber('notification_id');
-    Route::get('InteractWithFriend/{id}/{statu}',[NotificationController::class,'InteractWithFriend'])->whereNumber('id','statu');
+    Route::get('InteractWithFriend/{user_id}/{statu}',[NotificationController::class,'InteractWithFriend'])->whereNumber('user_id','statu');
     Route::get('getNotificationById/{id}/{type}',[NotificationController::class,'getNotificationById'])->whereNumber('id','type');
     Route::get('getAddFriends',[NotificationController::class,'getAddFriends']);
     Route::get('updateRead/{id}',[NotificationController::class,'updateRead'])->whereNumber('id');
