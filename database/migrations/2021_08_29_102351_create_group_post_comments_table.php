@@ -17,6 +17,7 @@ class CreateGroupPostCommentsTable extends Migration
             $table->id();
             $table->foreignId('group_post_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
+            $table->bigInteger('parent_id')->constrained()->nullable();
             $table->longText('comment');
             $table->tinyInteger('type');
             $table->timestamps();

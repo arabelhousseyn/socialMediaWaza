@@ -439,12 +439,59 @@ class GroupPostController extends Controller
                 'user_id' => Auth::user()->id,
                 'comment' => ($request->type == 2) ? env('DISPLAY_PATH') . "ImageComment/" . $path : $request->comment,
                 'type' => $request->type,
+                'parent_id' => null
             ]);
 
             $notification = notification::create([
                 'user_id' => Auth::user()->id,
                 'morphable_id' => $request->group_post_id,
                 'type' => 2,
+                'is_read' => 0,
+                //'affiliate' => 0,
+            ]);
+            $data = $this->commentsByPost($request->group_post_id);
+            return response()->json(['data' => $data->original,'notification_id' => $notification->id], 200);
+        }
+    }
+
+    public function replayToComment(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'group_post_id' => 'required',
+            'comment' => 'required',
+            'type' => 'required',
+            'parent_id' => 'required'
+        ]);
+
+        if($validator->fails())
+        {
+            return response()->json(['success' => false], 200);
+        }
+
+        if($validator->validated())
+        {
+            $path = '';
+            if($request->type == 2)
+            {
+                    $folderPath = env('MAIN_PATH') . "ImageComment/";
+                    $image_base64 = base64_decode($request->comment);
+                    $path = uniqid() . '.jpg';
+                    $file = $folderPath . $path;
+                    file_put_contents($file, $image_base64);
+            }
+
+            GroupPostComment::create([
+                'group_post_id' => $request->group_post_id,
+                'user_id' => Auth::user()->id,
+                'comment' => ($request->type == 2) ? env('DISPLAY_PATH') . "ImageComment/" . $path : $request->comment,
+                'type' => $request->type,
+                'parent_id' => $request->parent_id
+            ]);
+
+            $notification = notification::create([
+                'user_id' => Auth::user()->id,
+                'morphable_id' => $request->parent_id,
+                'type' => 5,
                 'is_read' => 0,
                 //'affiliate' => 0,
             ]);
@@ -538,6 +585,10 @@ class GroupPostController extends Controller
         $final = array();
         $comments = $data->comments;
         foreach ($comments as $comment) {
+            if($comment->parent_id == null)
+            {
+            $temp2 = array();
+            $replies = array();
             $temp['id'] = $comment->id;
             $temp['comment'] = $comment->comment;
             $temp['type'] = $comment->type;
@@ -548,7 +599,23 @@ class GroupPostController extends Controller
             $temp['is_kaiztech_team'] = $user->is_kaiztech_team;
             $temp['user_id'] = $comment->user_id;
             $temp['group_post_id'] = $data->id;
-            array_push($final,$temp);
+            $commentsPost = GroupPostComment::with('replies')->find($comment->id);
+            foreach ($commentsPost->replies as $replie) {
+            $temp2['id'] = $replie->id;
+            $temp2['comment'] = $replie->comment;
+            $temp2['type'] = $replie->type;
+            $temp2['created_at'] = $replie->created_at;
+            $user = User::find($replie->user_id);
+            $temp2['pictureUser'] = $user->picture;
+            $temp2['fullName'] = $user->fullName;
+            $temp2['is_kaiztech_team'] = $user->is_kaiztech_team;
+            $temp2['user_id'] = $replie->user_id;
+            $temp2['group_post_id'] = $data->id;
+            $replies[] = $temp2;
+            }
+            $temp['replies'] = $replies;
+            $final[] = $temp;
+            }
         }    
          return response()->json($final, 200);
     }

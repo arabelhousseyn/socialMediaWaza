@@ -91,6 +91,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('deleteCommentFromPost/{id_comment?}/{group_post_id?}', [GroupPostController::class, 'deleteCommentFromPost'])->whereNumber('id_comment','group_post_id');
     Route::get('getposts/{id}', [GroupPostController::class, 'getPostsByCategory'])->whereNumber('id');
     Route::post('addcommentpost', [GroupPostController::class, 'addComment']);
+    Route::post('replayToComment', [GroupPostController::class, 'replayToComment']);
     Route::post('handleActionPost', [GroupPostController::class, 'hanldeAction']);
     Route::get('groupbyunviers/{id}', [GroupController::class, 'getgroupsByunivers'])->whereNumber('id');
     Route::get('likeListByPost/{id}', [GroupPostController::class, 'likeListByPost'])->whereNumber('id');

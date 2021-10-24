@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers\V1\Api;
 
-use App\Models\notification;
-use App\Models\GroupPostLike;
-use App\Models\GroupPostComment;
-use App\Models\GroupPost;
-use App\Models\Group;
-use App\Models\User;
-use App\Models\follower;
+use App\Models\{
+    notification,
+    GroupPostLike,
+    GroupPostComment,
+    GroupPost,
+    Group,
+    User,
+    follower
+};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Auth;
@@ -365,8 +367,8 @@ class NotificationController extends Controller
             {
                 if($data->type == 2)
             {
-                $user = User::where('id',$data->user_id)->first();
-
+                $user = User::find($data->user_id);
+                $receiver = User::find($data->morphable_id);
                     $post = GroupPost::find($data->morphable_id);
                         $message = $user->fullName . ' commentez sur votre publication';
                         $final['id'] = $data->id;
@@ -375,7 +377,7 @@ class NotificationController extends Controller
                         $final['post_id'] = $data->morphable_id;
                         $final['picture'] = $user->picture;
                         $this->commentPost($post->user_id,$message);
-                        return response()->json(['data' => $final,'user_id' => $post->user_id], 200);
+                        return response()->json(['data' => $final,'user_id' => $post->user_id,'token' => $receiver->token], 200);
             }
             }
 
@@ -383,8 +385,8 @@ class NotificationController extends Controller
             {
                 if($data->type == 3)
             {
-                $user = User::where('id',$data->user_id)->first();
-                $group = Group::where('id',$data->morphable_id)->first();
+                $user = User::find($data->user_id);
+                $group = Group::find($data->morphable_id);
                 if($group)
                 {
                     if(Auth::user()->id != $group->user_id)
@@ -406,8 +408,8 @@ class NotificationController extends Controller
             {
                 if($data->type == 4)
             {
-                $user = User::where('id',$data->user_id)->first();
-                $receive = User::where('id',$data->morphable_id)->first();
+                $user = User::find($data->user_id);
+                $receive = User::find($data->morphable_id);
                 $message = $user->fullName . ' souhaite vous ajouter a son réseaux';
                     $final['id'] = $data->id;
                     $final['fullName'] = $user->fullName;
@@ -422,14 +424,26 @@ class NotificationController extends Controller
             {
                 if($data->type == 4)
             {
-                $receive = User::where('id',$data->user_id)->first();
-                $user = User::where('id',$data->morphable_id)->first();
+                $receive = User::find($data->user_id);
+                $user = User::find($data->morphable_id);
                 $message = $user->fullName . ' Accepte votre invitation';
                     $final['id'] = $data->id;
                     $final['message'] = $message;
                     $final['type'] = 4;
                     $final['picture'] = $user->picture;
                     return response()->json(['data' => $final,'user_id' => $receive->id,'token' => $receive->token], 200);
+            }
+            if($data->type == 5)
+            {
+                $user = User::find($data->user_id);
+                $comment = GroupPostComment::with('user')->find($data->morphable_id);
+                $message = $user->fullName . ' répondre à votre commentaire';
+                    $final['id'] = $data->id;
+                    $final['message'] = $message;
+                    $final['type'] = 5;
+                    $final['picture'] = $user->picture;
+                    $this->replayToComment($message,$comment->user->id);
+                    return response()->json(['data' => $final,'user_id' =>$comment->user->id,'token' =>$comment->user->token], 200);
             }
             }
 
