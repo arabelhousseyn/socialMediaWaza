@@ -111,6 +111,7 @@ class GroupController extends Controller
                 'large_cover' => (strlen($path1) != 0) ? env('DISPLAY_PATH') .'groupImages/'.$path1
                 : ''
             ]);
+            $cover = (strlen($path1) != 0) ? env('DISPLAY_PATH') .'groupImages/'. $path1 : ''; 
 
             $notification = notification::create([
                 'user_id' => Auth::user()->id,
@@ -118,7 +119,7 @@ class GroupController extends Controller
                 'type' => 3,
                 'is_read' => 0
             ]);
-            return response()->json(['success' => true,'id' => $group->id,'image' => $path,'notification_id' => $notification->id,'cover' => $path1], 200);
+            return response()->json(['success' => true,'id' => $group->id,'image' => env('DISPLAY_PATH') .'groupImages/'. $path,'notification_id' => $notification->id,'cover' => $cover], 200);
         }
     }
 

@@ -16,10 +16,6 @@ class notification extends Model
         //'affiliate'
     ];
 
-    protected $hidden = [
-        'updated_at'
-    ];
-
     /**
      * Get the user that owns the notification
      *

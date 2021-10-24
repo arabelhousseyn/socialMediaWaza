@@ -17,6 +17,11 @@ use App\Traits\{
     SendNotification,
     middlewares
 };
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use App\Jobs\pushNotification;
+use Queue;
 class NotificationController extends Controller
 {
     use SendNotification,middlewares;
@@ -134,7 +139,9 @@ class NotificationController extends Controller
                 if(!in_array($value->morphable_id,$breakInteraction))
                 {
                     $post = GroupPost::with('images','likesList')->find($value->morphable_id);
-                if(count($post->likesList) <= 5)
+                    if(@$post->likesList)
+                    {
+                        if(count($post->likesList) <= 5)
                 {
                     foreach ($post->likesList as $like) {
                         if($post->user_id == Auth::user()->id && $like->user_id != Auth::user()->id)
@@ -183,6 +190,7 @@ class NotificationController extends Controller
                             $final[] = $temp;  
                         } 
                 }
+                    }
                 $breakInteraction[] = $value->morphable_id;
                 }
             }
@@ -192,12 +200,14 @@ class NotificationController extends Controller
                 if(!in_array($value->morphable_id,$breakComment))
                 {
                     $post = GroupPost::with('images','comments')->find($value->morphable_id);
-                if(count($post->comments) <= 5)
+                    if(@$post->comments)
+                    {
+                        if(count($post->comments) <= 5)
                 {
                     foreach ($post->comments as $comment) {
                         if($post->user_id == Auth::user()->id && $comment->user_id != Auth::user()->id)
                         {
-                          $user = User::where('id',$comment->user_id)->first();
+                                $user = User::where('id',$comment->user_id)->first();
                             $temp['id'] = $value->id;
                             $temp['message'] ='a commenté sur votre publication';
                             $temp['sub_message'] =$user->fullName;
@@ -212,6 +222,7 @@ class NotificationController extends Controller
                                 $temp['link_cover'] = '';  
                               }
                             $final[] = $temp;
+                            
                         } 
                       }
                 }else{
@@ -241,6 +252,7 @@ class NotificationController extends Controller
                         }  
                 }
                 $breakComment[] = $value->morphable_id;
+                    }
                 }
             }
             if($value->type == 3)
@@ -305,7 +317,9 @@ class NotificationController extends Controller
             {
                 if($follower->is_friend == 1)
             {
-                $user = User::find($value->morphable_id);
+                if(Auth::user()->id == $value->user_id)
+                {
+                    $user = User::find($value->morphable_id);
                 $temp['id'] = $value->id;
                 $temp['message'] ='a accepté votre invitation';
                 $temp['sub_message'] = $user->fullName;
@@ -314,6 +328,7 @@ class NotificationController extends Controller
                 $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
                 $temp['link_cover'] = '';
                 $final[] = $temp;
+                }
             }
             }
             }
@@ -414,8 +429,7 @@ class NotificationController extends Controller
                     $final['message'] = $message;
                     $final['type'] = 4;
                     $final['picture'] = $user->picture;
-                    $this->sendNotificationForAddFriend($message,$data->user_id);
-                    return response()->json(['data' => $final,'user_id' => $receive->id], 200);
+                    return response()->json(['data' => $final,'user_id' => $receive->id,'token' => $receive->token], 200);
             }
             }
 
@@ -439,6 +453,8 @@ class NotificationController extends Controller
                     {
                         $this->sendNotificationForNewCreatedGroup($message,$user->id);
                     }
+                        // $push = new pushNotification($message,$user->id);
+                        // dispatch($push);
                   }
                 return response()->json(['success' => true], 200); 
                 }
@@ -450,11 +466,15 @@ class NotificationController extends Controller
                    {
                     if($group->gender == 2)
                     {
-                        $this->sendNotificationForNewCreatedGroup($message,$user->id);
+                         $this->sendNotificationForNewCreatedGroup($message,$user->id);
+                        // $push = new pushNotification($message,$user->id);
+                        // dispatch($push)->delay(now()->addMinutes(2));
                     }else{
                        if($group->gender == $user->gender)
                        {
                         $this->sendNotificationForNewCreatedGroup($message,$user->id);
+                        // $push = new pushNotification($message,$user->id);
+                        // dispatch($push)->delay(now()->addMinutes(2));
                        } 
                     }
                    }
@@ -514,18 +534,19 @@ class NotificationController extends Controller
         return response()->json($final, 200);
     }
 
-    public function InteractWithFriend($user_id,$statu)
+    public function InteractWithFriend($user_id,$status)
     {
-        switch ($statu) {
+        switch ($status) {
             case 1:
                 $check = follower::where([['user_id','=',$user_id],['follow_id','=',Auth::user()->id]])->first();
                 if($check && @$check->is_friend == 0)
                 {
+                    $notification = notification::where([['user_id','=',$user_id],['morphable_id','=',Auth::user()->id]])->first();
                     follower::where([['user_id','=',$user_id],['follow_id','=',Auth::user()->id]])->update([
                         'is_friend' => 1
                     ]);
 
-                    return response()->json(['success' => true], 200);
+                    return response()->json(['success' => true,'notification_id' => $notification->id], 200);
                 }
                 return response()->json(['success' => false], 200);
 
@@ -558,11 +579,10 @@ class NotificationController extends Controller
     }
 
 
-    public function friendsAccepted()
+    public function friendsAccepted($notification_id = null)
     {
         $final = array();
-        $notifications = notification::where([['user_id','=',Auth::user()->id],['type','=',4]])->whereDate('created_at', '>=', Carbon::now()->subDays(1)->setTime(0, 0, 0)->toDateTimeString())->orderBy('id','DESC')->get();
-        foreach ($notifications as $notification) {
+            $notification = notification::find($notification_id);
             $temp = array();
             $follower = follower::where([['user_id','=',$notification->user_id],['follow_id','=',$notification->morphable_id]])->first();
             if($follower->is_friend == 1)
@@ -576,8 +596,7 @@ class NotificationController extends Controller
                 $final[] = $temp;
                 $this->friendAccepted($notification->user_id,$message);
             }
-        }
-        return response()->json($final, 200);
+        return response()->json(['data' => $final,'user_id' => $notification->user_id], 200);
     }
 
 }

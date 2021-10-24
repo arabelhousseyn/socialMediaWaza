@@ -64,6 +64,7 @@ Route::get('usersnotverified', [userController::class, 'getUsersNotVeirifed']);
 Route::get('getAllUsersIds/{notification_id}', [userController::class, 'getAllUsersIds'])->whereNumber('notification_id');
 Route::get('getCountOfUsersAccepted', [userController::class, 'getCountOfUsersAccepted']);
 
+
 Route::group(['middleware' => 'auth:sanctum'], function () {
     // information user by id
     Route::get('statusUser', [userController::class, 'GetUserStatus']);
@@ -128,16 +129,16 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     // report ITA
     Route::resource('reportIta', ReportItaController::class);
     // follow
-    Route::get('acceptFriend/{user_id}',[FollowerController::class,'AcceptFriend']);
+    Route::get('acceptFriend/{user_id}',[FollowerController::class,'AcceptFriend'])->whereNumber('user_id');
     Route::resource('follow', FollowerController::class);
     Route::resource('followGroup', FollowGroupController::class);
     // notification
     Route::get('getNotificationsNotRead',[NotificationController::class,'getNotificationsNotRead']);
     Route::get('getNotifications',[NotificationController::class,'getNotifications']);
-    Route::get('friendsAccepted',[NotificationController::class,'friendsAccepted']);
+    Route::get('friendsAccepted/{notification_id?}',[NotificationController::class,'friendsAccepted'])->whereNumber('notification_id');
     Route::get('getPureNotifcation/{notification_id}',[NotificationController::class,'getPureNotifcation'])->whereNumber('notification_id');
     Route::get('sendPushNotification/{notification_id}',[NotificationController::class,'sendPushNotification'])->whereNumber('notification_id');
-    Route::get('InteractWithFriend/{user_id}/{statu}',[NotificationController::class,'InteractWithFriend'])->whereNumber('user_id','statu');
+    Route::get('InteractWithFriend/{user_id}/{status}',[NotificationController::class,'InteractWithFriend'])->whereNumber('user_id','status');
     Route::get('getNotificationById/{id}/{type}',[NotificationController::class,'getNotificationById'])->whereNumber('id','type');
     Route::get('getAddFriends',[NotificationController::class,'getAddFriends']);
     Route::get('updateRead/{id}',[NotificationController::class,'updateRead'])->whereNumber('id');

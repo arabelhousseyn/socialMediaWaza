@@ -65,7 +65,7 @@ class FollowerController extends Controller
             if($check)
             {
                 $delete = follower::where('id',$check->id)->delete();
-                notification::where([['user_id','=',Auth::user()->id],['morphable_id','=',$check->id]])->delete();
+                notification::where([['user_id','=',Auth::user()->id],['morphable_id','=',$request->user_id]])->delete();
                 if($delete)
                 {
                     return response()->json(['success' => true,'following' => 0], 200);
@@ -141,16 +141,16 @@ class FollowerController extends Controller
         //
     }
 
-    public function AcceptFriend($user_id)
+    public function AcceptFriend($user_id = null)
     {
         // accept friend
-        $check = follower::where([['user-id','=',Auth::user()->id],['follow_id','=',$user_id]])->whereDate('created_at', '>=', Carbon::now()->subDays(7)->setTime(0, 0, 0)->toDateTimeString())->first();
+        $check = follower::where([['user_id','=',$user_id],['follow_id','=',Auth::user()->id]])->first();
         if($check)
         {
-            follower::where([['user-id','=',Auth::user()->id],['follow_id','=',$user_id]])->update([
+           $follow =  follower::where([['user_id','=',$user_id],['follow_id','=',Auth::user()->id]])->update([
                 'is_friend' => 1
             ]);
-            $notification = notification::where([['user-id','=',Auth::user()->id],['follow_id','=',$user_id]])->first();
+            $notification = notification::where([['user_id','=',$user_id],['morphable_id','=',Auth::user()->id]])->first();
             return response()->json(['success' => true,'notification_id' => $notification->id], 200);
         }
 

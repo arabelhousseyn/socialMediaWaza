@@ -51,7 +51,7 @@ class userController extends Controller
         {
             if($user->is_verified == 1)
             {
-                $this->pushNotificarionForSingleUser();
+                $this->pushNotificarionForSingleUser($user->id);
             }
 
             return response()->json(['success' => $user->is_verified,'UserId' => $id], 200);
@@ -332,9 +332,9 @@ class userController extends Controller
        return response()->json($professions, 200);  
    }
 
-   public function pushNotificarionForSingleUser()
+   public function pushNotificarionForSingleUser($user_id)
    {
-       $this->forApprovedUser(Auth::user()->id,'Congratulations! You\'re officially a member of WAZA');
+       $this->forApprovedUser($user_id,'Congratulations! You\'re officially a member of WAZA');
        return response()->json(['success' => true], 200);
    }
 
