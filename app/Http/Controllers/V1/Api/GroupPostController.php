@@ -80,6 +80,11 @@ class GroupPostController extends Controller
                 }
             }
 
+            if($request->colorabble == 0 && strlen($request->images) == 0)
+            {
+                return response()->json(['success' => false], 200);
+            }
+
             
             if(strlen($request->video) != 0)
             {
@@ -408,6 +413,8 @@ class GroupPostController extends Controller
         return response()->json($data, 200);
     }
 
+
+
     public function addComment(Request $request)
     {
         // add comment for post
@@ -512,25 +519,20 @@ class GroupPostController extends Controller
                 notification::where([['user_id','=',Auth::user()->id],['morphable_id','=',$request->group_post_id],['type','=',$request->type]])->delete();
             }else{
 
-                $deleted = notification::where([['user_id','=',Auth::user()->id],['morphable_id','=',$request->group_post_id],['type','=',0]])->delete();
-                if(!$deleted)
-                {
-                    notification::where([['user_id','=',Auth::user()->id],['morphable_id','=',$request->group_post_id],['type','=',1]])->delete();
-                }
+                notification::where([['user_id','=',Auth::user()->id],['morphable_id','=',$request->group_post_id],['type','=',$request->type]])->delete();
 
                 $check->update([
                     'type' => $request->type
                 ]); 
             }
             
-            $notification = notification::create([
-                'user_id' => Auth::user()->id,
-                'morphable_id' => $request->group_post_id,
-                'type' => ($request->type == 1) ? 0 : 1,
-                'is_read' => 0,
-                //'affiliate' => 0,
-            ]);
-
+                $notification = notification::create([
+                    'user_id' => Auth::user()->id,
+                    'morphable_id' => $request->group_post_id,
+                    'type' => ($request->type == 1) ? 0 : 1,
+                    'is_read' => 0,
+                    //'affiliate' => 0,
+                ]);
         $data = $this->likeListByPost($request->group_post_id);
 
         return response()->json(['data' => $data->original,'notification_id' => $notification->id], 200);
@@ -575,6 +577,8 @@ class GroupPostController extends Controller
 
         $final['dislikeList'] = $dislikeList;
         $final['likeList'] = $likeList;
+        $final['dislikes'] = count($dislikeList);
+        $final['likes'] = count($likeList);
 
          return response()->json($final, 200);
     }
@@ -599,16 +603,16 @@ class GroupPostController extends Controller
             $temp['is_kaiztech_team'] = $user->is_kaiztech_team;
             $temp['user_id'] = $comment->user_id;
             $commentsPost = GroupPostComment::with('replies')->find($comment->id);
-            foreach ($commentsPost->replies as $replie) {
-            $temp2['id'] = $replie->id;
-            $temp2['comment'] = $replie->comment;
-            $temp2['type'] = $replie->type;
-            $temp2['created_at'] = $replie->created_at;
-            $user = User::find($replie->user_id);
+            foreach ($commentsPost->replies as $replay) {
+            $temp2['id'] = $replay->id;
+            $temp2['comment'] = $replay->comment;
+            $temp2['type'] = $replay->type;
+            $temp2['created_at'] = $replay->created_at;
+            $user = User::find($replay->user_id);
             $temp2['pictureUser'] = $user->picture;
             $temp2['fullName'] = $user->fullName;
             $temp2['is_kaiztech_team'] = $user->is_kaiztech_team;
-            $temp2['user_id'] = $replie->user_id;
+            $temp2['user_id'] = $replay->user_id;
             $replies[] = $temp2;
             }
             $temp['replies'] = $replies;
@@ -826,5 +830,6 @@ class GroupPostController extends Controller
             }
             return response()->json(['success' => false], 200);
         }
-    } 
+    }
+    
 }

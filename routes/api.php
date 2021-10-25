@@ -29,6 +29,8 @@ use App\Http\Controllers\V1\Api\{
     NotificationController,
     changePasswordController
 };
+
+
 use App\Http\Controllers\versionappController;
 
 
@@ -144,4 +146,5 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('getAddFriends',[NotificationController::class,'getAddFriends']);
     Route::get('updateRead/{id}',[NotificationController::class,'updateRead'])->whereNumber('id');
     Route::resource('notification', NotificationController::class);
+    
 });
