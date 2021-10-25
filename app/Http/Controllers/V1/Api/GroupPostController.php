@@ -598,7 +598,6 @@ class GroupPostController extends Controller
             $temp['fullName'] = $user->fullName;
             $temp['is_kaiztech_team'] = $user->is_kaiztech_team;
             $temp['user_id'] = $comment->user_id;
-            $temp['group_post_id'] = $data->id;
             $commentsPost = GroupPostComment::with('replies')->find($comment->id);
             foreach ($commentsPost->replies as $replie) {
             $temp2['id'] = $replie->id;
@@ -610,7 +609,6 @@ class GroupPostController extends Controller
             $temp2['fullName'] = $user->fullName;
             $temp2['is_kaiztech_team'] = $user->is_kaiztech_team;
             $temp2['user_id'] = $replie->user_id;
-            $temp2['group_post_id'] = $data->id;
             $replies[] = $temp2;
             }
             $temp['replies'] = $replies;
