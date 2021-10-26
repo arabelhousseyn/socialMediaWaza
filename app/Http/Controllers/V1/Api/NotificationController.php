@@ -369,8 +369,8 @@ class NotificationController extends Controller
                 if($data->type == 2)
             {
                 $user = User::find($data->user_id);
-                $receiver = User::find($data->morphable_id);
-                    $post = GroupPost::find($data->morphable_id);
+                $post = GroupPost::find($data->morphable_id);
+                $receiver = User::find($post->user_id);
                         $message = $user->fullName . ' commentez sur votre publication';
                         $final['id'] = $data->id;
                         $final['message'] = $message;
