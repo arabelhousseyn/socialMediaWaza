@@ -77,7 +77,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::put('updateUser', [userController::class, 'update']);
     Route::put('changePassword', [changePasswordController::class, 'index']);
     Route::get('getProfiles/{name?}', [userController::class, 'getProfiles'])->where('name', '[A-Za-z]+');
-    Route::get('pushNotificarionForSingleUser', [userController::class, 'pushNotificarionForSingleUser']);
+    Route::get('pushNotificarionForSingleUser/{$user_id}', [userController::class, 'pushNotificarionForSingleUser'])->whereNumber('user_id');
     
     // innovation
     Route::get('getInnovationByDomain/{id}', [innovationController::class, 'getInnovationByDomain'])->whereNumber('id')->name('getInnovationByDomainApi');

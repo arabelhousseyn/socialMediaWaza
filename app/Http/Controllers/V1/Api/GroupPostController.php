@@ -719,6 +719,8 @@ class GroupPostController extends Controller
             ]);
             if($data)
             {
+                $message = 'Admin du groupe ' . $group->name . ' accepte votre publication';
+                $this->push('Waza',$message,$check->user_id);
                 return response()->json(['success' => true], 200);
             }
             
