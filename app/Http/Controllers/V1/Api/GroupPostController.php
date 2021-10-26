@@ -17,10 +17,13 @@ use App\Models\{
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use App\Services\GroupPostService;
-use App\Traits\upload;
+use App\Traits\{
+    upload,
+    SendNotification
+};
 class GroupPostController extends Controller
 {
-    use upload;
+    use upload,SendNotification;
     /**
      * Display a listing of the resource.
      *
