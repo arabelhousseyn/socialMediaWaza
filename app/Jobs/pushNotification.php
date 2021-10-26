@@ -33,6 +33,7 @@ class pushNotification implements ShouldQueue
      */
     public function handle()
     {
-        $this->sendNotificationForNewCreatedGroup($this->message,$this->user_id);
+        $this->push('Waza',$this->message,$this->user_id);
+        // $this->sendNotificationForNewCreatedGroup($this->message,$this->user_id);
     }
 }

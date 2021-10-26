@@ -358,7 +358,8 @@ class NotificationController extends Controller
                         $final['type'] = 1;
                         $final['user_id'] = $data->morphable_id;
                         $final['picture'] = $user->picture;
-                        $this->InteractWithPost($post->user_id,$message);
+                        $this->push('Waza',$message,$post->user_id);
+                        //$this->InteractWithPost($post->user_id,$message);
                 return response()->json(['data' => $final,'user_id' => $post->user_id], 200);
             }
             }
@@ -376,7 +377,7 @@ class NotificationController extends Controller
                         $final['type'] = 1;
                         $final['post_id'] = $data->morphable_id;
                         $final['picture'] = $user->picture;
-                        $this->commentPost($post->user_id,$message);
+                        $this->push('Waza',$message,$post->user_id);
                         return response()->json(['data' => $final,'user_id' => $post->user_id,'token' => $receiver->token], 200);
             }
             }
@@ -415,7 +416,7 @@ class NotificationController extends Controller
                     $final['fullName'] = $user->fullName;
                     $final['type'] = 4;
                     $final['picture'] = $user->picture;
-                    $this->sendNotificationForAddFriend($message,$data->morphable_id);
+                    $this->push('Waza',$message,$data->morphable_id);
             return response()->json(['data' => $final,'user_id' => $receive->id], 200);
             }
             }
@@ -442,7 +443,7 @@ class NotificationController extends Controller
                     $final['message'] = $message;
                     $final['type'] = 5;
                     $final['picture'] = $user->picture;
-                    $this->replayToComment($message,$comment->user->id);
+                    $this->push('Waza',$message,$comment->user->id);
                     return response()->json(['data' => $final,'user_id' =>$comment->user->id,'token' =>$comment->user->token], 200);
             }
             }
@@ -465,7 +466,7 @@ class NotificationController extends Controller
                 foreach ($users as $user) {
                     if(strlen($user->device_token) != 0)
                     {
-                        $this->sendNotificationForNewCreatedGroup($message,$user->id);
+                        $this->push('Waza',$message,$user->id);
                     }
                         // $push = new pushNotification($message,$user->id);
                         // dispatch($push);
@@ -480,13 +481,13 @@ class NotificationController extends Controller
                    {
                     if($group->gender == 2)
                     {
-                         $this->sendNotificationForNewCreatedGroup($message,$user->id);
+                        $this->push('Waza',$message,$user->id);
                         // $push = new pushNotification($message,$user->id);
                         // dispatch($push)->delay(now()->addMinutes(2));
                     }else{
                        if($group->gender == $user->gender)
                        {
-                        $this->sendNotificationForNewCreatedGroup($message,$user->id);
+                        $this->push('Waza',$message,$user->id);
                         // $push = new pushNotification($message,$user->id);
                         // dispatch($push)->delay(now()->addMinutes(2));
                        } 
@@ -608,7 +609,7 @@ class NotificationController extends Controller
                 $temp['type'] = 4;
                 $temp['picture'] = $user->picture;
                 $final[] = $temp;
-                $this->friendAccepted($notification->user_id,$message);
+                $this->push('Waza',$message,$notification->user_id);
             }
         return response()->json(['data' => $final,'user_id' => $notification->user_id], 200);
     }

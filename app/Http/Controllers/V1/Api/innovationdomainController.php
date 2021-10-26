@@ -16,7 +16,7 @@ class innovationdomainController extends Controller
      */
     public function index()
     {
-        $data = innovationDomain::all();
+        $data = innovationDomain::where('type',1)->get();
         return response()->json(['data' => $data], 200);
     }
 

@@ -19,7 +19,7 @@ class AmanaCategoryController extends Controller
     public function index()
     {
         // get amana categories with selected rows order by date which is the last id inserted
-        $data =  AmanaCategory::select('id','title','path','created_at')->get();
+        $data =  AmanaCategory::where('type',1)->select('id','title','path','created_at')->get();
         return response()->json($data, 200);
     }
 

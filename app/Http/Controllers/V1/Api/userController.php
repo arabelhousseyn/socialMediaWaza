@@ -334,7 +334,7 @@ class userController extends Controller
 
    public function pushNotificarionForSingleUser($user_id)
    {
-       $this->forApprovedUser($user_id,'Congratulations! You\'re officially a member of WAZA');
+       $this->push('Waza','Congratulations! You\'re officially a member of WAZA',$user_id);
        return response()->json(['success' => true], 200);
    }
 
