@@ -35,7 +35,26 @@ class GroupPostController extends Controller
     {
         $post = new GroupPost;
         $post->setConnection('mysql2');
-        $posts = $post->with('images','user','likesList','comments')->orderBy('id','DESC')->paginate(7);
+        $selective = 'user:id,fullName,subName,dob,picture,gender,profession,phone,email,is_freelancer,receive_ads,hide_phone,is_kaiztech_team,company,website,wilaya_id';
+        $posts = $post->with('images',$selective,'likesList','comments','user.wilaya','likesList.user','comments.user','comments.replies')->orderBy('id','DESC')->paginate(7);
+        foreach ($posts as $post) {
+            $likes = 0;
+            $dislikes = 0;
+            foreach ($post->likesList as $interaction) {
+                if($interaction->type == 1)
+                {
+                    $likes++;
+                }
+                if($interaction->type == -1)
+                {
+                    $dislikes++;
+                }
+            }
+            $post['likes'] = $likes;
+            $post['dislikes'] = $dislikes;
+            $post['countComments'] = count($post->comments);
+            $post['createdAt'] = Carbon::parse($post->created_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
+        }
         return response()->json($posts, 200);
     }
 
@@ -840,5 +859,81 @@ class GroupPostController extends Controller
             return response()->json(['success' => false], 200);
         }
     }
+
+    // v2
+
+    public function getPostsbyGroup($group_id)
+    {
+        if($group_id == 0)
+        {
+            $post = new GroupPost;
+        $post->setConnection('mysql2');
+        $selective = 'user:id,fullName,subName,dob,picture,gender,profession,phone,email,is_freelancer,receive_ads,hide_phone,is_kaiztech_team,company,website,wilaya_id';
+        $posts = $post->with('images',$selective,'likesList','comments','user.wilaya','likesList.user','comments.user','comments.replies')->orderBy('id','DESC')->paginate(7);
+        foreach ($posts as $post) {
+            $likes = 0;
+            $dislikes = 0;
+            foreach ($post->likesList as $interaction) {
+                if($interaction->type == 1)
+                {
+                    $likes++;
+                }
+                if($interaction->type == -1)
+                {
+                    $dislikes++;
+                }
+            }
+            $post['likes'] = $likes;
+            $post['dislikes'] = $dislikes;
+            $post['countComments'] = count($post->comments);
+            $post['createdAt'] = Carbon::parse($post->created_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
+        }
+        return response()->json($posts, 200);
+        }else{
+        $post = new GroupPost;
+        $group_instance = new Group;
+        $follow_group_instance = new followGroup;
+        $group_instance->setConnection('mysql2');
+        $follow_group_instance->setConnection('mysql2');
+        $post->setConnection('mysql2');
+
+        $selective = 'user:id,fullName,subName,dob,picture,gender,profession,phone,email,is_freelancer,receive_ads,hide_phone,is_kaiztech_team,company,website,wilaya_id';
+        $posts = $post->with('images',$selective,'likesList','comments','user.wilaya','likesList.user','comments.user','comments.replies')->where('group_id',$group_id)->orderBy('id','DESC')->paginate(7);
+        $group = $group_instance->with('user')->find($group_id);
+        $follow = $follow_group_instance->where([['user_id','=',Auth::user()->id],['follow_id','=',$group_id]])->first();
+        $followers = $follow_group_instance::where('follow_id',$group_id)->get();
+        foreach ($posts as $post) {
+            $likes = 0;
+            $dislikes = 0;
+            foreach ($post->likesList as $interaction) {
+                if($interaction->type == 1)
+                {
+                    $likes++;
+                }
+                if($interaction->type == -1)
+                {
+                    $dislikes++;
+                }
+            }
+            $post['likes'] = $likes;
+            $post['dislikes'] = $dislikes;
+            $post['countComments'] = count($post->comments);
+            $post['createdAt'] = Carbon::parse($post->created_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
+        }
+        $collection = collect([
+            'group_name' => $group->name,
+            'cover' => $group->cover,
+            'large_cover' => $group->large_cover,
+            'description' => $group->description,
+            'is_subscribed' => ($follow) ? 1 : 0,
+            'countSubs' => count($followers)
+        ]);
+
+        $posts = $collection->merge($posts);
+
+        return response()->json($posts, 200);
+        }
+    }
     
 }
+

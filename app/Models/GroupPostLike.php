@@ -19,4 +19,14 @@ class GroupPostLike extends Model
         'created_at',
         'updated_at',
     ];
+
+    /**
+     * Get the user that owns the GroupPostLike
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

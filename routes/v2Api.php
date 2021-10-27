@@ -54,5 +54,6 @@ Route::get('getAllUsersIds/{notification_id}', [userController::class, 'getAllUs
 Route::get('getCountOfUsersAccepted', [userController::class, 'getCountOfUsersAccepted']);
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
+    Route::get('getPostsbyGroup/{group_id?}', [GroupPostController::class,'getPostsbyGroup'])->whereNumber('group_id');  
     Route::resource('grouposts', GroupPostController::class);  
 });
