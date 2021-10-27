@@ -33,7 +33,10 @@ class GroupPostController extends Controller
 
     public function index()
     {
-        
+        $post = new GroupPost;
+        $post->setConnection('mysql2');
+        $posts = $post->with('images','user','likesList','comments')->orderBy('id','DESC')->paginate(7);
+        return response()->json($posts, 200);
     }
 
     /**
@@ -582,6 +585,7 @@ class GroupPostController extends Controller
         $final['likeList'] = $likeList;
         $final['dislikes'] = count($dislikeList);
         $final['likes'] = count($likeList);
+        $final['group_post_id'] = $data->id;
 
          return response()->json($final, 200);
     }
