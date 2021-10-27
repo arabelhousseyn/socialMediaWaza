@@ -21,6 +21,7 @@ use App\Traits\{
     upload,
     SendNotification
 };
+use DB;
 class GroupPostController extends Controller
 {
     use upload,SendNotification;
@@ -866,10 +867,8 @@ class GroupPostController extends Controller
     {
         if($group_id == 0)
         {
-            $post = new GroupPost;
-        $post->setConnection('mysql2');
         $selective = 'user:id,fullName,subName,dob,picture,gender,profession,phone,email,is_freelancer,receive_ads,hide_phone,is_kaiztech_team,company,website,wilaya_id';
-        $posts = $post->with('images',$selective,'likesList','comments','user.wilaya','likesList.user','comments.user','comments.replies')->orderBy('id','DESC')->paginate(7);
+        $posts = GroupPost::on('mysql2')->with('images',$selective,'likesList','comments','user.wilaya','likesList.user','comments.user','comments.replies')->orderBy('id','DESC')->paginate(7);
         foreach ($posts as $post) {
             $likes = 0;
             $dislikes = 0;
@@ -890,18 +889,12 @@ class GroupPostController extends Controller
         }
         return response()->json($posts, 200);
         }else{
-        $post = new GroupPost;
-        $group_instance = new Group;
-        $follow_group_instance = new followGroup;
-        $group_instance->setConnection('mysql2');
-        $follow_group_instance->setConnection('mysql2');
-        $post->setConnection('mysql2');
 
         $selective = 'user:id,fullName,subName,dob,picture,gender,profession,phone,email,is_freelancer,receive_ads,hide_phone,is_kaiztech_team,company,website,wilaya_id';
-        $posts = $post->with('images',$selective,'likesList','comments','user.wilaya','likesList.user','comments.user','comments.replies')->where('group_id',$group_id)->orderBy('id','DESC')->paginate(7);
-        $group = $group_instance->with('user')->find($group_id);
-        $follow = $follow_group_instance->where([['user_id','=',Auth::user()->id],['follow_id','=',$group_id]])->first();
-        $followers = $follow_group_instance::where('follow_id',$group_id)->get();
+        $posts = GroupPost::on('mysql2')->with('images',$selective,'likesList','comments','user.wilaya','likesList.user','comments.user','comments.replies')->where('group_id',$group_id)->orderBy('id','DESC')->paginate(7);
+        $group = Group::on('mysql2')->with('user','linkInformation')->find($group_id);
+        $follow = followGroup::on('mysql2')->where([['user_id','=',Auth::user()->id],['follow_id','=',$group_id]])->first();
+        $followers = followGroup::on('mysql2')->where('follow_id',$group_id)->get();
         foreach ($posts as $post) {
             $likes = 0;
             $dislikes = 0;
@@ -925,6 +918,7 @@ class GroupPostController extends Controller
             'cover' => $group->cover,
             'large_cover' => $group->large_cover,
             'description' => $group->description,
+            'link_information' => $group->linkInformation,
             'is_subscribed' => ($follow) ? 1 : 0,
             'countSubs' => count($followers)
         ]);

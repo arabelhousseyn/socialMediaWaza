@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateLinkGroupsTable extends Migration
+class CreateGroupLinksTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,12 @@ class CreateLinkGroupsTable extends Migration
      */
     public function up()
     {
-        Schema::create('link_groups', function (Blueprint $table) {
+        Schema::create('group_links', function (Blueprint $table) {
             $table->id();
+            $table->string('link');
             $table->string('name_link');
-            $table->string('iconLink');
+            $table->string('icon_link');
+            $table->foreignId('group_id')->constrained()->onUpdate('cascade')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -28,6 +30,6 @@ class CreateLinkGroupsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('link_groups');
+        Schema::dropIfExists('group_links');
     }
 }

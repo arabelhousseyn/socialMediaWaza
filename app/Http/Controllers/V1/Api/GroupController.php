@@ -238,4 +238,31 @@ class GroupController extends Controller
         }
         return response()->json(['success' => false], 200);
     }
+    // v2
+
+    public function getOwnGroups()
+    {
+        $data = Group::where([['user_id','=',Auth::user()->id],['id','<>',100],['id','<>',161]])->select('id','name','cover')->orderBy('id','DESC')->paginate(20);
+        $data3 = Group::whereIn('id',[100,161])->select('id','name','cover')->orderBy('id','DESC')->paginate(20);
+        
+        $updatedItems = $data->merge($data3);
+        $data->setCollection($updatedItems);
+        return response()->json($data, 200);
+    }
+
+    public function getRandomGroups()
+    {
+        $user = User::find(Auth::user()->id);
+        $age = Carbon::parse($user->dob)->age;
+        $groups = Group::where([['user_id','<>',Auth::user()->id],['id','<>',100],['id','<>',161]])->orderBy('id','DESC')->get();
+        foreach ($groups as $group) {
+            $check = $this->checkIfEligible($age,$user->gender,$group->id);
+            if($check)
+            {
+                $ids[] = $group->id;
+            }
+         }
+        $data2 = Group::whereIn('id',$ids)->select('id','name','cover')->inRandomOrder()->orderBy('id','DESC')->paginate(20);
+        return response()->json($data2, 200);
+    }
 }

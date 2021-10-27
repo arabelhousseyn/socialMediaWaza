@@ -6,7 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\{
     GroupUniverse,
-    GroupPost
+    GroupPost,
+    groupLink
 };
 use Auth;
 class Group extends Model
@@ -54,5 +55,15 @@ class Group extends Model
     public function posts()
     {
         return $this->hasMany(GroupPost::class);
+    }
+
+    /**
+     * Get the user associated with the Group
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function linkInformation()
+    {
+        return $this->hasMany(groupLink::class);
     }
 }
