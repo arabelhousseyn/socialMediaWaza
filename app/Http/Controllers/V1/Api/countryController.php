@@ -12,4 +12,11 @@ class countryController extends Controller
         $data = Country::all();
         return response()->json($data, 200);
     }
+
+    public function index2()
+    {
+        // get all countries
+        $data = Country::on('mysql2')->all();
+        return response()->json($data, 200);
+    }
 }

@@ -916,6 +916,21 @@ class GroupPostController extends Controller
             $posts = GroupPost::on('mysql2')->whereIn('id',$ids)->with('images',$selective,'likesList','comments','user.wilaya','likesList.user','comments.user','comments.replies')->inRandomOrder()->paginate(7);
         }
         foreach ($posts as $post) {
+            $tempImages = array();
+            if(@$post->images[0]->path)
+            {
+                if(count($post->images) > 5)
+            {
+                for ($i=0; $i <5 ; $i++) {
+                    array_push($tempImages,$userPost->images[$i]); 
+                }
+                $post['images'] = $tempImages;
+            }
+            $post['countImages'] = count($post->images);
+            }else{
+                $post['countImages'] = 0;
+            }
+
             $likes = 0;
             $dislikes = 0;
             foreach ($post->likesList as $interaction) {
@@ -942,6 +957,22 @@ class GroupPostController extends Controller
         $follow = followGroup::on('mysql2')->where([['user_id','=',Auth::user()->id],['follow_id','=',$group_id]])->first();
         $followers = followGroup::on('mysql2')->where('follow_id',$group_id)->get();
         foreach ($posts as $post) {
+
+            $tempImages = array();
+            if(@$post->images[0]->path)
+            {
+                if(count($post->images) > 5)
+            {
+                for ($i=0; $i <5 ; $i++) {
+                    array_push($tempImages,$userPost->images[$i]); 
+                }
+                $post['images'] = $tempImages;
+            }
+            $post['countImages'] = count($post->images);
+            }else{
+                $post['countImages'] = 0;
+            }
+            
             $likes = 0;
             $dislikes = 0;
             foreach ($post->likesList as $interaction) {

@@ -59,6 +59,21 @@ class userController extends Controller
         return response()->json(['success' => 0], 200);
     }
 
+    public function checkIfApproved2($id)
+    {
+        $user = User::on('mysql2')->find($id);
+        if($user)
+        {
+            if($user->is_verified == 1)
+            {
+                $this->pushNotificarionForSingleUser($user->id);
+            }
+
+            return response()->json(['success' => $user->is_verified,'UserId' => $id], 200);
+        }
+        return response()->json(['success' => 0], 200);
+    }
+
     public function getVerificationByUser($id)
     {
         $user = User::with('verification')->findOrFail($id);
