@@ -352,4 +352,46 @@ class userController extends Controller
        return response()->json(['success' => true], 200);
    }
 
+   // v2
+
+   public function searchGlobal2($name = null)
+   {
+    if($name == null)
+    {
+        return response()->json([], 200);
+    }else{
+     if(strlen($name) >= 3)
+     {
+         $final = array();
+         $user = User::on('mysql2')->find(Auth::user()->id);
+         $age = Carbon::parse($user->dob)->age;
+         $ids = array();
+         $data = User::on('mysql2')->where('fullName', 'LIKE', "%{$name}%")
+     ->select('id','fullName','profession','picture')->get();
+     foreach ($data as $value) {
+         $value['type_record'] = 0;
+     }
+
+     $groups = Group::on('mysql2')->where('name', 'LIKE', "%{$name}%")->get();
+     foreach ($groups as $group) {
+        $check = $this->checkIfEligible2($age,$user->gender,$group->id);
+            if($check)
+            {
+                $ids[] = $group->id;
+            }
+     }
+
+     $data2 = Group::on('mysql2')->whereIn('id',$ids)->get();
+
+     foreach ($data2 as $value) {
+        $value['type_record'] = 1;
+     }
+
+       $updatedItems = $data->merge($data2);
+       return response()->json($updatedItems, 200);
+     }
+     return response()->json([], 200);
+    }
+   }
+
 }

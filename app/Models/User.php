@@ -7,7 +7,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use App\Models\Wilaya;
+use App\Models\{
+    Wilaya,
+    GroupPost
+};
 use App\Models\FaceVerification;
 class User extends Authenticatable
 {
@@ -80,6 +83,17 @@ public function followingGroup()
 {
     return $this->belongsToMany(User::class, followGroup::class, 'user_id', 'follow_id')->withTimestamps();
 }
+
+ /**
+  * Get all of the comments for the User
+  *
+  * @return \Illuminate\Database\Eloquent\Relations\HasMany
+  */
+ public function posts()
+ {
+     return $this->hasMany(GroupPost::class);
+ }
+
 
     /**
      * The attributes that should be cast to native types.

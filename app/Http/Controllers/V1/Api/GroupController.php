@@ -4,11 +4,13 @@ namespace App\Http\Controllers\V1\Api;
 
 use Illuminate\Http\Request;
 use App\Models\Group;
-use App\Models\followGroup;
 use Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\notification;
-use App\Models\User;
+use App\Models\{
+    User,
+    followGroup
+};
 use App\Traits\{
     SendNotification,
     upload,
@@ -242,9 +244,16 @@ class GroupController extends Controller
 
     public function getOwnGroups()
     {
-        $data = Group::where([['user_id','=',Auth::user()->id],['id','<>',100],['id','<>',161]])->select('id','name','cover')->orderBy('id','DESC')->paginate(20);
-        $data3 = Group::whereIn('id',[100,161])->select('id','name','cover')->orderBy('id','DESC')->paginate(20);
-        
+        $ids = array();
+        $data = Group::on('mysql2')->where('user_id',Auth::user()->id)->select('id','name','cover')->orderBy('id','DESC')->paginate(20);
+        $data2 = Group::on('mysql2')->whereIn('id',[161])->select('id','name','cover')->orderBy('id','DESC')->paginate(20);
+        $data3 = followGroup::on('mysql2')->where('user_id',Auth::user()->id)->get();
+        foreach ($data3 as $value) {
+           $ids[] = $value->follow_id;
+        }
+        $data3 = Group::on('mysql2')->whereIn('id',$ids)->select('id','name','cover')->orderBy('id','DESC')->paginate(20);
+        $updatedItems = $data->merge($data2);
+        $data->setCollection($updatedItems);
         $updatedItems = $data->merge($data3);
         $data->setCollection($updatedItems);
         return response()->json($data, 200);
@@ -254,15 +263,15 @@ class GroupController extends Controller
     {
         $user = User::find(Auth::user()->id);
         $age = Carbon::parse($user->dob)->age;
-        $groups = Group::where([['user_id','<>',Auth::user()->id],['id','<>',100],['id','<>',161]])->orderBy('id','DESC')->get();
+        $groups = Group::on('mysql2')->where([['user_id','<>',Auth::user()->id],['id','<>',161]])->orderBy('id','DESC')->get();
         foreach ($groups as $group) {
-            $check = $this->checkIfEligible($age,$user->gender,$group->id);
+            $check = $this->checkIfEligible2($age,$user->gender,$group->id);
             if($check)
             {
                 $ids[] = $group->id;
             }
          }
-        $data2 = Group::whereIn('id',$ids)->select('id','name','cover')->inRandomOrder()->orderBy('id','DESC')->paginate(20);
+        $data2 = Group::on('mysql2')->whereIn('id',$ids)->select('id','name','cover')->inRandomOrder()->orderBy('id','DESC')->paginate(20);
         return response()->json($data2, 200);
     }
 }

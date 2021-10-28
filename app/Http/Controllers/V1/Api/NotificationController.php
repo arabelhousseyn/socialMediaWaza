@@ -314,7 +314,7 @@ class NotificationController extends Controller
 
             if($value->type == 4)
             {
-            $follower = follower::where([['user_id','=',Auth::user()->id],['follow_id','=',$value->morphable_id]])->first();
+                $follower = follower::on('mysql2')->where([['user_id','=',$value->user_id],['follow_id','=',Auth::user()->id]])->first();
             if($follower)
             {
                 if($follower->is_friend == 1)
@@ -611,6 +611,244 @@ class NotificationController extends Controller
                 $this->push('Waza',$message,$notification->user_id);
             }
         return response()->json(['data' => $final,'user_id' => $notification->user_id], 200);
+    }
+
+    // v2
+
+
+    public function getNotifications2()
+    {
+        $ids = array();
+        $final = array();
+        $breakInteraction = array();
+        $breakComment = array();
+        $data = notification::on('mysql2')->where('is_read',0)->orderBy('id','DESC')->whereDate('updated_at', '>=', Carbon::now()->subDays(1)->setTime(0, 0, 0)->toDateTimeString())->get();
+        
+        foreach ($data as $value) {
+            $temp = array();
+            if($value->type == 0 || $value->type == 1)
+            {
+                // check if morphable_id is repeated
+                if(!in_array($value->morphable_id,$breakInteraction))
+                {
+                    $post = GroupPost::on('mysql2')->with('images','likesList')->find($value->morphable_id);
+                    if(@$post->likesList)
+                    {
+                        if(count($post->likesList) <= 5)
+                {
+                    foreach ($post->likesList as $like) {
+                        if($post->user_id == Auth::user()->id && $like->user_id != Auth::user()->id)
+                        {
+                              $user = User::on('mysql2')->where('id',$like->user_id)->first();
+                              $temp['id'] = $value->id;
+                              $temp['message'] ='a interagi avec votre publication';
+                              $temp['sub_message'] = $user->fullName;
+                              $temp['link_id'] = $value->morphable_id;
+                              $temp['user_id'] = $like->user_id;
+                              $temp['type'] = 1;
+                              $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
+                              if(count($post->images) > 0)
+                              {
+                                $temp['link_cover'] = $post->images[0]->path;
+                              }else{
+                                $temp['link_cover'] = '';  
+                              }
+                              $final[] = $temp;
+                        } 
+                      }
+                }else{
+
+                    if($post->user_id == Auth::user()->id)
+                        {
+                            $likes = count($post->likesList);
+                            $last_user = User::on('mysql2')->find($post->likesList[$likes - 1]->user_id);
+                            $temp['id'] = $value->id;
+                            $temp['message'] = 'ont interagi sur votre publication';
+                            if($last_user->id == Auth::user()->id)
+                            {
+                                $last_user = User::on('mysql2')->find($post->likesList[$likes - 2]->user_id);
+                                $temp['sub_message'] = strval($last_user->fullName . ' et '. $likes - 1 . ' autres personnes');
+                            }else{
+                                $temp['sub_message'] = strval($last_user->fullName . ' et '. $likes - 1 . ' autres personnes');
+                            }
+                            $temp['link_id'] = $value->morphable_id;
+                            $temp['type'] = 1;
+                            if(count($post->images) > 0)
+                              {
+                                $temp['link_cover'] = $post->images[0]->path;
+                              }else{
+                                $temp['link_cover'] = '';  
+                              }
+                            $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
+                            $final[] = $temp;  
+                        } 
+                }
+                    }
+                $breakInteraction[] = $value->morphable_id;
+                }
+            }
+                if($value->type == 2)
+            {
+                // check if morphable_id is repeated
+                if(!in_array($value->morphable_id,$breakComment))
+                {
+                    $post = GroupPost::on('mysql2')->with('images','comments')->find($value->morphable_id);
+                    if(@$post->comments)
+                    {
+                        if(count($post->comments) <= 5)
+                {
+                    foreach ($post->comments as $comment) {
+                        if($post->user_id == Auth::user()->id && $comment->user_id != Auth::user()->id)
+                        {
+                                $user = User::on('mysql2')->where('id',$comment->user_id)->first();
+                            $temp['id'] = $value->id;
+                            $temp['message'] ='a commenté sur votre publication';
+                            $temp['sub_message'] =$user->fullName;
+                            $temp['user_id'] = $comment->user_id;
+                            $temp['link_id'] = $value->morphable_id;
+                            $temp['type'] = 2;
+                            $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
+                            if(count($post->images) > 0)
+                              {
+                                $temp['link_cover'] = $post->images[0]->path;
+                              }else{
+                                $temp['link_cover'] = '';  
+                              }
+                            $final[] = $temp;
+                            
+                        } 
+                      }
+                }else{
+                    if($post->user_id == Auth::user()->id)
+                        {
+                    $comments = count($post->comments);
+                    $last_user = User::on('mysql2')->find($post->comments[$comments - 1]->user_id);
+                    $temp['id'] = $value->id;
+                    $temp['message'] = 'ont commenté sur votre publication';
+                    if($last_user->id == Auth::user()->id)
+                            {
+                                $last_user = User::find($post->comments[$comments - 2]->user_id);
+                                $temp['sub_message'] = strval($last_user->fullName . ' et '. $comments - 1 . ' autres personnes');
+                            }else{
+                                $temp['sub_message'] = strval($last_user->fullName . ' et '. $comments - 1 . ' autres personnes');
+                            }
+                    $temp['link_id'] = $value->morphable_id;
+                    if(count($post->images) > 0)
+                              {
+                                $temp['link_cover'] = $post->images[0]->path;
+                              }else{
+                                $temp['link_cover'] = '';  
+                              }
+                    $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
+                    $temp['type'] = 2;
+                    $final[] = $temp; 
+                        }  
+                }
+                $breakComment[] = $value->morphable_id;
+                    }
+                }
+            }
+            if($value->type == 3)
+            {
+                $user = User::on('mysql2')->where('id',$value->user_id)->first();
+                $group = Group::on('mysql2')->where('id',$value->morphable_id)->first();
+                if($group)
+                {
+                    if(Auth::user()->id != $group->user_id)
+                {
+           if($group->gender == null)
+           {
+               if(strval($group->gender) != 0)
+               {
+                $temp['id'] = $value->id;
+                $temp['message'] ='vient d\'être créé ! découvrez ce contenu';
+                $temp['sub_message'] = $group->name;
+                $temp['link_id'] = $group->id;
+                $temp['type'] = 3;
+                $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
+                $temp['link_cover'] = $group->cover;
+                $final[] = $temp;
+               }
+           }else{
+               // filter users
+                   $age = Carbon::parse(Auth::user()->dob)->age;
+                   if($age >= $group->minAge && $age <= $group->maxAge)
+                   {
+                    if($group->gender == 2)
+                    {
+                        $temp['id'] = $value->id;
+                        $temp['message'] ='vient d\'être créé ! découvrez ce contenu';
+                        $temp['sub_message'] = $group->name;
+                        $temp['link_id'] = $group->id;
+                        $temp['type'] = 3;
+                        $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
+                        $temp['link_cover'] = $group->cover;
+                        $final[] = $temp;
+                    }else{
+                       if($group->gender == $user->gender)
+                       {
+                        $temp['id'] = $value->id;
+                        $temp['message'] = $group->name . ' vient d\'être créé ! découvrez ce contenu';
+                        $temp['sub_message'] = $group->name;
+                        $temp['link_id'] = $group->id;
+                        $temp['type'] = 3;
+                        $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
+                        $temp['link_cover'] = $group->cover;
+                        $final[] = $temp;
+                       } 
+                    }
+                   }
+           }
+                }
+                }
+            }
+
+            if($value->type == 4)
+            {
+            $follower = follower::on('mysql2')->where([['user_id','=',$value->user_id],['follow_id','=',Auth::user()->id]])->first();
+            if($follower)
+            {
+                if($follower->is_friend == 1)
+            {
+                if(Auth::user()->id == $value->user_id)
+                {
+                $user = User::on('mysql2')->find($value->morphable_id);
+                $temp['id'] = $value->id;
+                $temp['message'] ='a accepté votre invitation';
+                $temp['sub_message'] = $user->fullName;
+                $temp['type'] = 4;
+                $temp['link_id'] = $user->id;
+                $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
+                $temp['link_cover'] = '';
+                $final[] = $temp;
+                }
+            }
+
+                if($follower->is_friend == 0)
+            {
+                $user = User::on('mysql2')->where('id',$value->user_id)->first();
+                $recevie = User::on('mysql2')->where('id',$value->morphable_id)->first();
+                if($recevie)
+                {
+                    if(Auth::user()->id == $recevie->id)
+            {
+                $temp['id'] = $value->id;
+                $temp['message'] ='a envoyé une invitation';
+                $temp['sub_message'] = $user->fullName;
+                $temp['type'] = 5;
+                $temp['link_id'] = $user->id;
+                $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
+                $temp['link_cover'] = '';
+                $final[] = $temp;
+            }
+                }
+            }            
+            }
+            }
+            
+        }
+
+        return response()->json($final, 200);
     }
 
 }

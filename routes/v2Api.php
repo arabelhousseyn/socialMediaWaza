@@ -54,7 +54,13 @@ Route::get('getAllUsersIds/{notification_id}', [userController::class, 'getAllUs
 Route::get('getCountOfUsersAccepted', [userController::class, 'getCountOfUsersAccepted']);
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
-    // groups and posts 
-    Route::get('getPostsbyGroup/{group_id?}', [GroupPostController::class,'getPostsbyGroup'])->whereNumber('group_id');  
-    Route::resource('grouposts', GroupPostController::class);  
+    // groups and posts
+    Route::get('getOwnGroups', [GroupController::class,'getOwnGroups']); 
+    Route::get('getRandomGroups', [GroupController::class,'getRandomGroups']);  
+    Route::post('group', [GroupPostController::class,'store2']);  
+    Route::get('getposts/{group_id?}', [GroupPostController::class,'getPostsbyGroup'])->whereNumber('group_id');  
+    Route::resource('grouposts', GroupPostController::class);
+    // search
+    Route::get('searchGlobal/{name?}', [userController::class,'searchGlobal2']); 
+    Route::get('getNotifications', [NotificationController::class,'getNotifications2']); 
 });

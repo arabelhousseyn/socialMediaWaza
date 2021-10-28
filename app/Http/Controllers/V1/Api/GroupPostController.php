@@ -867,8 +867,54 @@ class GroupPostController extends Controller
     {
         if($group_id == 0)
         {
+            $ids_groups = array();
+            $ids_users = array();
+            $ids_posts = array();
+            $ids = array();
+         $user = User::with('following','posts')->find(Auth::user()->id);
+         $followingGroup = followGroup::where('user_id',Auth::user()->id)->get();
+
+         foreach ($user->posts as $value) {
+           $ids_posts[] = $value->id; 
+         }
+
+         foreach ($user->following as $value) {
+             $ids_users[] = $value->id;
+         }
+
+         foreach ($followingGroup as $value) {
+            $ids_groups[] = $value->follow_id;
+         }
+         for ($i=0; $i <count($ids_users) ; $i++) { 
+             $postsFriend = GroupPost::where('user_id',$ids_users[$i])->get();
+             foreach ($postsFriend as $post) {
+                 if($post)
+                 {
+                    $ids_posts[] = $post->id;
+                 }
+             }
+         }
+
+         for ($i=0; $i <count($ids_groups) ; $i++) { 
+            $post = GroupPost::find($ids_groups[$i]);
+            if($post)
+            {
+                $ids_posts[] = $post->id;
+            }
+        }
+
+        $ids_posts = array_count_values($ids_posts);
+        foreach ($ids_posts as $key => $value) {
+            $ids[] = $key;
+        }
+
         $selective = 'user:id,fullName,subName,dob,picture,gender,profession,phone,email,is_freelancer,receive_ads,hide_phone,is_kaiztech_team,company,website,wilaya_id';
-        $posts = GroupPost::on('mysql2')->with('images',$selective,'likesList','comments','user.wilaya','likesList.user','comments.user','comments.replies')->orderBy('id','DESC')->paginate(7);
+        if(count($ids) == 0)
+        {
+            $posts = GroupPost::on('mysql2')->with('images',$selective,'likesList','comments','user.wilaya','likesList.user','comments.user','comments.replies')->orderBy('id','DESC')->paginate(7);
+        }else{
+            $posts = GroupPost::on('mysql2')->whereIn('id',$ids)->with('images',$selective,'likesList','comments','user.wilaya','likesList.user','comments.user','comments.replies')->inRandomOrder()->paginate(7);
+        }
         foreach ($posts as $post) {
             $likes = 0;
             $dislikes = 0;
@@ -926,6 +972,78 @@ class GroupPostController extends Controller
         $posts = $collection->merge($posts);
 
         return response()->json($posts, 200);
+        }
+    }
+
+    public function store2(Request $request)
+    {
+        // insert post 
+        $validator = Validator::make($request->all(), [
+            'type' => 'required',
+            'anonym' => 'required'
+        ]);
+        $is_approved = 0;
+    
+        if($validator->fails())
+        {
+            return response()->json(['success' => false], 200);
+        }
+    
+        if($validator->validated())
+        {
+            $path = '';
+            $videoPath = '';
+            $group = Group::on('mysql2')->where('id',$request->group_id)->first();
+            if($request->group_id == 0)
+            {
+               $is_approved = 1; 
+            }else{
+                if($group->user_id == Auth::user()->id)
+                {
+                    $is_approved = 1; 
+                }else{
+                    $is_approved = 0; 
+                }
+            }
+
+            if($request->colorabble == 0 && strlen($request->images) == 0)
+            {
+                return response()->json(['success' => false], 200);
+            }
+
+            
+            if(strlen($request->video) != 0)
+            {
+                $videoPath = $this->VideoUpload($request->video,'videoPost');
+            }
+
+            $post = GroupPost::on('mysql2')->create([
+                'user_id' => Auth::user()->id,
+                'group_id' => ($request->group_id == 0) ? null : $request->group_id,
+                'description' => (strlen($request->description) != 0) ? $request->description : '',
+                'source' => ($request->source == null) ? '' : $request->source,
+                'colorabble' => $request->colorabble,
+                'type' => $request->type,
+                'is_approved' => $is_approved,
+                'anonym' => $request->anonym,
+                'title_pitch' => (@$request->title_pitch) ? $request->title_pitch : '',
+                'video' => (strlen($videoPath) != 0) ? env('DISPLAY_PATH').'videoPost/'.  $videoPath : '',
+            ]);
+    
+            if(strlen($request->images) != 0)
+            {
+                $images = explode(';ibaa;',$request->images);
+                foreach ($images as $image) {
+                    $path = $this->ImageUpload($image,'postImages');
+                    GroupPostImage::on('mysql2')->create([
+                        'path' => env('DISPLAY_PATH').'postImages/'. $path,
+                        'group_post_id' => $post->id
+                    ]);
+                }
+    
+                return response()->json(['success' => true], 200);
+            }
+            return response()->json(['success' => true], 200);
         }
     }
     
