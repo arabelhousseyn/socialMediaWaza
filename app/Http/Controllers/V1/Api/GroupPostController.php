@@ -943,6 +943,7 @@ class GroupPostController extends Controller
                     $dislikes++;
                 }
             }
+
             $post['likes'] = $likes;
             $post['dislikes'] = $dislikes;
             $post['countComments'] = count($post->comments);

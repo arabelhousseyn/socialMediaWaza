@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fde5335796c4e5ef5ba52395edd9a2da",
+    "content-hash": "8882e3e9e6eea68cef956acb85118b32",
     "packages": [
         {
             "name": "amitkkhanchandani/faceplusplus",
@@ -2809,6 +2809,77 @@
             "time": "2021-08-11T01:06:55+00:00"
         },
         {
+            "name": "rappasoft/laravel-authentication-log",
+            "version": "v1.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/rappasoft/laravel-authentication-log.git",
+                "reference": "74fff58c1ae379df0ba68b4233b2490f7df67dc1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/rappasoft/laravel-authentication-log/zipball/74fff58c1ae379df0ba68b4233b2490f7df67dc1",
+                "reference": "74fff58c1ae379df0ba68b4233b2490f7df67dc1",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/contracts": "^8.37",
+                "php": "^8.0",
+                "spatie/laravel-package-tools": "^1.4.3"
+            },
+            "require-dev": {
+                "nunomaduro/collision": "^5.3",
+                "orchestra/testbench": "^6.15",
+                "pestphp/pest": "^1.18",
+                "pestphp/pest-plugin-laravel": "^1.1",
+                "spatie/laravel-ray": "^1.23",
+                "vimeo/psalm": "^4.8"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Rappasoft\\LaravelAuthenticationLog\\LaravelAuthenticationLogServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Rappasoft\\LaravelAuthenticationLog\\": "src",
+                    "Rappasoft\\LaravelAuthenticationLog\\Database\\Factories\\": "database/factories"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Anthony Rappa",
+                    "email": "rappa819@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Log user authentication details and send new device notifications.",
+            "homepage": "https://github.com/rappasoft/laravel-authentication-log",
+            "keywords": [
+                "laravel",
+                "laravel-authentication-log",
+                "rappasoft"
+            ],
+            "support": {
+                "issues": "https://github.com/rappasoft/laravel-authentication-log/issues",
+                "source": "https://github.com/rappasoft/laravel-authentication-log/tree/v1.1.1"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/rappasoft",
+                    "type": "github"
+                }
+            ],
+            "time": "2021-10-21T03:30:02+00:00"
+        },
+        {
             "name": "softon/laravel-face-detect",
             "version": "dev-master",
             "source": {
@@ -2976,6 +3047,66 @@
                 }
             ],
             "time": "2020-11-27T18:27:06+00:00"
+        },
+        {
+            "name": "spatie/laravel-package-tools",
+            "version": "1.9.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/spatie/laravel-package-tools.git",
+                "reference": "f710fe196c126fb9e0aee67eb5af49ad8f13f528"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/spatie/laravel-package-tools/zipball/f710fe196c126fb9e0aee67eb5af49ad8f13f528",
+                "reference": "f710fe196c126fb9e0aee67eb5af49ad8f13f528",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/contracts": "^7.0|^8.0",
+                "php": "^7.4|^8.0"
+            },
+            "require-dev": {
+                "mockery/mockery": "^1.4",
+                "orchestra/testbench": "^5.0|^6.0",
+                "phpunit/phpunit": "^9.3",
+                "spatie/test-time": "^1.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Spatie\\LaravelPackageTools\\": "src",
+                    "Spatie\\LaravelPackageTools\\Database\\Factories\\": "database/factories"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Freek Van der Herten",
+                    "email": "freek@spatie.be",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Tools for creating Laravel packages",
+            "homepage": "https://github.com/spatie/laravel-package-tools",
+            "keywords": [
+                "laravel-package-tools",
+                "spatie"
+            ],
+            "support": {
+                "issues": "https://github.com/spatie/laravel-package-tools/issues",
+                "source": "https://github.com/spatie/laravel-package-tools/tree/1.9.2"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/spatie",
+                    "type": "github"
+                }
+            ],
+            "time": "2021-09-21T13:06:51+00:00"
         },
         {
             "name": "swiftmailer/swiftmailer",
@@ -5575,71 +5706,6 @@
     ],
     "packages-dev": [
         {
-            "name": "agontuk/schema-builder",
-            "version": "1.3.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Agontuk/schema-builder.git",
-                "reference": "9e36b611228bd94dc83a21c4aa55f05e48979350"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Agontuk/schema-builder/zipball/9e36b611228bd94dc83a21c4aa55f05e48979350",
-                "reference": "9e36b611228bd94dc83a21c4aa55f05e48979350",
-                "shasum": ""
-            },
-            "require": {
-                "ext-zip": "*",
-                "illuminate/filesystem": "^5.1|^6|^7|^8",
-                "illuminate/http": "^5.1|^6|^7|^8",
-                "illuminate/support": "^5.1|^6|^7|^8",
-                "league/flysystem": "^1.0",
-                "league/flysystem-ziparchive": "^1.0"
-            },
-            "require-dev": {
-                "phpmd/phpmd": "^2.6"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "Agontuk\\Schema\\SchemaServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Agontuk\\Schema\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Iftekhar Rifat",
-                    "email": "rifat662@gmail.com",
-                    "homepage": "https://github.com/Agontuk",
-                    "role": "Developer"
-                }
-            ],
-            "description": "Schema designer & migration generator for laravel & lumen",
-            "homepage": "https://github.com/Agontuk/schema-builder",
-            "keywords": [
-                "database",
-                "migration generator",
-                "schema",
-                "schema builder",
-                "schema design"
-            ],
-            "support": {
-                "issues": "https://github.com/Agontuk/schema-builder/issues",
-                "source": "https://github.com/Agontuk/schema-builder/tree/v1.3.0"
-            },
-            "time": "2021-02-05T17:30:47+00:00"
-        },
-        {
             "name": "doctrine/instantiator",
             "version": "1.4.0",
             "source": {
@@ -6148,57 +6214,6 @@
                 "source": "https://github.com/laravel/sail"
             },
             "time": "2021-08-23T13:43:27+00:00"
-        },
-        {
-            "name": "league/flysystem-ziparchive",
-            "version": "1.0.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/thephpleague/flysystem-ziparchive.git",
-                "reference": "c6d7c7ea23a57ee802d533ab9eb9f19dd5c5fc45"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/flysystem-ziparchive/zipball/c6d7c7ea23a57ee802d533ab9eb9f19dd5c5fc45",
-                "reference": "c6d7c7ea23a57ee802d533ab9eb9f19dd5c5fc45",
-                "shasum": ""
-            },
-            "require": {
-                "ext-zip": "*",
-                "league/flysystem": "~1.0",
-                "php": ">=5.4.0"
-            },
-            "require-dev": {
-                "mockery/mockery": "0.9.*",
-                "phpunit/phpunit": "~4.0"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "1.0-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "League\\Flysystem\\ZipArchive\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Frank de Jonge",
-                    "email": "info@frenky.net"
-                }
-            ],
-            "description": "Flysystem adapter for ZipArchive's",
-            "support": {
-                "issues": "https://github.com/thephpleague/flysystem-ziparchive/issues",
-                "source": "https://github.com/thephpleague/flysystem-ziparchive/tree/master"
-            },
-            "time": "2016-12-20T08:36:16+00:00"
         },
         {
             "name": "mockery/mockery",

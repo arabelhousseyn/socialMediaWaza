@@ -12,6 +12,7 @@ use App\Models\{
     GroupPost
 };
 use App\Models\FaceVerification;
+use Rappasoft\LaravelAuthenticationLog\Traits\AuthenticationLoggable;
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
