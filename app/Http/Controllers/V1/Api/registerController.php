@@ -4,7 +4,10 @@ namespace App\Http\Controllers\V1\Api;
 
 use App\Traits\SendNotification;
 use Illuminate\Http\Request;
-use App\Models\User;
+use App\Models\{
+    User,
+    followGroup
+};
 use App\Models\FaceVerification;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -73,7 +76,10 @@ class registerController extends Controller
                     'dob','picture','gender','profession','wilaya_id','phone','email','is_freelancer',
                     'is_verified','receive_ads','token')->first();
                     $token = $usr->createToken('my-app-token')->plainTextToken;
-
+                    followGroup::create([
+                        'user_id' => $usr->id,
+                        'follow_id' => 161
+                    ]);
                     $usr->update([
                         'token' => $token
                     ]);

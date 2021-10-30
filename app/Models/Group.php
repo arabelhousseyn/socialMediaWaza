@@ -16,7 +16,7 @@ class Group extends Model
     protected $fillable = [
         'name',
         'user_id',
-        'cover',
+        'logo',
         'type',
         'gender',
         'minAge',

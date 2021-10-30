@@ -4,10 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\GroupPostImage;
-use App\Models\User;
-use App\Models\GroupPostLike;
-use App\Models\GroupPostComment;
+use App\Models\{
+    GroupPostImage,
+    GroupPostLike,
+    User,
+    GroupPostComment,
+    Group
+};
 class GroupPost extends Model
 {
     use HasFactory;
@@ -48,5 +51,15 @@ class GroupPost extends Model
     public function comments()
     {
         return $this->hasMany(GroupPostComment::class);
+    }
+
+    /**
+     * Get the group that owns the GroupPost
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function group()
+    {
+        return $this->belongsTo(Group::class);
     }
 }

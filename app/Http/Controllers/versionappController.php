@@ -22,21 +22,4 @@ class versionappController extends Controller
             return response()->json($response, 200); 
         }
     }
-
-    public function index2($version)
-    {
-        $check = DB::connection('mysql2')->table('useful_data')->where('data',$version)->first();
-        if($check)
-        {
-            $response = [
-                'success' => true
-            ];
-            return response()->json($response, 200);
-        }else{
-            $response = [
-                'success' => false
-            ];
-            return response()->json($response, 200); 
-        }
-    }
 }

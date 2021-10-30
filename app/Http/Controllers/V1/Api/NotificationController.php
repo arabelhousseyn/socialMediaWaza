@@ -622,7 +622,7 @@ class NotificationController extends Controller
         $final = array();
         $breakInteraction = array();
         $breakComment = array();
-        $data = notification::on('mysql2')->where('is_read',0)->orderBy('id','DESC')->whereDate('updated_at', '>=', Carbon::now()->subDays(1)->setTime(0, 0, 0)->toDateTimeString())->get();
+        $data = notification::where('is_read',0)->orderBy('id','DESC')->whereDate('updated_at', '>=', Carbon::now()->subDays(1)->setTime(0, 0, 0)->toDateTimeString())->get();
         
         foreach ($data as $value) {
             $temp = array();
@@ -631,7 +631,7 @@ class NotificationController extends Controller
                 // check if morphable_id is repeated
                 if(!in_array($value->morphable_id,$breakInteraction))
                 {
-                    $post = GroupPost::on('mysql2')->with('images','likesList')->find($value->morphable_id);
+                    $post = GroupPost::with('images','likesList')->find($value->morphable_id);
                     if(@$post->likesList)
                     {
                         if(count($post->likesList) <= 5)
@@ -639,7 +639,7 @@ class NotificationController extends Controller
                     foreach ($post->likesList as $like) {
                         if($post->user_id == Auth::user()->id && $like->user_id != Auth::user()->id)
                         {
-                              $user = User::on('mysql2')->where('id',$like->user_id)->first();
+                              $user = User::where('id',$like->user_id)->first();
                               $temp['id'] = $value->id;
                               $temp['message'] ='a interagi avec votre publication';
                               $temp['sub_message'] = $user->fullName;
@@ -661,12 +661,12 @@ class NotificationController extends Controller
                     if($post->user_id == Auth::user()->id)
                         {
                             $likes = count($post->likesList);
-                            $last_user = User::on('mysql2')->find($post->likesList[$likes - 1]->user_id);
+                            $last_user = User::find($post->likesList[$likes - 1]->user_id);
                             $temp['id'] = $value->id;
                             $temp['message'] = 'ont interagi sur votre publication';
                             if($last_user->id == Auth::user()->id)
                             {
-                                $last_user = User::on('mysql2')->find($post->likesList[$likes - 2]->user_id);
+                                $last_user = User::find($post->likesList[$likes - 2]->user_id);
                                 $temp['sub_message'] = strval($last_user->fullName . ' et '. $likes - 1 . ' autres personnes');
                             }else{
                                 $temp['sub_message'] = strval($last_user->fullName . ' et '. $likes - 1 . ' autres personnes');
@@ -692,7 +692,7 @@ class NotificationController extends Controller
                 // check if morphable_id is repeated
                 if(!in_array($value->morphable_id,$breakComment))
                 {
-                    $post = GroupPost::on('mysql2')->with('images','comments')->find($value->morphable_id);
+                    $post = GroupPost::with('images','comments')->find($value->morphable_id);
                     if(@$post->comments)
                     {
                         if(count($post->comments) <= 5)
@@ -722,7 +722,7 @@ class NotificationController extends Controller
                     if($post->user_id == Auth::user()->id)
                         {
                     $comments = count($post->comments);
-                    $last_user = User::on('mysql2')->find($post->comments[$comments - 1]->user_id);
+                    $last_user = User::find($post->comments[$comments - 1]->user_id);
                     $temp['id'] = $value->id;
                     $temp['message'] = 'ont commenté sur votre publication';
                     if($last_user->id == Auth::user()->id)
@@ -750,8 +750,8 @@ class NotificationController extends Controller
             }
             if($value->type == 3)
             {
-                $user = User::on('mysql2')->where('id',$value->user_id)->first();
-                $group = Group::on('mysql2')->where('id',$value->morphable_id)->first();
+                $user = User::where('id',$value->user_id)->first();
+                $group = Group::where('id',$value->morphable_id)->first();
                 if($group)
                 {
                     if(Auth::user()->id != $group->user_id)
@@ -805,14 +805,14 @@ class NotificationController extends Controller
 
             if($value->type == 4)
             {
-            $follower = follower::on('mysql2')->where([['user_id','=',$value->user_id],['follow_id','=',Auth::user()->id]])->first();
+            $follower = follower::where([['user_id','=',$value->user_id],['follow_id','=',Auth::user()->id]])->first();
             if($follower)
             {
                 if($follower->is_friend == 1)
             {
                 if(Auth::user()->id == $value->user_id)
                 {
-                $user = User::on('mysql2')->find($value->morphable_id);
+                $user = User::find($value->morphable_id);
                 $temp['id'] = $value->id;
                 $temp['message'] ='a accepté votre invitation';
                 $temp['sub_message'] = $user->fullName;
@@ -826,8 +826,8 @@ class NotificationController extends Controller
 
                 if($follower->is_friend == 0)
             {
-                $user = User::on('mysql2')->where('id',$value->user_id)->first();
-                $recevie = User::on('mysql2')->where('id',$value->morphable_id)->first();
+                $user = User::where('id',$value->user_id)->first();
+                $recevie = User::where('id',$value->morphable_id)->first();
                 if($recevie)
                 {
                     if(Auth::user()->id == $recevie->id)

@@ -10,6 +10,7 @@ use App\Models\FaceVerification;
 use Iman\Streamer\VideoStreamer;
 use Auth;
 use App\Models\Wilaya;
+use App\Models\follower;
 use App\Models\GroupPost;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
@@ -279,6 +280,7 @@ class userController extends Controller
      $data2 = Group::whereIn('id',$ids)->get();
 
      foreach ($data2 as $value) {
+         $value['cover'] = $value->logo;
         $value['type_record'] = 1;
      }
 
@@ -407,6 +409,27 @@ class userController extends Controller
      }
      return response()->json([], 200);
     }
+   }
+
+   public function getUsersByPhone($string)
+   {
+       $ids = array();
+       $phones = explode(';',$string);
+       foreach ($phones as $value) {
+           $value = trim($value,' ');
+           $value = intval($value);
+       }
+       $users = User::whereIn('phone',$phones)->get();
+       foreach ($users as $user) {
+           $checkFollowing1 = follower::where([['user_id','=',$user->id],['follow_id','=',Auth::user()->id]])->first();
+           $checkFollowing2 = follower::where([['user_id','=',Auth::user()->id],['follow_id','=',$user->id]])->first();
+           if(!$checkFollowing1 && !$checkFollowing2)
+           {
+               $ids[] = $user->id;
+           }
+       }
+       $data = User::whereIn('id',$ids)->select('id','picture','fullName','profession')->inRandomOrder()->LIMIT(20)->get();
+       return response()->json($data, 200);
    }
 
 }

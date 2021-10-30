@@ -69,6 +69,7 @@ Route::get('getCountOfUsersAccepted', [userController::class, 'getCountOfUsersAc
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
     // information user by id
+    Route::get('usersByPhone/{string?}',[userController::class,'getUsersByPhone']);
     Route::get('statusUser', [userController::class, 'GetUserStatus']);
     Route::get('getUserIdByAuth', [userController::class, 'getUserIdByAuth']);
     Route::get('userInformation/{id?}/{group_post_id?}', [userController::class, 'getInformationUser'])->whereNumber('id','group_post_id')->name('userInformationApi');
@@ -106,10 +107,9 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('searchGroup/{name?}',[GroupController::class,'searchGroup']);
     Route::put('updateComment/{comment_id?}',[GroupPostController::class,'updateComment'])->whereNumber('comment_id');
     Route::resource('group', GroupController::class);
-    Route::resource('groupuniverse', GroupUniverseController::class);
     Route::resource('grouposts', GroupPostController::class);
     Route::resource('groupuniverses', GroupUniverseController::class);
-
+    
     // amana
     Route::get('amanaByCategory/{id}', [AmanaController::class, 'amanaByCategory']);
     Route::resource('amana', AmanaController::class);

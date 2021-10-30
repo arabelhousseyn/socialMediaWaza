@@ -36,9 +36,9 @@ class GroupController extends Controller
         $user = User::find(Auth::user()->id);
         $age = Carbon::parse($user->dob)->age;
 
-        $data = Group::where([['user_id','=',Auth::user()->id],['id','<>',100],['id','<>',161]])->select('id','name','cover')->orderBy('id','DESC')->paginate(20);
+        $data = Group::where([['user_id','=',Auth::user()->id],['id','<>',100],['id','<>',161]])->select('id','name','logo')->orderBy('id','DESC')->paginate(20);
         $groups = Group::where([['user_id','<>',Auth::user()->id],['id','<>',100],['id','<>',161]])->orderBy('id','DESC')->get();
-        $data3 = Group::whereIn('id',[100,161])->select('id','name','cover')->orderBy('id','DESC')->paginate(20);
+        $data3 = Group::whereIn('id',[100,161])->select('id','name','logo')->orderBy('id','DESC')->paginate(20);
 
         foreach ($groups as $group) {
             $check = $this->checkIfEligible($age,$user->gender,$group->id);
@@ -47,7 +47,16 @@ class GroupController extends Controller
                 $ids[] = $group->id;
             }
          }
-         $data2 = Group::whereIn('id',$ids)->select('id','name','cover')->inRandomOrder()->orderBy('id','DESC')->paginate($count);
+         $data2 = Group::whereIn('id',$ids)->select('id','name','logo')->inRandomOrder()->orderBy('id','DESC')->paginate($count);
+         foreach ($data2 as $value) {
+             $value['cover'] = $value->logo;
+         }
+         foreach ($data3 as $value) {
+            $value['cover'] = $value->logo;
+        }
+        foreach ($data as $value) {
+            $value['cover'] = $value->logo;
+        }
         $updatedItems = $data->merge($data3);
         $data->setCollection($updatedItems);
         $updatedItems = $data->merge($data2);
@@ -104,8 +113,9 @@ class GroupController extends Controller
             $group = Group::create([
                 'name' => $request->name,
                 'user_id' => Auth::user()->id,
-                'cover' => env('DISPLAY_PATH') .'groupImages/'.$path,
+                'logo' => env('DISPLAY_PATH') .'groupImages/'.$path,
                 'type' => $request->type,
+                'description' => ($request->description) ? $request->description : '',
                 'gender' => ($request->type == 0) ? $request->gender : null,
                 'minAge' => ($request->type == 0) ? $request->minAge : null,
                 'maxAge' => ($request->type == 0) ? $request->maxAge : null,
@@ -195,15 +205,15 @@ class GroupController extends Controller
         if($id == 0)
         {
         // get all groups
-        $data = Group::where([['user_id','=',Auth::user()->id],['id','<>',100]])->select('id','name','cover')->paginate(20);
-        $data2 = Group::where([['user_id','<>',Auth::user()->id],['id','<>',100]])->select('id','name','cover')->inRandomOrder()->paginate(20);
+        $data = Group::where([['user_id','=',Auth::user()->id],['id','<>',100]])->select('id','name','logo')->paginate(20);
+        $data2 = Group::where([['user_id','<>',Auth::user()->id],['id','<>',100]])->select('id','name','logo')->inRandomOrder()->paginate(20);
         $updatedItems = $data->merge($data2);
         $data->setCollection($updatedItems);
         return response()->json($data, 200);
         }
         // get groups by univers
-        $data = Group::where([['user_id','=',Auth::user()->id],['group_universe_id','=',$id],['id','<>',100]])->select('id','name','cover')->paginate(20);
-        $data2 = Group::where([['user_id','<>',Auth::user()->id],['group_universe_id','=',$id],['id','<>',100]])->select('id','name','cover')->inRandomOrder()->paginate(20);
+        $data = Group::where([['user_id','=',Auth::user()->id],['group_universe_id','=',$id],['id','<>',100]])->select('id','name','logo')->paginate(20);
+        $data2 = Group::where([['user_id','<>',Auth::user()->id],['group_universe_id','=',$id],['id','<>',100]])->select('id','name','logo')->inRandomOrder()->paginate(20);
         $updatedItems = $data->merge($data2);
         $data->setCollection($updatedItems);
         return response()->json($data, 200);
@@ -245,15 +255,20 @@ class GroupController extends Controller
     public function getOwnGroups()
     {
         $ids = array();
-        $data = Group::on('mysql2')->where('user_id',Auth::user()->id)->select('id','name','cover')->orderBy('id','DESC')->paginate(20);
-        $data2 = Group::on('mysql2')->whereIn('id',[161])->select('id','name','cover')->orderBy('id','DESC')->paginate(20);
-        $data3 = followGroup::on('mysql2')->where('user_id',Auth::user()->id)->get();
+        $data = Group::where('user_id',Auth::user()->id)->select('id','name','logo')->orderBy('id','DESC')->paginate(20);
+        $data3 = followGroup::where('user_id',Auth::user()->id)->get();
         foreach ($data3 as $value) {
            $ids[] = $value->follow_id;
         }
-        $data3 = Group::on('mysql2')->whereIn('id',$ids)->select('id','name','cover')->orderBy('id','DESC')->paginate(20);
-        $updatedItems = $data->merge($data2);
-        $data->setCollection($updatedItems);
+
+        $data3 = Group::whereIn('id',$ids)->select('id','name','logo')->orderBy('id','DESC')->paginate(20);
+        foreach ($data as $value) {
+            $value['is_own'] = 1;
+        }
+
+        foreach ($data3 as $value) {
+            $value['is_own'] = 0;
+        }
         $updatedItems = $data->merge($data3);
         $data->setCollection($updatedItems);
         return response()->json($data, 200);
@@ -261,17 +276,23 @@ class GroupController extends Controller
 
     public function getRandomGroups()
     {
+        $ids = array();
+        $ids2 = array();
         $user = User::find(Auth::user()->id);
         $age = Carbon::parse($user->dob)->age;
-        $groups = Group::on('mysql2')->where([['user_id','<>',Auth::user()->id],['id','<>',161]])->orderBy('id','DESC')->get();
+        $groups = Group::where([['user_id','<>',Auth::user()->id],['id','<>',161]])->orderBy('id','DESC')->get();
         foreach ($groups as $group) {
-            $check = $this->checkIfEligible2($age,$user->gender,$group->id);
+            $check = $this->checkIfEligible($age,$user->gender,$group->id);
             if($check)
             {
                 $ids[] = $group->id;
             }
          }
-        $data2 = Group::on('mysql2')->whereIn('id',$ids)->select('id','name','cover')->inRandomOrder()->orderBy('id','DESC')->paginate(20);
-        return response()->json($data2, 200);
+        $data2 = Group::whereIn('id',$ids)->select('id','name','logo')->inRandomOrder()->orderBy('id','DESC')->paginate(20);
+        foreach ($data2 as $value) {
+            $ids2[] = $value->id;
+        }
+        $data3 = Group::whereIn('id',$ids2)->select('id','name','logo')->orderBy('id','DESC')->paginate(20);
+        return response()->json($data3, 200);
     }
 }
