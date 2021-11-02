@@ -79,8 +79,7 @@ class GroupPostController extends Controller
     {
         // insert post 
         $validator = Validator::make($request->all(), [
-            'type' => 'required',
-            'anonym' => 'required'
+            'type' => 'required'
         ]);
         $is_approved = 0;
     
@@ -125,7 +124,7 @@ class GroupPostController extends Controller
                 'colorabble' => $request->colorabble,
                 'type' => $request->type,
                 'is_approved' => $is_approved,
-                'anonym' => $request->anonym,
+                'anonym' => 0,
                 'title_pitch' => (@$request->title_pitch) ? $request->title_pitch : '',
                 'video' => (strlen($videoPath) != 0) ? env('DISPLAY_PATH').'videoPost/'.  $videoPath : '',
             ]);
@@ -957,7 +956,6 @@ class GroupPostController extends Controller
 
         $selective = 'user:id,fullName,subName,dob,picture,gender,profession,phone,email,is_freelancer,receive_ads,hide_phone,is_kaiztech_team,company,website,wilaya_id,is_verified';
         $posts = GroupPost::with('images',$selective,'likesList','comments','user.wilaya','likesList.user','comments.user','comments.replies','comments.replies.user','group')->where('group_id',$group_id)->orderBy('id','DESC')->paginate(7);
-        $group = Group::with('user','linkInformation')->find($group_id);
         $follow = followGroup::where([['user_id','=',Auth::user()->id],['follow_id','=',$group_id]])->first();
         $followers = followGroup::where('follow_id',$group_id)->get();
         foreach ($posts as $post) {
@@ -994,17 +992,6 @@ class GroupPostController extends Controller
             $post['countComments'] = count($post->comments);
             $post['createdAt'] = Carbon::parse($post->created_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
         }
-        $collection = collect([
-            'group_name' => $group->name,
-            'logo' => $group->logo,
-            'large_cover' => $group->large_cover,
-            'description' => $group->description,
-            'link_information' => $group->linkInformation,
-            'is_subscribed' => ($follow) ? 1 : 0,
-            'countSubs' => count($followers)
-        ]);
-
-        $posts = $collection->merge($posts);
 
         return response()->json($posts, 200);
         }
