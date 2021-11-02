@@ -4,7 +4,7 @@ namespace App\Http\Controllers\V1\Api;
 
 use Illuminate\Http\Request;
 use App\Models\Group;
-use Auth;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\notification;
 use App\Models\{GroupPost, User, followGroup};
@@ -284,8 +284,15 @@ class GroupController extends Controller
         return response()->json($data3, 200);
     }
 
-    public function getGroupInformation($id)
+    public function getGroupInformation(Request $request, $id)
     {
-            $group = g::withCount('flo')->find($id);
+        $group = Group::with('linkInformation')->find($id, ['name', 'logo', 'large_cover', 'description']);
+        $group_followers_count = followGroup::where('follow_id', $id)->count();
+        $is_follower = followGroup::where('user_id', Auth::id())->count();
+        return response()->json([
+            'group' => $group,
+            'group_followers_count' => $group_followers_count,
+            'is_follower' => $is_follower === 1,
+        ]);
     }
 }
