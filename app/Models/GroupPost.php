@@ -11,9 +11,11 @@ use App\Models\{
     GroupPostComment,
     Group
 };
+
 class GroupPost extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'user_id',
         'group_id',
@@ -53,11 +55,7 @@ class GroupPost extends Model
         return $this->hasMany(GroupPostComment::class);
     }
 
-    /**
-     * Get the group that owns the GroupPost
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
+
     public function group()
     {
         return $this->belongsTo(Group::class);

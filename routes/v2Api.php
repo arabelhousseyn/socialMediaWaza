@@ -62,6 +62,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     // groups and posts
     Route::get('getOwnGroups', [GroupController::class, 'getOwnGroups']);
     Route::get('getRandomGroups', [GroupController::class, 'getRandomGroups']);
+    Route::get('get-group-information', [GroupController::class, 'getGroupInformation']);
     Route::resource('group', GroupController::class);
     Route::get('getposts/{group_id?}', [GroupPostController::class, 'getPostsbyGroup'])->whereNumber('group_id');
     Route::resource('grouposts', GroupPostController::class);
@@ -84,6 +85,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     //profile
     Route::get('get-profile-data', [ProfileController::class, 'getProfileData']);
     Route::post('update-profile-data', [ProfileController::class, 'updateProfileData']);
+    Route::post('update-password', [ProfileController::class, 'updatePassword']);
     Route::post('update-profile-picture', [ProfileController::class, 'updateProfilePicture']);
     Route::get('get-all-publications', [ProfileController::class, 'getAllPublications']);
 });
