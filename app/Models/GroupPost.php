@@ -9,7 +9,8 @@ use App\Models\{
     GroupPostLike,
     User,
     GroupPostComment,
-    Group
+    Group,
+    GroupPostShare
 };
 
 class GroupPost extends Model
@@ -31,7 +32,6 @@ class GroupPost extends Model
     ];
 
     protected $hidden = [
-        'created_at',
         'updated_at'
     ];
 
@@ -59,5 +59,10 @@ class GroupPost extends Model
     public function group()
     {
         return $this->belongsTo(Group::class);
+    }
+
+    public function shares()
+    {
+        return $this->hasMany(GroupPostShare::class);
     }
 }

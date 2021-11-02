@@ -28,7 +28,7 @@ use App\Http\Controllers\V1\Api\{
     FollowGroupController,
     NotificationController,
     changePasswordController,
-    ProfileController,
+    ProfileController
 };
 
 
@@ -60,12 +60,14 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('getNotificationsNotRead', [NotificationController::class, 'getNotificationsNotRead']);
     Route::resource('follow', FollowerController::class);
     // groups and posts
+    Route::post('handleActionPost', [GroupPostController::class, 'hanldeAction2']);
     Route::get('getOwnGroups', [GroupController::class, 'getOwnGroups']);
     Route::get('getRandomGroups', [GroupController::class, 'getRandomGroups']);
     Route::get('get-group-information', [GroupController::class, 'getGroupInformation']);
     Route::resource('group', GroupController::class);
     Route::get('getposts/{group_id?}', [GroupPostController::class, 'getPostsbyGroup'])->whereNumber('group_id');
     Route::resource('grouposts', GroupPostController::class);
+    Route::post('sharepost', [GroupPostController::class,'sharePost']);
     // search
     Route::get('searchGlobal/{name?}', [userController::class, 'searchGlobal']);
     Route::get('getNotifications', [NotificationController::class, 'getNotifications2']);
