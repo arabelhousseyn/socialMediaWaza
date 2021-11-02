@@ -56,6 +56,8 @@ Route::get('getCountOfUsersAccepted', [userController::class, 'getCountOfUsersAc
 Route::group(['middleware' => 'auth:sanctum'], function () {
     // user
     Route::get('usersByPhone/{string?}',[userController::class,'getUsersByPhone']);
+    Route::get('getNotificationsNotRead',[NotificationController::class,'getNotificationsNotRead']);
+    Route::resource('follow', FollowerController::class);
     // groups and posts
     Route::get('getOwnGroups', [GroupController::class,'getOwnGroups']); 
     Route::get('getRandomGroups', [GroupController::class,'getRandomGroups']);  
@@ -65,4 +67,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     // search
     Route::get('searchGlobal/{name?}', [userController::class,'searchGlobal']); 
     Route::get('getNotifications', [NotificationController::class,'getNotifications2']); 
+    // notification
+    Route::get('getPureNotifcation/{notification_id}',[NotificationController::class,'getPureNotifcation'])->whereNumber('notification_id');
+    Route::get('getNotificationById/{id}/{type}',[NotificationController::class,'getNotificationById'])->whereNumber('id','type');
 });

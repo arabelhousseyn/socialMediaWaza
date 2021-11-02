@@ -943,7 +943,10 @@ class GroupPostController extends Controller
                     $dislikes++;
                 }
             }
-
+            if($post->group_id != null)
+            {
+                $post['user']['picture'] = $post->group->logo;
+            }
             $post['likes'] = $likes;
             $post['dislikes'] = $dislikes;
             $post['countComments'] = count($post->comments);
@@ -1005,6 +1008,6 @@ class GroupPostController extends Controller
 
         return response()->json($posts, 200);
         }
-    }    
+    }
 }
 

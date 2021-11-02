@@ -415,10 +415,6 @@ class userController extends Controller
    {
        $ids = array();
        $phones = explode(';',$string);
-       foreach ($phones as $value) {
-           $value = trim($value,' ');
-           $value = intval($value);
-       }
        $users = User::whereIn('phone',$phones)->get();
        foreach ($users as $user) {
            $checkFollowing1 = follower::where([['user_id','=',$user->id],['follow_id','=',Auth::user()->id]])->first();

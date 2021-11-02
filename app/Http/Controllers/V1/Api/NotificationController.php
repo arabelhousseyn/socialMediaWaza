@@ -314,7 +314,7 @@ class NotificationController extends Controller
 
             if($value->type == 4)
             {
-                $follower = follower::on('mysql2')->where([['user_id','=',$value->user_id],['follow_id','=',Auth::user()->id]])->first();
+                $follower = follower::where([['user_id','=',$value->user_id],['follow_id','=',Auth::user()->id]])->first();
             if($follower)
             {
                 if($follower->is_friend == 1)
@@ -700,7 +700,7 @@ class NotificationController extends Controller
                     foreach ($post->comments as $comment) {
                         if($post->user_id == Auth::user()->id && $comment->user_id != Auth::user()->id)
                         {
-                                $user = User::on('mysql2')->where('id',$comment->user_id)->first();
+                                $user = User::where('id',$comment->user_id)->first();
                             $temp['id'] = $value->id;
                             $temp['message'] ='a commenté sur votre publication';
                             $temp['sub_message'] =$user->fullName;
