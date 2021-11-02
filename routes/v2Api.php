@@ -65,7 +65,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('get-group-information', [GroupController::class, 'getGroupInformation']);
     Route::resource('group', GroupController::class);
     Route::get('getposts/{group_id?}', [GroupPostController::class, 'getPostsbyGroup'])->whereNumber('group_id');
-    
     Route::resource('grouposts', GroupPostController::class);
     // search
     Route::get('searchGlobal/{name?}', [userController::class, 'searchGlobal']);
