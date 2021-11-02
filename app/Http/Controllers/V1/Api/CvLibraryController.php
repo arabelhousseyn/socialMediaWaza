@@ -13,14 +13,10 @@ use Carbon\Carbon;
 class CvLibraryController extends Controller
 {
     use upload;
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
     public function index()
     {
-        // get all cv libraries  
+        // get all cv libraries
         $data = CvLibrary::select('id','path','user_id')->whereDate('created_at', '>=', Carbon::now()->subDays(7)->setTime(0, 0, 0)->toDateTimeString())->orderBy('id','DESC')->paginate(20); // to be changed with('user')
         foreach ($data as $value) {
             $user = User::where('id',$value->user_id)->first();
@@ -50,7 +46,7 @@ class CvLibraryController extends Controller
      */
     public function store(Request $request)
     {
-        // insert cv library 
+        // insert cv library
         $image = '';
 
         $validator = Validator::make($request->all(), [
@@ -80,7 +76,7 @@ class CvLibraryController extends Controller
             $cvLibrary = CvLibrary::create([
                 'user_id' => Auth::user()->id,
                 'FullName' => $request->FullName,
-                'path' => (strlen($image) != 0) ?env('DISPLAY_PATH') .'CvLibraryImages/'.$image 
+                'path' => (strlen($image) != 0) ?env('DISPLAY_PATH') .'CvLibraryImages/'.$image
                 : Auth::user()->picture,
                 'dob' => $request->dob,
                 'arabic' => $request->arabic,
