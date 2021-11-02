@@ -320,16 +320,16 @@ class userController extends Controller
         } else {
             if (strlen($name) >= 3) {
                 $final = array();
-                $user = User::on('mysql2')->find(Auth::user()->id);
+                $user = User::find(Auth::user()->id);
                 $age = Carbon::parse($user->dob)->age;
                 $ids = array();
-                $data = User::on('mysql2')->where('fullName', 'LIKE', "%{$name}%")
+                $data = User::where('fullName', 'LIKE', "%{$name}%")
                     ->select('id', 'fullName', 'profession', 'picture')->get();
                 foreach ($data as $value) {
                     $value['type_record'] = 0;
                 }
 
-                $groups = Group::on('mysql2')->where('name', 'LIKE', "%{$name}%")->get();
+                $groups = Group::where('name', 'LIKE', "%{$name}%")->get();
                 foreach ($groups as $group) {
                     $check = $this->checkIfEligible2($age, $user->gender, $group->id);
                     if ($check) {
