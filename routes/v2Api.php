@@ -16,19 +16,14 @@ use App\Http\Controllers\V1\Api\{
     GroupPostController,
     GroupUniverseController,
     AmanaController,
-    FreelanceController,
     CategoryController,
     ListingController,
     ReportController,
     AmanaCategoryController,
-    JobOfferController,
-    CvLibraryController,
     ReportItaController,
     FollowerController,
     FollowGroupController,
     NotificationController,
-    changePasswordController,
-    ProfileController,
 };
 
 

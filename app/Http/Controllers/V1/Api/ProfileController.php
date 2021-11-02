@@ -20,7 +20,7 @@ class ProfileController extends Controller
 
     public function getProfileData()
     {
-        $user = User::find(Auth::id());
+        $user = User::withCount('followers')->find(Auth::id());
         return response()->json($user, 200);
     }
 

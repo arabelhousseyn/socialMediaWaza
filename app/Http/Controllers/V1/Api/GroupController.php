@@ -286,6 +286,6 @@ class GroupController extends Controller
 
     public function getGroupInformation($id)
     {
-        $group = GroupPost::find($id);
+            $group = g::withCount('flo')->find($id);
     }
 }
