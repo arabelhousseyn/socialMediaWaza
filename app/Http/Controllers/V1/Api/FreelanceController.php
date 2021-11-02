@@ -3,137 +3,45 @@
 namespace App\Http\Controllers\V1\Api;
 
 use App\Models\Freelance;
-use App\Models\JobOffer;
-use App\Models\User;
 use Illuminate\Http\Request;
-use Auth;
 use Illuminate\Support\Facades\Validator;
-use App\Traits\upload;
+
 class FreelanceController extends Controller
 {
-    use upload;
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
-        // get all freelancers
-        $data = Freelance::orderBy('id','DESC')->select('id','description','user_id','job_offer_id')->paginate(20);
-        foreach ($data as $value) {
-            $user = User::where('id',$value->user_id)->first();
-            $value['user'] = $user->fullName;
-            $value['pictureUser'] = $user->picture;
-            $value['is_kaiztech_team'] = $user->is_kaiztech_team;
-        }
-        return response()->json($data, 200);
+        $freelances = Freelance::whereStatus(true)->latest()->paginate(10);
+        return response()->json($freelances);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-        // insert freelancer
         $validator = Validator::make($request->all(), [
+            'searched_profile' => 'required',
             'description' => 'required',
-            'profil' => 'required',
             'date' => 'required|date',
             'duration' => 'required',
-            'area' => 'required'
+            'region' => 'required',
         ]);
-
-        if($validator->fails())
-        {
+        if ($validator->fails()) {
             return response()->json(['success' => false], 200);
         }
-
-        if($validator->validated())
-        {
-            $job = JobOffer::where('id',$request->job_offer_id)->first();
-        if($job)
-        {
-            $freelance = Freelance::create([
-                'user_id' => Auth::user()->id,
-                'profil' => $request->profil,
-                'description' => $request->description,
-                'date' => $request->date,
-                'duration' => $request->duration,
-                'area' => $request->area
-            ]);
-
-            return response()->json(['success' => true], 200);   
-        }
-        return response()->json(['success' => false], 200);
-        }    
+        Freelance::create([
+            'user_id' => auth('sanctum')->user()->id,
+            'searched_profile' => $request->searched_profile,
+            'description' => $request->description,
+            'date' => $request->date,
+            'duration' => $request->duration,
+            'region' => $request->region,
+        ]);
+        return true;
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Freelance  $freelance
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
+    public function changeStatus(Request $request)
     {
-        // show details of freelancer
-        $data = Freelance::find($id);
-         if($data)
-         {
-            $user = User::where('id',$data->user_id)->first();
-            $data['pictureUser'] = $user->picture;
-            $data['is_kaiztech_team'] = $user->is_kaiztech_team;
-            $data['profession'] = $user->profession;
-            return response()->json(['success' => true,'data' => $data], 200);
-         }
-         return response()->json(['success' => false], 200);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Freelance  $freelance
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Freelance $freelance)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Freelance  $freelance
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Freelance $freelance)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Freelance  $freelance
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Freelance $freelance)
-    {
-        //
+        $data = Freelance::find($request->id);
+        $data->status = !$data->status;
+        $data->save();
+        return true;
     }
 }

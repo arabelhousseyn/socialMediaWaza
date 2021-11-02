@@ -8,21 +8,21 @@ use Illuminate\Database\Eloquent\Model;
 class Freelance extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'user_id',
-        'profil',
+        'searched_profile',
         'description',
         'date',
         'duration',
-        'area'
+        'region',
+        'status'
     ];
 
     protected $hidden = [
         'created_at',
-        'updated_at',
     ];
 
- 
 
     public function user()
     {

@@ -8,21 +8,17 @@ use Illuminate\Database\Eloquent\Model;
 class JobOffer extends Model
 {
     use HasFactory;
-    
+
     protected $fillable = [
         'user_id',
-        'path',
-        'name_company',
-        'sector',
-        'address',
-        'job',
-        'status',
-        'state',
-        'price',
+        'company_logo',
+        'searched_profile',
+        'company_name',
         'description',
-        'mission',
-        'profile',
-        'advantage'
+        'number',
+        'workplace',
+        'type_of_contract',
+        'status',
     ];
 
     protected $hidden = [

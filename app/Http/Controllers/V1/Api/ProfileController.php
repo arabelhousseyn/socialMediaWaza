@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Traits\upload;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ProfileController extends Controller
 {
@@ -13,7 +14,7 @@ class ProfileController extends Controller
 
     public function getProfileData()
     {
-        $user = User::find(auth('sanctum')->user()->id);
+        $user = User::find(Auth::id());
         return response()->json([
             'data' => $user,
             'success' => true,
@@ -22,7 +23,7 @@ class ProfileController extends Controller
 
     public function updateProfileData(Request $request)
     {
-        User::where('id', auth('sanctum')->user()->id)->update([
+        User::where('id', Auth::id())->update([
             'fullName' => $request->fullName,
             'subName' => $request->subName,
             'dob' => $request->dob,
@@ -41,7 +42,7 @@ class ProfileController extends Controller
     public function updateProfilePicture(Request $request)
     {
         $path = $this->ImageUpload($request->picture, 'profiles');
-        User::where('id', auth('sanctum')->user()->id)->update([
+        User::where('id', Auth::id())->update([
             'picture' => $path
         ]);
         return true;
@@ -49,7 +50,7 @@ class ProfileController extends Controller
 
     public function getAllPublications(Request $request)
     {
-        $group_posts = User::where('id', auth('sanctum')->user()->id)->paginate(20);
+        $group_posts = User::where('id', Auth::id())->paginate(20);
         return response()->json([
             $group_posts,
             'success' => true,
