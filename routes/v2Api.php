@@ -73,19 +73,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('getPureNotifcation/{notification_id}', [NotificationController::class, 'getPureNotifcation'])->whereNumber('notification_id');
     Route::get('getNotificationById/{id}/{type}', [NotificationController::class, 'getNotificationById'])->whereNumber('id', 'type');
     ////jobs
-    Route::post('create-cv', [CvLibraryController::class, 'store']);
-    Route::get('get-cv', [CvLibraryController::class, 'index']);
-    Route::post('cv-increment', [CvLibraryController::class, 'increment']);
-    Route::post('create-offer', [JobOfferController::class, 'store']);
-    Route::post('change-status-offer', [JobOfferController::class, 'changeStatus']);
-    Route::get('get-offers', [JobOfferController::class, 'index']);
-    Route::post('create-freelance', [FreelanceController::class, 'store']);
-    Route::post('change-status-freelance', [FreelanceController::class, 'changeStatus']);
-    Route::get('get-freelances', [FreelanceController::class, 'index']);
+    require_once __DIR__ . "/master/jobs.php";
     //profile
-    Route::get('get-profile-data', [ProfileController::class, 'getProfileData']);
-    Route::post('update-profile-data', [ProfileController::class, 'updateProfileData']);
-    Route::post('update-password', [ProfileController::class, 'updatePassword']);
-    Route::post('update-profile-picture', [ProfileController::class, 'updateProfilePicture']);
-    Route::get('get-all-publications', [ProfileController::class, 'getAllPublications']);
+    require_once __DIR__ . "/master/profile.php";
 });
