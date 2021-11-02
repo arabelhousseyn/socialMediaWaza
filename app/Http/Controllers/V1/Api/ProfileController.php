@@ -15,10 +15,7 @@ class ProfileController extends Controller
     public function getProfileData()
     {
         $user = User::find(Auth::id());
-        return response()->json([
-            'data' => $user,
-            'success' => true,
-        ], 200);
+        return response()->json($user, 200);
     }
 
     public function updateProfileData(Request $request)
@@ -36,7 +33,7 @@ class ProfileController extends Controller
             'company' => $request->company,
             'website' => $request->website,
         ]);
-        return true;
+        return response()->json(['success' => true], 200);
     }
 
     public function updateProfilePicture(Request $request)
@@ -45,15 +42,12 @@ class ProfileController extends Controller
         User::where('id', Auth::id())->update([
             'picture' => $path
         ]);
-        return true;
+        return response()->json(['success' => true], 200);
     }
 
     public function getAllPublications(Request $request)
     {
         $group_posts = User::where('id', Auth::id())->paginate(20);
-        return response()->json([
-            $group_posts,
-            'success' => true,
-        ], 200);
+        return response()->json($group_posts, 200);
     }
 }
