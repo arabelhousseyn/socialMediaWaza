@@ -26,6 +26,22 @@ class ProfileController extends Controller
 
     public function updateProfileData(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'fullName' => 'required',
+            'subName' => 'required',
+            'dob' => 'required',
+            'gender' => 'required',
+            'profession' => 'required',
+            'wilaya_id' => 'required',
+            'phone' => 'required',
+            'is_freelancer' => 'required|boolean',
+            'hide_phone' => 'required|boolean',
+            'company' => 'nullable',
+            'website' => 'nullable|url',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['success' => false], 200);
+        }
         User::where('id', Auth::id())->update([
             'fullName' => $request->fullName,
             'subName' => $request->subName,
