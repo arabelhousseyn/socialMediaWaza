@@ -3,10 +3,16 @@
 namespace App\Http\Controllers\V1\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ChangePasswordNotificationMail;
 use App\Models\User;
+use App\Rules\MatchOldPassword;
 use App\Traits\upload;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
 
 class ProfileController extends Controller
 {
@@ -45,6 +51,27 @@ class ProfileController extends Controller
         User::where('id', Auth::id())->update([
             'picture' => $path
         ]);
+        return true;
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'current_password' => ['required', new MatchOldPassword(), 'min:8', 'max:50'],
+            'new_password' => ['required', 'min:8', 'max:50'],
+            'new_confirm_password' => ['same:new_password'],
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['success' => false], 200);
+        }
+        $message = 'Votre mot de passe a été modifié le : ' . Carbon::now()->format('d-m-Y , H:i');
+        $user = User::find(Auth::id());
+        $user->update(['password' => Hash::make($request->new_password)]);
+        $details = [
+            'subject' => 'Changement de mot de passe',
+            'text' => 'Bonjour  <strong>' . $user->fullName . '</strong><br>' . $message . '',
+        ];
+        Mail::to($user->email)->send(new ChangePasswordNotificationMail($details));
         return true;
     }
 
