@@ -284,7 +284,7 @@ class GroupController extends Controller
         return response()->json($data3, 200);
     }
 
-    public function getGroupInformation(Request $request, $id)
+    public function getGroupInformation($id)
     {
         $group = Group::with('linkInformation')->find($id, ['name', 'logo', 'large_cover', 'description']);
         $group_followers_count = followGroup::where('follow_id', $id)->count();
