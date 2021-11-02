@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-// v1 of api 
+// v1 of api
 use App\Http\Controllers\V1\Api\{
     loginController,
     registerController,
@@ -79,7 +79,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::put('changePassword', [changePasswordController::class, 'index']);
     Route::get('getProfiles/{name?}', [userController::class, 'getProfiles'])->where('name', '[A-Za-z]+');
     Route::get('pushNotificarionForSingleUser/{$user_id}', [userController::class, 'pushNotificarionForSingleUser'])->whereNumber('user_id');
-    
+
     // innovation
     Route::get('getInnovationByDomain/{id}', [innovationController::class, 'getInnovationByDomain'])->whereNumber('id')->name('getInnovationByDomainApi');
     Route::post('funding', [innovationController::class, 'funding'])->name('fundingApi');
@@ -109,7 +109,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::resource('group', GroupController::class);
     Route::resource('grouposts', GroupPostController::class);
     Route::resource('groupuniverses', GroupUniverseController::class);
-    
+
     // amana
     Route::get('amanaByCategory/{id}', [AmanaController::class, 'amanaByCategory']);
     Route::resource('amana', AmanaController::class);
@@ -146,5 +146,14 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('getAddFriends',[NotificationController::class,'getAddFriends']);
     Route::get('updateRead/{id}',[NotificationController::class,'updateRead'])->whereNumber('id');
     Route::resource('notification', NotificationController::class);
-    
+    ////jobs
+    Route::post('create-cv', [CvLibraryController::class, 'store']);
+    Route::get('get-cv', [CvLibraryController::class, 'index']);
+    Route::post('cv-increment', [CvLibraryController::class, 'increment']);
+    Route::post('create-offer', [JobOfferController::class, 'store']);
+    Route::post('change-status-offer', [JobOfferController::class, 'changeStatus']);
+    Route::get('get-offers', [JobOfferController::class, 'index']);
+    Route::post('create-freelance', [FreelanceController::class, 'store']);
+    Route::post('change-status-freelance', [FreelanceController::class, 'changeStatus']);
+    Route::get('get-freelances', [FreelanceController::class, 'index']);
 });
