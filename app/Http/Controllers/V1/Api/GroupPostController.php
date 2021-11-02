@@ -79,8 +79,7 @@ class GroupPostController extends Controller
     {
         // insert post 
         $validator = Validator::make($request->all(), [
-            'type' => 'required',
-            'anonym' => 'required'
+            'type' => 'required'
         ]);
         $is_approved = 0;
     
@@ -125,7 +124,7 @@ class GroupPostController extends Controller
                 'colorabble' => $request->colorabble,
                 'type' => $request->type,
                 'is_approved' => $is_approved,
-                'anonym' => $request->anonym,
+                'anonym' => 0,
                 'title_pitch' => (@$request->title_pitch) ? $request->title_pitch : '',
                 'video' => (strlen($videoPath) != 0) ? env('DISPLAY_PATH').'videoPost/'.  $videoPath : '',
             ]);
