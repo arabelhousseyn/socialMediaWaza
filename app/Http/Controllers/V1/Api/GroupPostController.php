@@ -998,7 +998,7 @@ class GroupPostController extends Controller
         $selective = 'user:id,fullName,subName,dob,picture,gender,profession,phone,email,is_freelancer,receive_ads,hide_phone,is_kaiztech_team,company,website,wilaya_id,is_verified';
         // if(count($ids) == 0)
         // {
-            $posts = GroupPost::select('id','user_id','group_id','description','colorabble','type','title_pitch','video')->where('is_approved',1)->orderBy('id','DESC')->paginate(7);
+            $posts = GroupPost::select('id','user_id','group_id','description','colorabble','type','title_pitch','video')->where([['is_approved','=',1],['type','<>',1]])->orderBy('id','DESC')->paginate(7);
         // }else{
         //     $posts = GroupPost::whereIn('id',$ids)->with('images',$selective,'likesList','comments','user.wilaya','likesList.user','comments.user','comments.replies','comments.replies.user','group')->inRandomOrder()->paginate(7);
         // }
@@ -1077,7 +1077,7 @@ class GroupPostController extends Controller
         }else{
 
         $selective = 'user:id,fullName,subName,dob,picture,gender,profession,phone,email,is_freelancer,receive_ads,hide_phone,is_kaiztech_team,company,website,wilaya_id,is_verified';
-        $posts = GroupPost::select('id','user_id','group_id','description','colorabble','type','title_pitch','video')->where([['group_id','=',$group_id],['is_approved','=',1]])->orderBy('id','DESC')->paginate(7);
+        $posts = GroupPost::select('id','user_id','group_id','description','colorabble','type','title_pitch','video')->where([['group_id','=',$group_id],['is_approved','=',1],['type','<>',1]])->orderBy('id','DESC')->paginate(7);
         foreach ($posts as $post) {
             $temp = GroupPost::with('images',$selective,'likesList','comments','user.wilaya','likesList.user','comments.user','comments.replies','comments.replies.user','group','shares')->find($post->id);
             $is_liked = false;
