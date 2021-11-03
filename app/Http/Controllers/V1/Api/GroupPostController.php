@@ -35,10 +35,8 @@ class GroupPostController extends Controller
 
     public function index()
     {
-        $post = new GroupPost;
-        $post->setConnection('mysql2');
         $selective = 'user:id,fullName,subName,dob,picture,gender,profession,phone,email,is_freelancer,receive_ads,hide_phone,is_kaiztech_team,company,website,wilaya_id';
-        $posts = $post->with('images',$selective,'likesList','comments','user.wilaya','likesList.user','comments.user','comments.replies')->orderBy('id','DESC')->paginate(7);
+        $posts = GroupPost::with('images',$selective,'likesList','comments','user.wilaya','likesList.user','comments.user','comments.replies')->orderBy('id','DESC')->paginate(7);
         foreach ($posts as $post) {
             $likes = 0;
             $dislikes = 0;
