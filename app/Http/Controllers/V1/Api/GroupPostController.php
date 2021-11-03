@@ -1180,7 +1180,50 @@ if($tog)
                     'type' => 5,
                     'is_read' => 0
                 ]);
-                return response()->json(['success' => true,'notification_id' => $notification->id], 200);
+
+                $status = 0;
+            $tog = false;
+            $is_liked = false;
+            $is_disliked = false;
+
+        $postInfo = GroupPost::with('comments','shares','likesList')->find($request->group_post_id);
+foreach ($postInfo->likesList as $interaction) {
+    if($interaction->user_id == Auth::user()->id)
+        {
+            $tog = true;
+            if($interaction->type == 1)
+            {
+                $is_liked = true;
+            }
+            if($interaction->type == -1)
+            {
+                $is_disliked = true;
+            }
+        }
+}
+if($tog)
+    {
+        if($is_liked)
+        {
+            $status = 1;
+        }  
+        if($is_disliked)
+        {
+            $status = -1;
+        }  
+    }else{
+        $status = 0;  
+    }
+        $postInfo2 = GroupPost::with('comments','shares','likesList')->find($request->group_post_id);
+        return response()->json([
+            'group_post_id' => $request->group_post_id,
+            'countComments' => ($postInfo2->comments) ? count($postInfo2->comments) : '0',
+            'countShares' => ($postInfo2->shares) ? count($postInfo2->shares) : '0',
+            'countInteractions' => ($postInfo2->likesList) ? count($postInfo2->likesList) : '0',
+            'like_status' => $status,
+            'notification_id' => $notification->id
+    
+    ], 200);
             }
             return response()->json(['success' => false], 200);
         }
