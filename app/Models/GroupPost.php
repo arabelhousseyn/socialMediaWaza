@@ -4,18 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-<<<<<<< HEAD
-=======
-use App\Models\{
-    GroupPostImage,
-    GroupPostLike,
-    User,
-    GroupPostComment,
-    Group,
-    GroupPostShare
-};
->>>>>>> ba5dcd53c0b0187f85cd40b7b9b564bebab42ab0
-
 class GroupPost extends Model
 {
     use HasFactory;

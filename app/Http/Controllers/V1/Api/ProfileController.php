@@ -4,6 +4,7 @@ namespace App\Http\Controllers\V1\Api;
 
 use App\Http\Controllers\Controller;
 use App\Mail\ChangePasswordNotificationMail;
+use App\Models\GroupPost;
 use App\Models\User;
 use App\Rules\MatchOldPassword;
 use App\Traits\upload;
@@ -90,7 +91,7 @@ class ProfileController extends Controller
 
     public function getAllPublications(Request $request)
     {
-        $group_posts = G::where('id', Auth::id())->paginate(20);
+        $group_posts = GroupPost::where('id', Auth::id())->paginate(20);
         return response()->json($group_posts, 200);
     }
 }
