@@ -88,7 +88,7 @@ class ProfileController extends Controller
             'text' => 'Bonjour  <strong>' . $user->fullName . '</strong><br>' . $message . '',
         ];
         Mail::to($user->email)->send(new ChangePasswordNotificationMail($details));
-        return true;
+        return response()->json(['success' => true], 200);
     }
 
     public function getAllPublications(Request $request)
