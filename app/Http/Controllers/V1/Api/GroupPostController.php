@@ -586,26 +586,33 @@ class GroupPostController extends Controller
     public function hanldeAction2(Request $request)
     {
         $check = GroupPostLike::where([['user_id','=',Auth::user()->id],['group_post_id','=',$request->group_post_id]])->first();
-
-        if($check)
-        {
-            $status = 0;
+        $status = 0;
             $tog = false;
             $is_liked = false;
             $is_disliked = false;
+        if($check)
+        {
             if($request->type == $check->type)
             {
                 GroupPostLike::where([['user_id','=',Auth::user()->id],['group_post_id','=',$request->group_post_id],['type','=',$request->type]])->delete();  
                 notification::where([['user_id','=',Auth::user()->id],['morphable_id','=',$request->group_post_id],['type','=',$request->type]])->delete();
+                $postInfo2 = GroupPost::with('comments','shares','likesList')->find($request->group_post_id);
+        return response()->json([
+            'group_post_id' => $request->group_post_id,
+            'countComments' => ($postInfo2->comments) ? count($postInfo2->comments) : '0',
+            'countShares' => ($postInfo2->shares) ? count($postInfo2->shares) : '0',
+            'countInteractions' => ($postInfo2->likesList) ? count($postInfo2->likesList) : '0',
+            'like_status' => 0,
+            'notification_id' => 0
+    
+    ], 200);
             }else{
 
                 notification::where([['user_id','=',Auth::user()->id],['morphable_id','=',$request->group_post_id],['type','=',$request->type]])->delete();
 
                 $check->update([
                     'type' => $request->type
-                ]); 
-            }
-            
+                ]);
                 $notification = notification::create([
                     'user_id' => Auth::user()->id,
                     'morphable_id' => $request->group_post_id,
@@ -613,33 +620,17 @@ class GroupPostController extends Controller
                     'is_read' => 0,
                     //'affiliate' => 0,
                 ]);
-        $postInfo = GroupPost::with('comments','shares','likesList')->find($request->group_post_id);
-        foreach ($postInfo->likesList as $interaction) {
-            if($interaction->user_id == Auth::user()->id)
-                {
-                    $tog = true;
-                    if($interaction->type == 1)
-                    {
-                        $is_liked = true;
-                    }
-                    if($interaction->type == -1)
-                    {
-                        $is_disliked = true;
-                    }
-                }
-        }
-        if($tog)
-            {
-                if($is_liked)
-                {
-                    $status = 1;
-                }  
-                if($is_disliked)
-                {
-                    $status = -1;
-                }  
-            }else{
-                $status = 0;  
+                
+                $postInfo2 = GroupPost::with('comments','shares','likesList')->find($request->group_post_id);
+        return response()->json([
+            'group_post_id' => $request->group_post_id,
+            'countComments' => ($postInfo2->comments) ? count($postInfo2->comments) : '0',
+            'countShares' => ($postInfo2->shares) ? count($postInfo2->shares) : '0',
+            'countInteractions' => ($postInfo2->likesList) ? count($postInfo2->likesList) : '0',
+            'like_status' => $status,
+            'notification_id' => $notification->id
+    
+    ], 200);
             }
         }
 
@@ -648,6 +639,34 @@ class GroupPostController extends Controller
             'group_post_id' => $request->group_post_id,
             'type' => $request->type
         ]);
+$postInfo = GroupPost::with('comments','shares','likesList')->find($request->group_post_id);
+foreach ($postInfo->likesList as $interaction) {
+    if($interaction->user_id == Auth::user()->id)
+        {
+            $tog = true;
+            if($interaction->type == 1)
+            {
+                $is_liked = true;
+            }
+            if($interaction->type == -1)
+            {
+                $is_disliked = true;
+            }
+        }
+}
+if($tog)
+    {
+        if($is_liked)
+        {
+            $status = 1;
+        }  
+        if($is_disliked)
+        {
+            $status = -1;
+        }  
+    }else{
+        $status = 0;  
+    }
 
         $notification = notification::create([
             'user_id' => Auth::user()->id,
@@ -656,12 +675,12 @@ class GroupPostController extends Controller
             'is_read' => 0,
             //'affiliate' => 0,
         ]); 
-
+        $postInfo2 = GroupPost::with('comments','shares','likesList')->find($request->group_post_id);
         return response()->json([
             'group_post_id' => $request->group_post_id,
-            'countComments' => ($postInfo->comments) ? count($postInfo->comments) : '0',
-            'countShares' => ($postInfo->shares) ? count($postInfo->shares) : '0',
-            'countInteractions' => ($postInfo->likesList) ? count($postInfo->likesList) : '0',
+            'countComments' => ($postInfo2->comments) ? count($postInfo2->comments) : '0',
+            'countShares' => ($postInfo2->shares) ? count($postInfo2->shares) : '0',
+            'countInteractions' => ($postInfo2->likesList) ? count($postInfo2->likesList) : '0',
             'like_status' => $status,
             'notification_id' => $notification->id
     
