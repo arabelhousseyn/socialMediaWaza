@@ -12,7 +12,8 @@ use App\Models\{
     GroupPostComment,
     GroupPostLike,
     followGroup,
-    notification
+    notification,
+    GroupPostShare
 };
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
@@ -105,7 +106,7 @@ class GroupPostController extends Controller
                 }
             }
 
-            if($request->colorabble == 0 && strlen($request->images) == 0)
+            if($request->colorabble == 0 && strlen($request->images) == 0 && strlen($request->video) == 0)
             {
                 return response()->json(['success' => false], 200);
             }
@@ -581,6 +582,92 @@ class GroupPostController extends Controller
         return response()->json(['data' => $data->original,'notification_id' => $notification->id], 200);
     }
 
+
+    public function hanldeAction2(Request $request)
+    {
+        $check = GroupPostLike::where([['user_id','=',Auth::user()->id],['group_post_id','=',$request->group_post_id]])->first();
+
+        if($check)
+        {
+            $status = 0;
+            $tog = false;
+            $is_liked = false;
+            $is_disliked = false;
+            if($request->type == $check->type)
+            {
+                GroupPostLike::where([['user_id','=',Auth::user()->id],['group_post_id','=',$request->group_post_id],['type','=',$request->type]])->delete();  
+                notification::where([['user_id','=',Auth::user()->id],['morphable_id','=',$request->group_post_id],['type','=',$request->type]])->delete();
+            }else{
+
+                notification::where([['user_id','=',Auth::user()->id],['morphable_id','=',$request->group_post_id],['type','=',$request->type]])->delete();
+
+                $check->update([
+                    'type' => $request->type
+                ]); 
+            }
+            
+                $notification = notification::create([
+                    'user_id' => Auth::user()->id,
+                    'morphable_id' => $request->group_post_id,
+                    'type' => ($request->type == 1) ? 0 : 1,
+                    'is_read' => 0,
+                    //'affiliate' => 0,
+                ]);
+        $postInfo = GroupPost::with('comments','shares','likesList')->find($request->group_post_id);
+        foreach ($postInfo->likesList as $interaction) {
+            if($interaction->user_id == Auth::user()->id)
+                {
+                    $tog = true;
+                    if($interaction->type == 1)
+                    {
+                        $is_liked = true;
+                    }
+                    if($interaction->type == -1)
+                    {
+                        $is_disliked = true;
+                    }
+                }
+        }
+        if($tog)
+            {
+                if($is_liked)
+                {
+                    $status = 1;
+                }  
+                if($is_disliked)
+                {
+                    $status = -1;
+                }  
+            }else{
+                $status = 0;  
+            }
+        }
+
+        $like = GroupPostLike::create([
+            'user_id' => Auth::user()->id,
+            'group_post_id' => $request->group_post_id,
+            'type' => $request->type
+        ]);
+
+        $notification = notification::create([
+            'user_id' => Auth::user()->id,
+            'morphable_id' => $request->group_post_id,
+            'type' => 0,
+            'is_read' => 0,
+            //'affiliate' => 0,
+        ]); 
+
+        return response()->json([
+            'group_post_id' => $request->group_post_id,
+            'countComments' => ($postInfo->comments) ? count($postInfo->comments) : '0',
+            'countShares' => ($postInfo->shares) ? count($postInfo->shares) : '0',
+            'countInteractions' => ($postInfo->likesList) ? count($postInfo->likesList) : '0',
+            'like_status' => $status,
+            'notification_id' => $notification->id
+    
+    ], 200);
+    }
+
     public function likeListByPost($id)
     {
         $data = GroupPost::with('user','likesList')->find($id);
@@ -866,6 +953,7 @@ class GroupPostController extends Controller
     {
         if($group_id == 0)
         {
+            $final = array();
         //     $ids_groups = array();
         //     $ids_users = array();
         //     $ids_posts = array();
@@ -910,90 +998,172 @@ class GroupPostController extends Controller
         $selective = 'user:id,fullName,subName,dob,picture,gender,profession,phone,email,is_freelancer,receive_ads,hide_phone,is_kaiztech_team,company,website,wilaya_id,is_verified';
         // if(count($ids) == 0)
         // {
-            $posts = GroupPost::with('images',$selective,'likesList','comments','user.wilaya','likesList.user','comments.user','comments.replies','comments.replies.user','group')->orderBy('id','DESC')->paginate(7);
+            $posts = GroupPost::select('id','user_id','group_id','description','colorabble','type','title_pitch','video')->where([['is_approved','=',1],['type','<>',1]])->orderBy('id','DESC')->paginate(7);
         // }else{
         //     $posts = GroupPost::whereIn('id',$ids)->with('images',$selective,'likesList','comments','user.wilaya','likesList.user','comments.user','comments.replies','comments.replies.user','group')->inRandomOrder()->paginate(7);
         // }
         foreach ($posts as $post) {
-            $tempImages = array();
-            if(@$post->images[0]->path)
+            $temp = GroupPost::with('images',$selective,'likesList','comments','user.wilaya','likesList.user','comments.user','comments.replies','comments.replies.user','group','shares')->find($post->id);
+            $is_liked = false;
+            $is_disliked = false;
+            $tog = false;
+            if($temp->likesList)
             {
-                if(count($post->images) > 5)
-            {
-                for ($i=0; $i <5 ; $i++) {
-                    array_push($tempImages,$userPost->images[$i]); 
-                }
-                $post['images'] = $tempImages;
-            }
-            $post['countImages'] = count($post->images);
+                $post['countInteraction'] = count($temp->likesList);
             }else{
-                $post['countImages'] = 0;
+                $post['countInteraction'] = 0; 
             }
-
-            $likes = 0;
-            $dislikes = 0;
-            foreach ($post->likesList as $interaction) {
-                if($interaction->type == 1)
-                {
-                    $likes++;
-                }
-                if($interaction->type == -1)
-                {
-                    $dislikes++;
-                }
-            }
-            if($post->group_id != null)
+            $post['user_fullName'] = $temp->user->fullName;
+            $post['images'] = $temp->images;
+            $post['user_pic'] = $temp->user->picture;
+            $post['description'] = $temp->description;
+            $post['type'] = $temp->type;
+            $post['colorabble'] = $temp->colorabble;
+            $post['title_pitch'] = $temp->title_pitch;
+            $post['video'] = $temp->video;
+            if($temp->shares)
             {
-                $post['user']['picture'] = $post->group->logo;
+                $post['countShare'] = count($temp->shares);
+            }else{
+                $post['countShare'] = 0;
             }
-            $post['likes'] = $likes;
-            $post['dislikes'] = $dislikes;
-            $post['countComments'] = count($post->comments);
-            $post['createdAt'] = Carbon::parse($post->created_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
+            $post['user_profession'] = $temp->user->profession;
+            foreach ($temp->likesList as $interaction) {
+                if($interaction->user_id == Auth::user()->id)
+                {
+                    $tog = true;
+                    if($interaction->type == 1)
+                    {
+                        $is_liked = true;
+                    }
+                    if($interaction->type == -1)
+                    {
+                        $is_disliked = true;
+                    }
+                }
+            }
+            if($tog)
+            {
+                if($is_liked)
+                {
+                    $post['like_status'] = 1;
+                }  
+                if($is_disliked)
+                {
+                    $post['like_status'] = -1;
+                }  
+            }else{
+                $post['like_status'] = 0;  
+            }
+            if($temp->group_id != null)
+            {
+                $post['group_name'] = $temp->group->name;
+                $post['group_logo'] = $temp->group->logo;
+                $post['is_group'] = 1;  
+            }else{
+                $post['group_name'] = '';
+                $post['group_logo'] = '';
+                $post['is_group'] = 0;  
+            }
+            if($temp->comments)
+            {
+                $post['countComments'] = count($temp->comments);
+            }else{
+                $post['countComments'] = 0;
+            }
+            $post['createdAt'] = strval($temp->created_at);
         }
         return response()->json($posts, 200);
         }else{
 
         $selective = 'user:id,fullName,subName,dob,picture,gender,profession,phone,email,is_freelancer,receive_ads,hide_phone,is_kaiztech_team,company,website,wilaya_id,is_verified';
-        $posts = GroupPost::with('images',$selective,'likesList','comments','user.wilaya','likesList.user','comments.user','comments.replies','comments.replies.user','group')->where('group_id',$group_id)->orderBy('id','DESC')->paginate(7);
-        $follow = followGroup::where([['user_id','=',Auth::user()->id],['follow_id','=',$group_id]])->first();
-        $followers = followGroup::where('follow_id',$group_id)->get();
+        $posts = GroupPost::select('id','user_id','group_id','description','colorabble','type','title_pitch','video')->where([['group_id','=',$group_id],['is_approved','=',1],['type','<>',1]])->orderBy('id','DESC')->paginate(7);
         foreach ($posts as $post) {
-
-            $tempImages = array();
-            if(@$post->images[0]->path)
+            $temp = GroupPost::with('images',$selective,'likesList','comments','user.wilaya','likesList.user','comments.user','comments.replies','comments.replies.user','group','shares')->find($post->id);
+            $is_liked = false;
+            if($temp->likesList)
             {
-                if(count($post->images) > 5)
-            {
-                for ($i=0; $i <5 ; $i++) {
-                    array_push($tempImages,$userPost->images[$i]); 
-                }
-                $post['images'] = $tempImages;
-            }
-            $post['countImages'] = count($post->images);
+                $post['countInteraction'] = count($temp->likesList);
             }else{
-                $post['countImages'] = 0;
+                $post['countInteraction'] = 0; 
             }
-            
-            $likes = 0;
-            $dislikes = 0;
-            foreach ($post->likesList as $interaction) {
-                if($interaction->type == 1)
+            $post['user_fullName'] = $temp->user->fullName;
+            $post['images'] = $temp->images;
+            $post['user_pic'] = $temp->user->picture;
+            $post['description'] = $temp->description;
+            $post['type'] = $temp->type;
+            $post['colorabble'] = $temp->colorabble;
+            $post['title_pitch'] = $temp->title_pitch;
+            $post['video'] = $temp->video;
+            if($temp->shares)
+            {
+                $post['countShare'] = count($temp->shares);
+            }else{
+                $post['countShare'] = 0;
+            }
+            $post['user_profession'] = $temp->user->profession;
+            foreach ($temp->likesList as $interaction) {
+                if($interaction->user_id == Auth::user()->id)
                 {
-                    $likes++;
-                }
-                if($interaction->type == -1)
-                {
-                    $dislikes++;
+                    $is_liked = true;
                 }
             }
-            $post['likes'] = $likes;
-            $post['dislikes'] = $dislikes;
-            $post['countComments'] = count($post->comments);
-            $post['createdAt'] = Carbon::parse($post->created_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
+            if($is_liked)
+            {
+                $post['like_status'] = 1;   
+            }else{
+                $post['like_status'] = 0;  
+            }
+            if($temp->group_id != null)
+            {
+                $post['group_name'] = $temp->group->name;
+                $post['group_logo'] = $temp->group->logo;
+                $post['is_group'] = 1;  
+            }else{
+                $post['group_name'] = '';
+                $post['group_logo'] = '';
+                $post['is_group'] = 0;  
+            }
+            if($temp->comments)
+            {
+                $post['countComments'] = count($temp->comments);
+            }else{
+                $post['countComments'] = 0;
+            }
+            $post['createdAt'] = strval($temp->created_at);
         }
 
         return response()->json($posts, 200);
+        }
+    }
+
+    public function sharePost(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'group_post_id' => 'required',
+        ]);
+        if($validator->fails())
+        {
+            return response()->json(['success' => false], 200);
+        }
+        if($validator->validated())
+        {
+            $groupPostShare = GroupPostShare::create([
+                'group_post_id' => $request->group_post_id,
+                'user_id' => Auth::user()->id
+            ]);
+
+            if($groupPostShare)
+            {
+               $notification = notification::create([
+                    'user_id' => Auth::user()->id,
+                    'morphable_id' => $request->group_post_id,
+                    'type' => 5,
+                    'is_read' => 0
+                ]);
+                return response()->json(['success' => true,'notification_id' => $notification->id], 200);
+            }
+            return response()->json(['success' => false], 200);
         }
     }
 }

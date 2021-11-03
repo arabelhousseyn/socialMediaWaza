@@ -132,6 +132,7 @@ class NotificationController extends Controller
         $final = array();
         $breakInteraction = array();
         $breakComment = array();
+        $breakShare = array();
         $data = notification::where('is_read',0)->orderBy('id','DESC')->whereDate('updated_at', '>=', Carbon::now()->subDays(1)->setTime(0, 0, 0)->toDateTimeString())->get();
         foreach ($data as $value) {
             $temp = array();
@@ -334,6 +335,68 @@ class NotificationController extends Controller
             }
             }
             }
+
+            if($value->type == 5)
+            {
+
+                if(!in_array($value->morphable_id,$breakShare))
+                {
+                    $post = GroupPost::with('shares')->find($value->morphable_id);
+                    if(@$post->shares)
+                    {
+                        if(count($post->shares) <= 5)
+                {
+                    foreach ($post->shares as $share) {
+                        if($share->user_id == Auth::user()->id && $share->user_id != Auth::user()->id)
+                        {
+                              $user = User::where('id',$share->user_id)->first();
+                              $temp['id'] = $value->id;
+                              $temp['message'] ='a partagé avec votre publication';
+                              $temp['sub_message'] = $user->fullName;
+                              $temp['link_id'] = $value->morphable_id;
+                              $temp['user_id'] = $share->user_id;
+                              $temp['type'] = 5;
+                              $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
+                              if(count($post->images) > 0)
+                              {
+                                $temp['link_cover'] = $post->images[0]->path;
+                              }else{
+                                $temp['link_cover'] = '';  
+                              }
+                              $final[] = $temp;
+                        } 
+                      }
+                }else{
+
+                    if($post->user_id == Auth::user()->id)
+                        {
+                            $shares = count($post->shares);
+                            $last_user = User::find($post->shares[$shares - 1]->user_id);
+                            $temp['id'] = $value->id;
+                            $temp['message'] = 'ont partagé sur votre publication';
+                            if($last_user->id == Auth::user()->id)
+                            {
+                                $last_user = User::find($post->shares[$shares - 2]->user_id);
+                                $temp['sub_message'] = strval($last_user->fullName . ' et '. $shares - 1 . ' autres personnes');
+                            }else{
+                                $temp['sub_message'] = strval($last_user->fullName . ' et '. $shares - 1 . ' autres personnes');
+                            }
+                            $temp['link_id'] = $value->morphable_id;
+                            $temp['type'] = 5;
+                            if(count($post->images) > 0)
+                              {
+                                $temp['link_cover'] = $post->images[0]->path;
+                              }else{
+                                $temp['link_cover'] = '';  
+                              }
+                            $temp['createdAt'] = Carbon::parse($value->updated_at)->locale('fr_FR')->subMinutes(2)->diffForHumans();
+                            $final[] = $temp;  
+                        } 
+                }
+                    }
+                $breakShare[] = $value->morphable_id;
+                }
+            }
             
         }
 
@@ -445,6 +508,22 @@ class NotificationController extends Controller
                     $final['picture'] = $user->picture;
                     $this->push('Waza',$message,$comment->user->id);
                     return response()->json(['data' => $final,'user_id' =>$comment->user->id,'token' =>$comment->user->token], 200);
+            }
+            }
+
+            if($type == 6)
+            {
+                if($data->type == 5)
+            {
+                $user = User::find($data->user_id);
+                $receive = GroupPost::with('user')->find($data->morphable_id);
+                $message = $user->fullName . ' partagé votre publication';
+                    $final['id'] = $data->id;
+                    $final['fullName'] = $user->fullName;
+                    $final['type'] = 6;
+                    $final['picture'] = $user->picture;
+                    $this->push('Waza',$message,$receive->user->id);
+            return response()->json(['data' => $final,'user_id' => $receive->user->id], 200);
             }
             }
 
