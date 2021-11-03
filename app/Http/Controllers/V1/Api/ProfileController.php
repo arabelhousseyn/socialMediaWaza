@@ -21,7 +21,7 @@ class ProfileController extends Controller
 
     public function getProfileData()
     {
-        $user = User::withCount('followers')->with('followers:id,fullName,picture')->find(Auth::id());
+        $user = User::select('id','fullName','profession','picture')->withCount('followers')->with('followers.user:id,picture')->find(Auth::id());
         return response()->json($user, 200);
     }
 
@@ -43,19 +43,22 @@ class ProfileController extends Controller
         if ($validator->fails()) {
             return response()->json(['success' => false], 200);
         }
-        User::where('id', Auth::id())->update([
-            'fullName' => $request->fullName,
-            'subName' => $request->subName,
-            'dob' => $request->dob,
-            'gender' => $request->gender,
-            'profession' => $request->profession,
-            'wilaya_id' => $request->wilaya_id,
-            'phone' => $request->phone,
-            'is_freelancer' => $request->is_freelancer,
-            'hide_phone' => $request->hide_phone,
-            'company' => $request->company,
-            'website' => $request->website,
-        ]);
+        if($validator->validated())
+        {
+            User::where('id', Auth::id())->update([
+                'fullName' => $request->fullName,
+                'subName' => $request->subName,
+                'dob' => $request->dob,
+                'gender' => $request->gender,
+                'profession' => $request->profession,
+                'wilaya_id' => $request->wilaya_id,
+                'phone' => $request->phone,
+                'is_freelancer' => $request->is_freelancer,
+                'hide_phone' => $request->hide_phone,
+                'company' => $request->company,
+                'website' => $request->website,
+            ]);
+        }
         return response()->json(['success' => true], 200);
     }
 

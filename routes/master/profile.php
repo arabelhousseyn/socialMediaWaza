@@ -6,7 +6,7 @@ use App\Http\Controllers\V1\Api\{
 };
 
 Route::get('get-profile-data', [ProfileController::class, 'getProfileData']);
-Route::post('update-profile-data', [ProfileController::class, 'updateProfileData']);
-Route::post('update-password', [ProfileController::class, 'updatePassword']);
-Route::post('update-profile-picture', [ProfileController::class, 'updateProfilePicture']);
+Route::put('update-profile-data', [ProfileController::class, 'updateProfileData']);
+Route::put('update-password', [ProfileController::class, 'updatePassword']);
+Route::put('update-profile-picture', [ProfileController::class, 'updateProfilePicture']);
 Route::get('get-all-publications', [ProfileController::class, 'getAllPublications']);
