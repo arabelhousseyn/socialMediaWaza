@@ -290,7 +290,10 @@ class GroupController extends Controller
         $group_followers_count = followGroup::where('follow_id', $id)->count();
         $is_followed = followGroup::where('user_id', Auth::id())->count();
         return response()->json([
-            'group' => $group,
+            'group_name' => $group->name,
+            'group_logo' => $group->logo,
+            'group_large_cover' => $group->large_cover,
+            'group_description' => $group->description,
             'group_followers_count' => $group_followers_count,
             'is_followed' => $is_followed === 1,
         ], 200);
