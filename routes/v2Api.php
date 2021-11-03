@@ -73,5 +73,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('getNotificationById/{id}/{type}', [NotificationController::class, 'getNotificationById'])->whereNumber('id', 'type');
     //profile
     require_once __DIR__ . "/master/profile.php";
+    // report
+    Route::resource('report', ReportController::class);
 
 });
