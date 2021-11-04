@@ -6,7 +6,7 @@ use App\Models\Report;
 use Illuminate\Http\Request;
 use Auth;
 use Illuminate\Support\Facades\Validator;
-use App\Services\ReportService;
+// use App\Services\ReportService;
 class ReportController extends Controller
 {
     /**
@@ -15,12 +15,12 @@ class ReportController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-     private $reportService;
+    //  private $reportService;
 
-     public function __construct()
-     {
-         $this->reportService = new ReportService();
-     }
+    //  public function __construct()
+    //  {
+    //      $this->reportService = new ReportService();
+    //  }
     
     public function index()
     {
@@ -45,7 +45,27 @@ class ReportController extends Controller
      */
     public function store(Request $request)
     {
-        return $this->reportService->store($request);
+        // return $this->reportService->store($request);
+        $validator = Validator::make($request->all(), [
+            'reportable_id' => 'required',
+            'reportable_type' => 'required',
+        ]);
+
+        if($validator->fails())
+        {
+            return response()->json(['success' => false], 200);
+        }
+
+        if($validator->validated())
+        {
+            $report = Report::create([
+                'user_id' => Auth::user()->id,
+                'reportable_id' => $request->reportable_id,
+                'reportable_type' => $request->reportable_type
+            ]);
+
+            return response()->json(['success' => true], 200);
+        }
     }
 
     /**

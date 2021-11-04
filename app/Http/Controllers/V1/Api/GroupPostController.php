@@ -35,10 +35,8 @@ class GroupPostController extends Controller
 
     public function index()
     {
-        $post = new GroupPost;
-        $post->setConnection('mysql2');
         $selective = 'user:id,fullName,subName,dob,picture,gender,profession,phone,email,is_freelancer,receive_ads,hide_phone,is_kaiztech_team,company,website,wilaya_id';
-        $posts = $post->with('images',$selective,'likesList','comments','user.wilaya','likesList.user','comments.user','comments.replies')->orderBy('id','DESC')->paginate(7);
+        $posts = GroupPost::with('images',$selective,'likesList','comments','user.wilaya','likesList.user','comments.user','comments.replies')->orderBy('id','DESC')->paginate(7);
         foreach ($posts as $post) {
             $likes = 0;
             $dislikes = 0;
@@ -592,20 +590,19 @@ class GroupPostController extends Controller
             $is_disliked = false;
         if($check)
         {
-            if($request->type == $check->type)
+            if($request->type == 0)
             {
-                GroupPostLike::where([['user_id','=',Auth::user()->id],['group_post_id','=',$request->group_post_id],['type','=',$request->type]])->delete();  
-                notification::where([['user_id','=',Auth::user()->id],['morphable_id','=',$request->group_post_id],['type','=',$request->type]])->delete();
+                GroupPostLike::where([['group_post_id','=',$request->group_post_id],['user_id','=',Auth::user()->id]])->delete();  
+                notification::where([['morphable_id','=',$request->group_post_id],['user_id','=',Auth::user()->id]])->delete();
                 $postInfo2 = GroupPost::with('comments','shares','likesList')->find($request->group_post_id);
-        return response()->json([
+              return response()->json([
             'group_post_id' => $request->group_post_id,
             'countComments' => ($postInfo2->comments) ? count($postInfo2->comments) : '0',
             'countShares' => ($postInfo2->shares) ? count($postInfo2->shares) : '0',
             'countInteractions' => ($postInfo2->likesList) ? count($postInfo2->likesList) : '0',
             'like_status' => 0,
             'notification_id' => 0
-    
-    ], 200);
+            ], 200);
             }else{
 
                 notification::where([['user_id','=',Auth::user()->id],['morphable_id','=',$request->group_post_id],['type','=',$request->type]])->delete();
@@ -627,7 +624,7 @@ class GroupPostController extends Controller
             'countComments' => ($postInfo2->comments) ? count($postInfo2->comments) : '0',
             'countShares' => ($postInfo2->shares) ? count($postInfo2->shares) : '0',
             'countInteractions' => ($postInfo2->likesList) ? count($postInfo2->likesList) : '0',
-            'like_status' => $status,
+            'like_status' => $request->type,
             'notification_id' => $notification->id
     
     ], 200);
@@ -1180,7 +1177,50 @@ if($tog)
                     'type' => 5,
                     'is_read' => 0
                 ]);
-                return response()->json(['success' => true,'notification_id' => $notification->id], 200);
+
+                $status = 0;
+            $tog = false;
+            $is_liked = false;
+            $is_disliked = false;
+
+        $postInfo = GroupPost::with('comments','shares','likesList')->find($request->group_post_id);
+foreach ($postInfo->likesList as $interaction) {
+    if($interaction->user_id == Auth::user()->id)
+        {
+            $tog = true;
+            if($interaction->type == 1)
+            {
+                $is_liked = true;
+            }
+            if($interaction->type == -1)
+            {
+                $is_disliked = true;
+            }
+        }
+}
+if($tog)
+    {
+        if($is_liked)
+        {
+            $status = 1;
+        }  
+        if($is_disliked)
+        {
+            $status = -1;
+        }  
+    }else{
+        $status = 0;  
+    }
+        $postInfo2 = GroupPost::with('comments','shares','likesList')->find($request->group_post_id);
+        return response()->json([
+            'group_post_id' => $request->group_post_id,
+            'countComments' => ($postInfo2->comments) ? count($postInfo2->comments) : '0',
+            'countShares' => ($postInfo2->shares) ? count($postInfo2->shares) : '0',
+            'countInteractions' => ($postInfo2->likesList) ? count($postInfo2->likesList) : '0',
+            'like_status' => $status,
+            'notification_id' => $notification->id
+    
+    ], 200);
             }
             return response()->json(['success' => false], 200);
         }
