@@ -94,7 +94,7 @@ class ProfileController extends Controller
 
     public function getAllPublications(Request $request)
     {
-        $group_posts = GroupPost::where('id', Auth::id())->paginate(20);
+        $group_posts = GroupPost::where('id', Auth::id())->paginate(7);
         return response()->json($group_posts, 200);
     }
 }
