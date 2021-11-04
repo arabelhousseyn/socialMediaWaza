@@ -9,6 +9,7 @@ use App\Http\Controllers\V1\Api\{
 
 Route::post('create-cv', [CvLibraryController::class, 'store']);
 Route::get('get-cv', [CvLibraryController::class, 'index']);
+Route::get('get-all-cv', [CvLibraryController::class, 'getAllCv']);
 Route::post('cv-increment', [CvLibraryController::class, 'increment']);
 Route::post('create-offer', [JobOfferController::class, 'store']);
 Route::post('change-status-offer', [JobOfferController::class, 'changeStatus']);
