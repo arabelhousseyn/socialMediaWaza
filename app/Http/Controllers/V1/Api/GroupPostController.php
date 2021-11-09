@@ -103,12 +103,6 @@ class GroupPostController extends Controller
                     $is_approved = 0; 
                 }
             }
-
-            if($request->colorabble == 0 && strlen($request->images) == 0 && strlen($request->video) == 0)
-            {
-                return response()->json(['success' => false], 200);
-            }
-
             
             if(strlen($request->video) != 0)
             {
@@ -341,7 +335,7 @@ class GroupPostController extends Controller
             {
                 $group = Group::where('id',$value->group_id)->first();
                 $value['user'] = $group->name;
-                $value['picture'] =$group->cover;
+                $value['picture'] =$group->logo;
                 $value['is_admin'] = 1;
                 $value['is_kaiztech_team'] = $user->is_kaiztech_team; 
             }
@@ -419,7 +413,7 @@ class GroupPostController extends Controller
             if($group->user_id == $value->user_id)
                 {
                 $value['user'] = $group->name;
-            $value['picture'] = $group->cover;
+            $value['picture'] = $group->logo;
             $value['is_admin'] = 1;
                 }else{
                 $value['user'] = $user->fullName;
@@ -1029,6 +1023,12 @@ if($tog)
             }else{
                 $post['countInteraction'] = 0; 
             }
+            if(Auth::user()->id == $temp->user->id)
+            {
+                $post['is_own'] = 1;
+            }else{
+                $post['is_own'] = 0;
+            }
             $post['user_fullName'] = $temp->user->fullName;
             $post['images'] = $temp->images;
             $post['user_pic'] = $temp->user->picture;
@@ -1102,6 +1102,13 @@ if($tog)
                 $post['countInteraction'] = count($temp->likesList);
             }else{
                 $post['countInteraction'] = 0; 
+            }
+
+            if(Auth::user()->id == $temp->user->id)
+            {
+                $post['is_own'] = 1;
+            }else{
+                $post['is_own'] = 0;
             }
             $post['user_fullName'] = $temp->user->fullName;
             $post['images'] = $temp->images;
