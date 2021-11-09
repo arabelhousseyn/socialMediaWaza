@@ -64,7 +64,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::resource('group', GroupController::class);
     Route::get('getposts/{group_id?}', [GroupPostController::class, 'getPostsbyGroup'])->whereNumber('group_id');
     Route::resource('grouposts', GroupPostController::class);
-    Route::post('sharepost', [GroupPostController::class,'sharePost']);
+    Route::post('sharepost', [GroupPostController::class, 'sharePost']);
     // search
     Route::get('searchGlobal/{name?}', [userController::class, 'searchGlobal']);
     Route::get('getNotifications', [NotificationController::class, 'getNotifications2']);
@@ -73,6 +73,10 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('getNotificationById/{id}/{type}', [NotificationController::class, 'getNotificationById'])->whereNumber('id', 'type');
     //profile
     require_once __DIR__ . "/master/profile.php";
+    //job
+    require_once __DIR__ . "/master/jobs.php";
+    //chat
+    require_once __DIR__ . "/master/chat.php";
     // report
     Route::resource('report', ReportController::class);
 

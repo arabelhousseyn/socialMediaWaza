@@ -5,28 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class follower extends Model
+class ChatGroup extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'user_id',
-        'follow_id',
-        'is_friend'
+        'name',
+        'image',
     ];
 
-    protected $hidden = [
-        'updated_at'
-    ];
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function users()
     {
-        return $this->belongsTo(User::class);
-
-    }
-
-    public function follows()
-    {
-        return $this->belongsTo(User::class, 'follow_id');
+        return $this->belongsToMany(User::class, 'chat_groups_users');
     }
 }
