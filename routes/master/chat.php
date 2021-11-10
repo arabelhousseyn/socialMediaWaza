@@ -19,7 +19,8 @@ Route::namespace('chat')->group(function () {
     Route::post('delete-group', [ChatController::class, 'deleteChatGroup']);
     Route::post('delete-user-from-group', [ChatController::class, 'deleteUserFromGroup']);
     //settings
-    Route::post('settings', [ChatController::class, 'update_chat_settings']);
-    Route::get('settings', [ChatController::class, 'get_chat_settings']);
+    Route::post('create-settings', [ChatController::class, 'create_chat_settings']);
+    Route::post('update-settings', [ChatController::class, 'update_chat_settings']);
+    Route::get('get-settings', [ChatController::class, 'get_chat_settings']);
 });
 

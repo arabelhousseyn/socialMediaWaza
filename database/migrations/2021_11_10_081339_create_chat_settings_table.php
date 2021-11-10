@@ -15,9 +15,8 @@ class CreateChatSettingsTable extends Migration
     {
         Schema::create('chat_settings', function (Blueprint $table) {
             $table->id();
-            $table->boolean('receive_notification')->default(true);
-            $table->boolean('')->default(true);
-            $table->boolean('')->default(true);
+            $table->bigInteger('user_id')->nullable();
+            $table->boolean('block_notification')->default(false);
             $table->timestamps();
         });
     }

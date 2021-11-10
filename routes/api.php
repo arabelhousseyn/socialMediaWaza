@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
 // v1 of api
 use App\Http\Controllers\V1\Api\{
     loginController,
@@ -48,7 +49,7 @@ use App\Http\Controllers\versionappController;
 
 Route::get('appversion/{version}', [versionappController::class, 'index']);
 
-Route::get('changePath',[userController::class,'changePath']);
+Route::get('changePath', [userController::class, 'changePath']);
 
 Route::post('login', [loginController::class, 'index'])->name('loginApi');
 Route::post('register', [registerController::class, 'index'])->name('registerApi');
@@ -69,10 +70,10 @@ Route::get('getCountOfUsersAccepted', [userController::class, 'getCountOfUsersAc
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
     // information user by id
-    Route::get('usersByPhone/{string?}',[userController::class,'getUsersByPhone']);
+    Route::get('usersByPhone/{string?}', [userController::class, 'getUsersByPhone']);
     Route::get('statusUser', [userController::class, 'GetUserStatus']);
     Route::get('getUserIdByAuth', [userController::class, 'getUserIdByAuth']);
-    Route::get('userInformation/{id?}/{group_post_id?}', [userController::class, 'getInformationUser'])->whereNumber('id','group_post_id')->name('userInformationApi');
+    Route::get('userInformation/{id?}/{group_post_id?}', [userController::class, 'getInformationUser'])->whereNumber('id', 'group_post_id')->name('userInformationApi');
     Route::get('searchForUser/{name?}', [userController::class, 'searchForUser']);
     Route::get('searchGlobal/{name?}', [userController::class, 'searchGlobal']);
     Route::put('updateUser', [userController::class, 'update']);
@@ -91,7 +92,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     //group & post of group & group universe
     Route::get('infoGroup/{group_id?}', [GroupController::class, 'infoGroup'])->whereNumber('group_id');
     Route::get('getTheLatestPost', [GroupPostController::class, 'getTheLatestPost']);
-    Route::get('deleteCommentFromPost/{id_comment?}/{group_post_id?}', [GroupPostController::class, 'deleteCommentFromPost'])->whereNumber('id_comment','group_post_id');
+    Route::get('deleteCommentFromPost/{id_comment?}/{group_post_id?}', [GroupPostController::class, 'deleteCommentFromPost'])->whereNumber('id_comment', 'group_post_id');
     Route::get('getposts/{id}', [GroupPostController::class, 'getPostsByCategory'])->whereNumber('id');
     Route::post('addcommentpost', [GroupPostController::class, 'addComment']);
     Route::post('replayToComment', [GroupPostController::class, 'replayToComment']);
@@ -103,9 +104,9 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('approveAllPosts/{id}', [GroupPostController::class, 'approveAllPosts'])->whereNumber('id');
     Route::post('decilnePost', [GroupPostController::class, 'decilnePost'])->whereNumber('id');
     Route::post('approvePost', [GroupPostController::class, 'approvePost'])->whereNumber('id');
-    Route::get('checkUserIsAdminOfGroup/{group_id}',[GroupPostController::class,'checkUserIsAdminOfGroup'])->whereNumber('group_id');
-    Route::get('searchGroup/{name?}',[GroupController::class,'searchGroup']);
-    Route::put('updateComment/{comment_id?}',[GroupPostController::class,'updateComment'])->whereNumber('comment_id');
+    Route::get('checkUserIsAdminOfGroup/{group_id}', [GroupPostController::class, 'checkUserIsAdminOfGroup'])->whereNumber('group_id');
+    Route::get('searchGroup/{name?}', [GroupController::class, 'searchGroup']);
+    Route::put('updateComment/{comment_id?}', [GroupPostController::class, 'updateComment'])->whereNumber('comment_id');
     Route::resource('group', GroupController::class);
     Route::resource('grouposts', GroupPostController::class);
     Route::resource('groupuniverses', GroupUniverseController::class);
@@ -115,13 +116,13 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::resource('amana', AmanaController::class);
     Route::resource('amanaCategory', AmanaCategoryController::class);
     // job
-      // freelance
-      Route::resource('freelance', FreelanceController::class);
-      // job offer
-      Route::get('getAllJobs', [JobOfferController::class, 'getAll']);
-      Route::resource('jobOffer', JobOfferController::class);
-      // cv library
-      Route::resource('cvLibrary', CvLibraryController::class);
+    // freelance
+    Route::resource('freelance', FreelanceController::class);
+    // job offer
+    Route::get('getAllJobs', [JobOfferController::class, 'getAll']);
+    Route::resource('jobOffer', JobOfferController::class);
+    // cv library
+    Route::resource('cvLibrary', CvLibraryController::class);
 
     //Category
     Route::get('listingByCategory/{id}/{pos}', [ListingController::class, 'listingByCategory'])->whereNumber('id', 'pos');
@@ -132,28 +133,22 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     // report ITA
     Route::resource('reportIta', ReportItaController::class);
     // follow
-    Route::get('acceptFriend/{user_id}',[FollowerController::class,'AcceptFriend'])->whereNumber('user_id');
+    Route::get('acceptFriend/{user_id}', [FollowerController::class, 'AcceptFriend'])->whereNumber('user_id');
     Route::resource('follow', FollowerController::class);
     Route::resource('followGroup', FollowGroupController::class);
     // notification
-    Route::get('getNotificationsNotRead',[NotificationController::class,'getNotificationsNotRead']);
-    Route::get('getNotifications',[NotificationController::class,'getNotifications']);
-    Route::get('friendsAccepted/{notification_id?}',[NotificationController::class,'friendsAccepted'])->whereNumber('notification_id');
-    Route::get('getPureNotifcation/{notification_id}',[NotificationController::class,'getPureNotifcation'])->whereNumber('notification_id');
-    Route::get('sendPushNotification/{notification_id}',[NotificationController::class,'sendPushNotification'])->whereNumber('notification_id');
-    Route::get('InteractWithFriend/{user_id}/{status}',[NotificationController::class,'InteractWithFriend'])->whereNumber('user_id','status');
-    Route::get('getNotificationById/{id}/{type}',[NotificationController::class,'getNotificationById'])->whereNumber('id','type');
-    Route::get('getAddFriends',[NotificationController::class,'getAddFriends']);
-    Route::get('updateRead/{id}',[NotificationController::class,'updateRead'])->whereNumber('id');
+    Route::get('getNotificationsNotRead', [NotificationController::class, 'getNotificationsNotRead']);
+    Route::get('getNotifications', [NotificationController::class, 'getNotifications']);
+    Route::get('friendsAccepted/{notification_id?}', [NotificationController::class, 'friendsAccepted'])->whereNumber('notification_id');
+    Route::get('getPureNotifcation/{notification_id}', [NotificationController::class, 'getPureNotifcation'])->whereNumber('notification_id');
+    Route::get('sendPushNotification/{notification_id}', [NotificationController::class, 'sendPushNotification'])->whereNumber('notification_id');
+    Route::get('InteractWithFriend/{user_id}/{status}', [NotificationController::class, 'InteractWithFriend'])->whereNumber('user_id', 'status');
+    Route::get('getNotificationById/{id}/{type}', [NotificationController::class, 'getNotificationById'])->whereNumber('id', 'type');
+    Route::get('getAddFriends', [NotificationController::class, 'getAddFriends']);
+    Route::get('updateRead/{id}', [NotificationController::class, 'updateRead'])->whereNumber('id');
     Route::resource('notification', NotificationController::class);
-    ////jobs
-    Route::post('create-cv', [CvLibraryController::class, 'store']);
-    Route::get('get-cv', [CvLibraryController::class, 'index']);
-    Route::post('cv-increment', [CvLibraryController::class, 'increment']);
-    Route::post('create-offer', [JobOfferController::class, 'store']);
-    Route::post('change-status-offer', [JobOfferController::class, 'changeStatus']);
-    Route::get('get-offers', [JobOfferController::class, 'index']);
-    Route::post('create-freelance', [FreelanceController::class, 'store']);
-    Route::post('change-status-freelance', [FreelanceController::class, 'changeStatus']);
-    Route::get('get-freelances', [FreelanceController::class, 'index']);
+    //job
+    require_once __DIR__ . "/master/jobs.php";
+    //chat
+    require_once __DIR__ . "/master/chat.php";
 });

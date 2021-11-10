@@ -5,6 +5,7 @@ namespace App\Http\Controllers\V1\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Chat;
 use App\Models\ChatGroup;
+use App\Models\ChatSetting;
 use App\Models\follower;
 use App\Models\GroupPost;
 use App\Models\User;
@@ -103,5 +104,27 @@ class ChatController extends Controller
         $group_chat_id = $request->group_chat_id;
         $group_chat_id->users()->sync($user_id);
         return true;
+    }
+
+    public function create_chat_settings(Request $request)
+    {
+        ChatSetting::create([
+            'user_id' => $request->user_id
+        ]);
+        return true;
+    }
+
+    public function update_chat_settings(Request $request)
+    {
+        ChatSetting::whereUserId($request->user_id)->update([
+            'block_notification' => $request->boolean('block_notification')
+        ]);
+        return true;
+    }
+
+    public function get_chat_settings(Request $request)
+    {
+        $chat_settings = ChatSetting::whereUserId($request->user_id)->first()->get('block_notification');
+        return response()->json($chat_settings, true);
     }
 }
