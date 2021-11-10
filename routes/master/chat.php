@@ -5,7 +5,7 @@ use App\Http\Controllers\V1\Api\{
     ChatController,
 };
 
-Route::namespace('chat')->group(function () {
+Route::prefix('chat')->group(function () {
     //person
     Route::get('messages', [ChatController::class, 'index']);
     Route::post('store', [ChatController::class, 'store']);

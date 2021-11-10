@@ -40,7 +40,7 @@ class ChatController extends Controller
             'message' => $request->message,
             'type' => $request->type,
         ]);
-        $chat->user()->attach($request->sender_user_id, ['received_user_id' => $request->received_user_id]);
+        $chat->users()->attach($request->sender_user_id, ['received_user_id' => $request->received_user_id]);
         return true;
     }
 
