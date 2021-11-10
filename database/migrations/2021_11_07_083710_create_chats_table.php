@@ -16,7 +16,7 @@ class CreateChatsTable extends Migration
         Schema::create('chats', function (Blueprint $table) {
             $table->id();
             $table->longText('message')->nullable();
-            $table->enum('type', ['text', 'file'])->default('text');
+            $table->enum('type', ['text', 'image', 'video', 'audio'])->default('text');
             $table->boolean('seen')->default(false);
             $table->softDeletes();
             $table->timestamps();

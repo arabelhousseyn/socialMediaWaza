@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Traits\upload;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 
 class ChatController extends Controller
@@ -26,6 +27,15 @@ class ChatController extends Controller
 
     public function store(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'sender_user_id' => 'required',
+            'received_user_id' => 'required',
+            'message' => 'required',
+            'type' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['success' => false], 200);
+        }
         $chat = Chat::create([
             'message' => $request->message,
             'type' => $request->type,
