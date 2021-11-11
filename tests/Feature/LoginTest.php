@@ -15,12 +15,12 @@ class LoginTest extends TestCase
      */
     public function test_example()
     {
-        // $data = [
-        //     'phone' => '0699687499',
-        //     'password' => 'hocine.12',
-        //     'country_code' => '213'
-        // ];
+        $data = [
+            'phone' => '0699687499',
+            'password' => 'hocine.12',
+            'country_code' => '213'
+        ];
 
-        // $this->post(route('loginApi'),$data)->assertStatus(200);
+        $this->post(route('loginApi'),$data)->assertStatus(200);
     }
 }
