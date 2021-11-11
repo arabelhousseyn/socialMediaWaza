@@ -52,7 +52,6 @@ Route::get('appversion/{version}', [versionappController::class, 'index']);
 Route::get('changePath', [userController::class, 'changePath']);
 
 Route::post('login', [loginController::class, 'index'])->name('loginApi');
-Route::get('testuser',[loginController::class,'testuser'])->name('testuser');
 Route::post('register', [registerController::class, 'index'])->name('registerApi');
 Route::post('faceDetection', [registerController::class, 'HandleFaceDetection'])->name('faceVerificationApi');
 Route::get('testtest', [userController::class, 'test']);
