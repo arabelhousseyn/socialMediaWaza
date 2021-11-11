@@ -21,6 +21,6 @@ class LoginTest extends TestCase
             'country_code' => '213'
         ];
 
-        $this->post(route('loginApi'),$data)->assertStatus(200);
+        $this->get(route('testuser'))->assertStatus(200);
     }
 }
