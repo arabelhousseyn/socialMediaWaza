@@ -15,10 +15,6 @@ class UsersTableSeeder extends Seeder
     public function run()
     {
         DB::table('users')->insert([
-            'fullName' => 'John Doe',
-            'subName' => 'john',
-            'dob' =>'1999-06-20',
-            'picture' => '',
             'gendre' => 0,
             'profession' => 'web developer',
             'wilaya_id' => 1,
