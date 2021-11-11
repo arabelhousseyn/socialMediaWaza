@@ -61,4 +61,9 @@ class loginController extends Controller
              return response($response, 200);
         }
     }
+
+    public function testuser()
+    {
+        return response()->json(User::all(), 200);
+    }
 }
