@@ -17,7 +17,7 @@ class LoginTest extends TestCase
     {
         $data = [
             'phone' => '0699687499',
-            'password' => 'hocine.12',
+            'password' => 'password',
             'country_code' => '213'
         ];
 
